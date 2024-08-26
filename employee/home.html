@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="hstyle.css">
+    <title>Home</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script type="module" src="home.js" defer></script>
+</head>
+<body>
+    <div class="nav">
+    
+        <div class="links">
+            <button onclick="location.href='home.html'">HOME</button>
+            <button onclick="location.href='job.html'">JOB</button>
+            <button onclick="location.href='app.html'">APPLICATION</button>
+            <button onclick="location.href='emp.html'">EMPLOYED</button>
+            <button id="signOutBtn">SIGN OUT</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="card job">
+            <h3>JOB</h3>
+            <p id="jobCount">Total: 0</p>
+        </div>
+        <div class="card app">
+            <h3>APPLICATION</h3>
+            <p id="applicationCount">Total: 0</p> <!-- Added this line -->
+        </div>
+        <div class="card emp">
+            <h3>EMPLOYED</h3>
+            <p id="employedCount">Total: 0</p> <!-- Added this line -->
+        </div>
+        <div class="card vac">
+            <h3>VACANTS</h3>
+            <p id="vacanciesCount">Total: 0</p> <!-- Added this line -->
+        </div>
+    </div>
+    <div class="logo">
+        <img src="logo.jpeg">
+    </div>
+</body>
+</html>

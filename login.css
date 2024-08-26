@@ -1,0 +1,115 @@
+body {
+    background-color: #f0a8a8;
+    padding: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.logo {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.logo h2 {
+    font-size: 30px;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.elements {
+    width: 400px;
+    height: 400px;
+    background-color: white;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 5%;
+    border: solid;
+}
+
+.input1 {
+    margin-bottom: 0;
+    width: 50%;
+    margin-left: 23%;
+    margin-top: 15%;
+    border-radius: 5px;
+    text-align: center;
+    border-bottom: 2px solid #9c0100;
+}
+
+input {
+    width: 100%;
+    padding: 1 9px;
+    height: 25px;
+    margin-top: 5px;
+    font: 200;
+    background: none;
+    outline: none;
+    border: none;
+}
+
+label {
+    position: absolute;
+    left: 44%;
+    color: #9c0100;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+button {
+    width: 60%;
+    padding: 20px;
+    background-color: #9c0100;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 15%;
+    margin-left: 2%;
+}
+
+button:hover {
+    background-color:#df4b4b;
+}
+
+/* Loading Screen  */
+.loading-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    border: 12px solid #f3f3f3;
+    border-top: 12px solid #bd1a1a;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+/* Loading Screen */

@@ -1,0 +1,234 @@
+body {
+    background-color: #F2F2F2;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Navigation bar */
+.nav {
+    background: rgb(223, 75, 75);
+    background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure the navbar stays on top */
+}
+
+.links {
+    display: flex;
+    align-items: center;
+}
+
+.links button {
+    background: none; /* Remove default button background */
+    border: none; /* Remove default border */
+    color: #f2f2f2;
+    padding: 16px 10px;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 10px;
+    cursor: pointer; /* Ensure it's clear this is clickable */
+}
+
+.nav h2 {
+    font-size: 30px;
+    color: #f2f2f2;
+    margin-left: 20px;
+    margin-right: auto;
+}
+
+.links button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Change background color on hover */
+}
+/* End Navigation bar */
+
+.job-container {
+    padding: 16px;
+    padding-top: 100px;
+    margin-top: 1px; /* Reduced margin to bring the container closer to the navbar */
+    display: flex;
+    justify-content: space-between;
+}
+
+.job-actions {
+    align-content: center;
+    display: flex;
+    flex-direction: column;
+    padding: 50px;
+    background-color: white;
+    border: 1px solid black;
+}
+
+.job-actions h2 {
+    margin-bottom: 10px;
+}
+
+.job-actions #jobCount {
+    margin-left: 10px; /* Adjust spacing to your liking */
+    font-size: 0.6em; /* Smaller font size relative to h2 */
+    color: #666; /* Subtle color difference if needed */
+}
+
+.job-actions input[type="text"],
+.job-actions select {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.job-actions button {
+    background-color: red; /* example color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%; /* Full width */
+    box-sizing: border-box;
+}
+
+.job-actions button:hover {
+    background-color: darkred;
+}
+
+.sort-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.sort-container label,
+.sort-container select,
+.sort-container button {
+    margin-right: 10px;
+}
+
+.sort-container button:last-child {
+    margin-right: 0; /* Remove margin from last button */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.jable {
+    display: flex;
+    padding: 30px;
+    width: 75%;
+    background-color: white;
+    border: 1px solid black;
+}
+
+/* Circular checkboxes */
+.circular-checkbox {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+}
+
+.circular-checkbox:checked::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background-color: red;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+/* Edit Button Styles */
+table td button {
+    background-color: red; /* Primary blue color */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+table td button:hover {
+    background-color: darkred; /* Darker blue on hover */
+    transform: translateY(-2px); /* Subtle lift effect */
+}
+
+table td button:active {
+    background-color: darkred;; /* Even darker blue when clicked */
+    transform: translateY(0); /* Return to original position on click */
+}
+/* Add pagination styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    color: #333;
+}
+
+.pagination span {
+    margin-right: 10px;
+}
+
+.pagination button {
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    margin: 0 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.pagination button:hover {
+    background-color: #f0f0f0;
+}
+
+.pagination button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    border-color: #eee;
+}
+
+.pagination button:disabled:hover {
+    background-color: #fff;
+}
+
+.pagination button.active {
+    background-color: #333;
+    color: #fff;
+    border-color: #333;
+}
+

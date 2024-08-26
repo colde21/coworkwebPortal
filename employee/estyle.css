@@ -1,0 +1,45 @@
+body{
+    background-color:#F2F2F2;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.nav {
+    background: rgb(223, 75, 75);
+    background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.links {
+    display: flex;
+    align-items: center;
+}
+
+.links button {
+    background: none; /* Remove default button background */
+    border: none; /* Remove default border */
+    color: #f2f2f2;
+    padding: 16px 10px;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 10px;
+    cursor: pointer; /* Ensure it's clear this is clickable */
+}
+
+.nav h2 {
+    font-size: 30px;
+    color: #f2f2f2;
+    margin-left: 20px;
+    margin-right: auto;
+
+}
+
+.links button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Change background color on hover */
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Job</title>
+    <link rel="stylesheet" href="job.css">
+    <script src="database.js" type="module"></script>
+</head>
+<body>
+    <!-- Navigation bar-->
+    <div class="nav">
+        <div class="links"> 
+            <button onclick="location.href='home.html'">HOME</button>
+            <button onclick="location.href='job.html'">JOB</button>
+            <button onclick="location.href='app.html'">APPLICATION</button>
+            <button onclick="location.href='emp.html'">EMPLOYED</button>
+            <button id="signOutBtn">SIGN OUT</button>  <!-- Updated button with id -->
+        </div>
+    </div> 
+    <!-- Navigation bar--> 
+    
+    <div class="job-container">
+        <div class="job-actions">
+            <h2>Job List | <span id="jobCount">Total Jobs: 0</span></h2>
+            <input type="text" id="searchBar" placeholder="Search for Keywords..">
+            <div>
+                <label for="sortBy">Sort by:</label>
+                <select id="sortBy">
+                    <option value="company">Company</option>
+                    <option value="position">Position</option>
+                    <option value="type">Type</option>
+                    <option value="status">Status</option>
+                </select>
+                <button id="sortAsc">Ascending</button>
+                <button id="sortDesc">Descending</button>
+            </div>
+        </div>
+       <div class="jable">
+            <table id="jobTable">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Company</th>
+                        <th>Location  </th>
+                        <th>Vacancy</th>
+                        <th>Type</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamic rows will be added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module" src="job.js"></script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex; /* Use flexbox to center the form */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh; /* Full viewport height */
+    margin: 0; 
+    background-color: #efeaea;
+}
+.nav {
+    background: rgb(223, 75, 75);
+    background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;
+    z-index: 1;
+}
+
+.links {
+    display: flex;
+    align-items: center; /* Align items vertically */
+}
+
+.links a {
+    color: #f2f2f2;
+    padding: 16px 10px;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.nav h2 {
+    font-size: 30px;
+    color: #f2f2f2;
+    margin-left: 20px;
+    margin-right: auto;
+}
+
+/* Form styles */
+#jobForm {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px; /* Increased gap for equal spacing */
+    width: 75%;
+    padding: 20px;
+    margin-top: 250px; /* Ensure it doesn't overlap with the nav bar */
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+}
+
+#jobForm input[type="submit"],
+#jobForm input[type="button"] { /* Combined rules for buttons */
+    color: white;
+    background-color: red;
+    padding: 20px 20px;
+    margin-left: auto;
+    width: 200px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px; /* Add some top margin for space */
+}
+
+#jobForm input[type="submit"]:hover,
+#jobForm input[type="button"]:hover {
+    background-color: darkred;
+}
+
+#jobForm label {
+    text-align: right; /* Align labels to the right */
+    padding-right: 10px; /* Space between label and input */
+}
+
+#jobForm input, 
+#jobForm textarea, 
+#jobForm select {
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    width: 100%; /* Full width for consistency */
+    box-sizing: border-box; /* Ensure padding doesn't exceed width */
+    
+}
+
+#jobForm input[type="number"],
+#jobForm input[type="text"],
+#jobForm input[type="email"] {
+    margin-bottom: 20px; /* Consistent bottom margin */
+}
+
+#jobForm select {
+    margin-bottom: 20px; /* Consistent bottom margin */
+    background-color: white; /* Background color */
+    color: #333; /* Text color */
+    padding: 10px; /* Padding inside the select box */
+    border: 2px solid #ddd; /* Border color */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+    cursor: pointer; /* Pointer cursor */
+}
+
+#jobForm select:focus {
+    border-color: #aaa; /* Border color on focus */
+    outline: none; /* Remove default outline */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Shadow on focus */
+}
+
+/* Adjust the buttons */
+#jobForm .button-container {
+    grid-column: span 2;
+    display: flex;
+    justify-content: space-between; /* Distribute space between buttons */
+    align-items: center;
+}
+
+#jobForm .button-container button {
+    width: 10px; /* Ensure the buttons only take up necessary space */
+    padding: 12px 10px;
+}

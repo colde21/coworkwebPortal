@@ -1,0 +1,148 @@
+/* Archive Page Styles */
+
+body {
+    background-color: #F2F2F2;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.nav {
+    background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.links {
+    display: flex;
+    align-items: center;
+}
+
+.links button {
+    background: none; /* Remove default button background */
+    border: none; /* Remove default border */
+    color: #f2f2f2;
+    padding: 16px 10px;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 10px;
+    cursor: pointer; /* Ensure it's clear this is clickable */
+}
+
+.nav h2 {
+    font-size: 30px;
+    color: #f2f2f2;
+    margin-left: 20px;
+    margin-right: auto;
+}
+
+.links button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Change background color on hover */
+}
+
+/* Container Styles */
+.container {
+    width: 80%;
+    margin: 100px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-color: #f9f9f9;
+    padding: 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allow items to wrap */
+}
+
+li:last-child {
+    margin-bottom: 0;
+}
+
+.jobTitle, .company, .location {
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.jobTitle {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.company {
+    color: #666;
+    font-size: 16px;
+}
+
+.location {
+    color: #999;
+    font-size: 14px;
+}
+
+/* Button Styles */
+button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-left: 10px;
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+}
+
+button:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px); /* Subtle lift effect */
+}
+
+button:active {
+    background-color: #a93226;
+    transform: translateY(0); /* Return to original position on click */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .jobTitle, .company, .location {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    button {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}

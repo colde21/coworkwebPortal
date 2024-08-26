@@ -1,0 +1,105 @@
+body {
+    background-color: #9c0100;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding-top: 70px; /* Ensure content is below the navbar */
+}
+
+/* Navigation bar */
+.nav {
+    background: rgb(223, 75, 75);
+    background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.links {
+    display: flex;
+    align-items: center;
+}
+
+.links button {
+    background: none; /* Remove default button background */
+    border: none; /* Remove default border */
+    color: #f2f2f2;
+    padding: 16px 10px;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 10px;
+    cursor: pointer; /* Ensure it's clear this is clickable */
+}
+
+.nav h2 {
+    font-size: 30px;
+    color: #f2f2f2;
+    margin-left: 20px;
+    margin-right: auto;
+}
+
+.links button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Change background color on hover */
+}
+/* End Navigation bar */
+
+.container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 20px auto;
+    width: 80%;
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    flex: 1; /* Allow cards to grow and shrink equally */
+    max-width: 250px; /* Optional: limit the max width of each card */
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.card p {
+    margin: 10px 0 0;
+    font-size: 16px;
+    color: #666;
+}
+
+#exportAuditLogBtn {
+    margin-top: 20px;
+    background-color: #ff0000; /* Example color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#exportAuditLogBtn:hover {
+    background-color: #cc0000; /* Darker color on hover */
+}
+.logo {
+    display: flex;       /* Enables flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center;     /* Center vertically */
+    height: 500px;       /* Set a specific height if needed */
+}
+
+.logo img {
+    height: 100%;        /* Make image take full height of its container */
+    max-width: 100%;     /* Ensures the image is responsive and does not overflow */
+}
