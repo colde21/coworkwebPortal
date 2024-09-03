@@ -53,6 +53,7 @@ body {
     margin-top: 1px; /* Reduced margin to bring the container closer to the navbar */
     display: flex;
     justify-content: space-between;
+    gap: 10px; /* Add a small gap between the two sections */
 }
 
 .job-actions {
@@ -61,7 +62,10 @@ body {
     flex-direction: column;
     padding: 50px;
     background-color: white;
-    border: 1px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    border-radius: 8px;  /* Slightly rounded corners */
+    flex-shrink: 0; /* Prevent the actions column from shrinking */
+    transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
 }
 
 .job-actions h2 {
@@ -136,7 +140,9 @@ th {
     padding: 30px;
     width: 75%;
     background-color: white;
-    border: 1px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    border-radius: 8px;  /* Slightly rounded corners */
+    transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
 }
 
 /* Circular checkboxes */
@@ -164,6 +170,7 @@ th {
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
 /* Edit Button Styles */
 table td button {
     background-color: red; /* Primary blue color */
@@ -183,9 +190,10 @@ table td button:hover {
 }
 
 table td button:active {
-    background-color: darkred;; /* Even darker blue when clicked */
+    background-color: darkred; /* Even darker blue when clicked */
     transform: translateY(0); /* Return to original position on click */
 }
+
 /* Add pagination styles */
 .pagination {
     display: flex;
@@ -231,4 +239,3 @@ table td button:active {
     color: #fff;
     border-color: #333;
 }
-
