@@ -1,7 +1,8 @@
 import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { fetchAllApplications } from './database.js';
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-functions.js";
+import { fetchAllApplications, hireApplicant, archiveJobIfNeeded } from './database.js';
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -14,15 +15,14 @@ const firebaseConfig = {
     measurementId: "G-8DL6T09CP4"
 };
 
-// Initialize Firebase
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const functions = getFunctions(app);
+const firestore = getFirestore(app);
 
 let allApplications = [];  // To store all applications globally
 let refreshInterval; // To store the interval ID
 
-function performSignOut() {
+function performSignOut() { 
     firebaseSignOut(auth).then(() => {
         window.location.href = "../login.html";
     }).catch((error) => {
@@ -30,100 +30,144 @@ function performSignOut() {
     });
 }
 
-document.getElementById('signOutBtn').addEventListener('click', performSignOut);
+// Ensure elements exist before attaching event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const signOutBtn = document.getElementById('signOutBtn');
+    const searchBar = document.getElementById('searchBar');
 
-// Function to fetch applications and update the UI
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', performSignOut);
+    }
+
+    if (searchBar) {
+        searchBar.addEventListener('input', handleSearch);
+        searchBar.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                handleSearch();
+            }
+        });
+        searchBar.addEventListener('focus', () => clearInterval(refreshInterval));
+    }
+
+    refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
+    fetchApplicationsAndUpdateUI();
+});
+
 function fetchApplicationsAndUpdateUI() {
     fetchAllApplications().then(applications => {
-        allApplications = applications; // Store all applications globally
-        updateApplicationList(allApplications); // Update the UI
+        allApplications = applications;
+        updateApplicationList(allApplications);
     }).catch(err => console.error("Failed to fetch applications:", err));
 }
 
-// Function to update the displayed application list
 function updateApplicationList(applications) {
     const applicationList = document.getElementById('applicationList');
-    applicationList.innerHTML = ''; // Clear existing list items
+    if (!applicationList) return; // Exit if the element does not exist
 
-    applications.forEach(application => {
+    applicationList.innerHTML = ''; 
+
+    applications.forEach((application) => {
         const listItem = document.createElement('li');
-        
-        // Create a div to hold the details
+
         const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'details'; // Add class for styling
-        
-        // Add applicant details
+        detailsDiv.className = 'details';
         detailsDiv.innerHTML = `
             <strong>Applicant:</strong> ${application.userName}<br>
             <strong>Position:</strong> ${application.position} - ${application.company}<br>
             <strong>Email:</strong> ${application.userEmail}<br>
             <strong>Contact number:</strong> ${application.userPhone}
         `;
-        
-        // Create the Contact button
+
         const contactButton = document.createElement('button');
         contactButton.textContent = 'Contact';
-        contactButton.addEventListener('click', () => sendEmail(application.userEmail));
-        
-        // Append details and button to list item
+        contactButton.addEventListener('click', () => {
+            const subject = `Application Status for ${application.position} at ${application.company}`;
+            const body = `Dear ${application.userName},\n\nCongratulations! You have been approved by ${application.company} for the position of ${application.position}.\n\nBest regards,\nYour Company Name`;
+            const mailtoLink = `mailto:${application.userEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
+        });
+
+        const hireButton = document.createElement('button');
+        hireButton.textContent = 'Hire';
+        hireButton.addEventListener('click', async () => {
+            await hireApplicantAndDecrementVacancy(application.id, application);
+        });
+
         listItem.appendChild(detailsDiv);
         listItem.appendChild(contactButton);
-        
-        // Append list item to the list
+        listItem.appendChild(hireButton);
         applicationList.appendChild(listItem);
     });
 }
 
-// Function to send email using Firebase Function
-function sendEmail(email) {
-    const sendEmailFunction = httpsCallable(functions, 'sendEmail');
-    sendEmailFunction({ email: email })
-        .then(result => {
-            if (result.data.success) {
-                alert('Email sent successfully!');
+async function hireApplicantAndDecrementVacancy(applicationId, application) {
+    try {
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
+
+        // Ensure jobId exists in the application
+        if (!application.jobId) {
+            alert("Job ID not found for the selected application.");
+            return;
+        }
+
+        // Hire the applicant
+        await hireApplicant(applicationId, application);
+
+        // Fetch the job and decrement the vacancy
+        const jobDocRef = doc(firestore, 'jobs', application.jobId);
+        const jobDocSnap = await getDoc(jobDocRef);
+
+        if (jobDocSnap.exists()) {
+            let vacancy = jobDocSnap.data().vacancy;
+            if (vacancy > 0) {
+                vacancy--;
+
+                // Update the job vacancy
+                await updateDoc(jobDocRef, { vacancy });
+
+                // Archive the job if vacancy is 0
+                if (vacancy === 0) {
+                    await archiveJobIfNeeded(application.jobId, application.company, application.position, userEmail);
+                
+                    // Update the UI after archiving the job
+                    window.location.href = "archive.html";
+                    fetchApplicationsAndUpdateUI();
+                    return;  // Exit the function to prevent further execution
+                }
+                
+
+                // Refresh the job table after updating the vacancy
+                fetchApplicationsAndUpdateUI();
+
+                alert(`${application.userName} has been hired and vacancy updated.`);
             } else {
-                alert('Failed to send email: ' + result.data.error);
+                alert("The job has no more vacancies.");
             }
-        })
-        .catch(error => {
-            console.error('Error sending email:', error);
-            alert('Failed to send email: ' + error.message);
-        });
+        } else {
+            alert("Job not found.");
+        }
+    } catch (error) {
+        console.error("Error hiring applicant and updating vacancy:", error);
+    }
 }
 
-// Search function to filter applications by company
+
+
 function handleSearch() {
+    const searchBar = document.getElementById('searchBar');
+    if (!searchBar) return;
+
     const query = searchBar.value.toLowerCase();
-    
+
     if (query === '') {
-        // If search bar is empty, show all applications and restart the refresh interval
         updateApplicationList(allApplications);
         refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
     } else {
-        // Otherwise, filter the applications by the search query
         const filteredApplications = allApplications.filter(application =>
             application.company.toLowerCase().includes(query)
         );
         updateApplicationList(filteredApplications);
-        clearInterval(refreshInterval); // Stop refreshing when searching
+        clearInterval(refreshInterval);
     }
 }
-
-// Add event listener to the search bar
-const searchBar = document.getElementById('searchBar');
-
-searchBar.addEventListener('input', handleSearch);
-searchBar.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-        handleSearch();
-    }
-});
-
-// Pause refreshing when the user interacts with the search bar
-searchBar.addEventListener('focus', () => clearInterval(refreshInterval));
-
-// Refresh the application list every second
-refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
-
-// Initial fetch and display of applications
-document.addEventListener('DOMContentLoaded', fetchApplicationsAndUpdateUI);

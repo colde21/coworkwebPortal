@@ -201,17 +201,26 @@ async function editVacancy(jobId, currentVacancy, company, position) {
         try {
             const user = auth.currentUser;
             const userEmail = user ? user.email : "Unknown user";
-            await updateJobStatus(jobId, { vacancy: parseInt(newVacancy, 10) });
-            await logAudit(userEmail, "Vacancy Updated", { jobId, newVacancy });
+            const updatedVacancy = parseInt(newVacancy, 10);
+
+            // Update the job vacancy
+            await updateJobStatus(jobId, { vacancy: updatedVacancy });
+            await logAudit(userEmail, "Vacancy Updated", { jobId, updatedVacancy });
+            console.log(`Updated job ${jobId} vacancy to ${updatedVacancy}`);
+
+            // Check if the vacancy is 0, and if so, archive the job
+            if (updatedVacancy === 0) {
+                await archiveJobIfNeeded(jobId, company, position, userEmail);
+            }
+
             fetchAllJobs().then(jobs => {
                 window.allJobs = jobs;
                 filteredJobs = jobs;
                 updateJobTable();
             });
-            console.log(`Updated job ${jobId} vacancy to ${newVacancy}`);
 
             // Show an alert that the vacancy was updated
-            alert(`Vacancy for "${position}" at "${company}" updated to ${newVacancy}.`);
+            alert(`Vacancy for "${position}" at "${company}" updated to ${updatedVacancy}.`);
         } catch (error) {
             console.error(`Failed to update job vacancy for ${jobId}`, error);
         }
@@ -219,6 +228,37 @@ async function editVacancy(jobId, currentVacancy, company, position) {
         alert("Invalid input. Please enter a valid number.");
     }
 }
+
+async function archiveJobIfNeeded(jobId, company, position, userEmail) {
+    try {
+        const jobDocRef = doc(firestore, 'jobs', jobId);
+        const jobDocSnap = await getDoc(jobDocRef);
+        if (jobDocSnap.exists()) {
+            const jobData = jobDocSnap.data();
+
+            // Archive the job
+            await addDoc(collection(firestore, 'archive'), jobData);
+            await deleteDoc(jobDocRef);
+            console.log(`Archived job with ID: ${jobId}`);
+
+            await logAudit(userEmail, "Job Archived", { jobId });
+
+            // Show a confirmation alert with company name and position
+            alert(`Job "${position}" at "${company}" was automatically archived because the vacancy is 0.`);
+
+            // Refresh the job table after archiving
+            fetchAllJobs().then(jobs => {
+                window.allJobs = jobs;
+                filteredJobs = jobs;
+                updateJobTable();
+            });
+        }
+    } catch (error) {
+        console.error(`Failed to archive job with ID: ${jobId}`, error);
+        alert(`Failed to archive job with ID: ${jobId}.`);
+    }
+}
+
 
 document.getElementById('exportAuditLogBtn').addEventListener('click', () => {
     exportAuditLog().then(csvContent => {

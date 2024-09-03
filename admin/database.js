@@ -153,7 +153,7 @@ export async function hireApplicant(applicationId, applicantData) {
         const employedCol = collection(firestore, 'employed');
         await addDoc(employedCol, applicantData);
 
-        // Optionally delete the application after hiring
+        // Delete the application after hiring
         await deleteDoc(doc(firestore, `applied/${applicationId}`));
 
         console.log(`Applicant with ID: ${applicationId} has been hired and moved to the employed collection.`);
@@ -162,3 +162,30 @@ export async function hireApplicant(applicationId, applicantData) {
         throw error;
     }
 }
+
+// Exporting the archiveJobIfNeeded function
+export async function archiveJobIfNeeded(jobId, company, position, userEmail) {
+    try {
+        const jobDocRef = doc(firestore, 'jobs', jobId);
+        const jobDocSnap = await getDoc(jobDocRef);
+        if (jobDocSnap.exists()) {
+            const jobData = jobDocSnap.data();
+
+            // Archive the job
+            await addDoc(collection(firestore, 'archive'), jobData);
+            await deleteDoc(jobDocRef);
+            console.log(`Archived job with ID: ${jobId}`);
+
+            await logAudit(userEmail, "Job Archived", { jobId });
+
+            // Show a confirmation alert with company name and position
+            alert(`Job "${position}" at "${company}" was automatically archived because the vacancy is 0.`);
+        }
+    } catch (error) {
+        console.error(`Failed to archive job with ID: ${jobId}`, error);
+        alert(`Failed to archive job with ID: ${jobId}.`);
+    }
+}
+
+
+
