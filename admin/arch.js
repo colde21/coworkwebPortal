@@ -67,26 +67,61 @@ function updateArchiveTable(jobs) {
     container.appendChild(list);
 }
 
-// Function to unarchive a job
+// Function to unarchive a job with vacancy editing
 async function unarchiveJob(jobId) {
-    const confirmation = confirm("Are you sure you want to unarchive this job?");
-    if (confirmation) {
-        try {
-            const user = auth.currentUser;
-            const userEmail = user ? user.email : "Unknown user";
-            const jobData = await getDoc(doc(firestore, `archive/${jobId}`));
-            if (jobData.exists()) {
-                await addDoc(collection(firestore, 'jobs'), jobData.data());
-                await deleteArchivedJob(jobId);
-                await logAudit(userEmail, "Job Unarchived", { jobId });
-                alert("Job successfully unarchived.");
-                window.location.reload(); // Reload to update the archive list
-            }
-        } catch (error) {
-            console.error(`Failed to unarchive job ${jobId}:`, error);
+    // Fetch the job data from the archive
+    const jobDocRef = doc(firestore, `archive/${jobId}`);
+    const jobData = await getDoc(jobDocRef);
+
+    if (jobData.exists()) {
+        // Confirmation before editing the vacancy
+        const editConfirmation = confirm("Do you want to unarchive this job?");
+        if (!editConfirmation) {
+            alert("Unarchiving canceled.");
+            return;
         }
+
+        // Prompt the user to edit the vacancy number before unarchiving
+        const currentVacancy = jobData.data().vacancy || 0;
+        const newVacancy = prompt(`Edit the vacancy number for "${jobData.data().position}" at "${jobData.data().company}":`, currentVacancy);
+
+        if (newVacancy !== null && !isNaN(newVacancy) && newVacancy >= 0) {
+            const confirmation = confirm("Are you sure you want to unarchive this job with the updated vacancy?");
+            if (confirmation) {
+                try {
+                    const user = auth.currentUser;
+                    const userEmail = user ? user.email : "Unknown user";
+                    
+                    // Update the vacancy in the job data
+                    const updatedJobData = {
+                        ...jobData.data(),
+                        vacancy: parseInt(newVacancy, 10)
+                    };
+
+                    // Add the updated job back to the jobs collection with a new ID
+                    await addDoc(collection(firestore, 'jobs'), updatedJobData);
+
+                    // Remove the job from the archive collection
+                    await deleteArchivedJob(jobId);
+
+                    // Log the unarchive action
+                    await logAudit(userEmail, "Job Unarchived", { jobId, newVacancy });
+
+                    alert(`Job "${updatedJobData.position}" at "${updatedJobData.company}" was successfully unarchived with updated vacancy ${newVacancy}.`);
+                    window.location.reload(); // Reload to update the archive list
+                } catch (error) {
+                    console.error(`Failed to unarchive job ${jobId}:`, error);
+                }
+            }
+        } else {
+            alert("Invalid input. The job was not unarchived.");
+        }
+    } else {
+        alert("Job data not found.");
     }
 }
+
+
 
 // Function to delete a job permanently
 async function deleteJob(jobId, listItem) {

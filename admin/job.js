@@ -94,7 +94,7 @@ function updateJobTable() {
         const editCell = newRow.insertCell();
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
-        editButton.addEventListener('click', () => editVacancy(job.id, job.vacancy));
+        editButton.addEventListener('click', () => editVacancy(job.id, job.vacancy, job.company, job.position));
         editCell.appendChild(editButton);
     });
 
@@ -166,28 +166,37 @@ async function archiveSelectedJobs() {
     const user = auth.currentUser;
     const userEmail = user ? user.email : "Unknown user";
 
-    checkedBoxes.forEach(async (box) => {
+    for (const box of checkedBoxes) {
         const jobId = box.closest('tr').dataset.id;
         try {
             const jobDocRef = doc(firestore, 'jobs', jobId);
             const jobDocSnap = await getDoc(jobDocRef);
             if (jobDocSnap.exists()) {
                 const jobData = jobDocSnap.data();
+                const { company, position } = jobData;
+
                 await addDoc(collection(firestore, 'archive'), jobData);
                 await deleteDoc(jobDocRef);
                 console.log(`Archived job with ID: ${jobId}`);
                 await logAudit(userEmail, "Job Archived", { jobId });
+
+                // Show a confirmation alert with company name and position
+                alert(`Job "${position}" at "${company}" was successfully archived.`);
+
                 box.closest('tr').remove();
-                window.location.reload();  // Refresh the list after archiving
             }
         } catch (error) {
             console.error(`Failed to archive job with ID: ${jobId}`, error);
+            alert(`Failed to archive job with ID: ${jobId}.`);
         }
-    });
+    }
+
+    // Reload the page after all jobs are processed
+    window.location.reload();  
 }
 
-async function editVacancy(jobId, currentVacancy) {
-    const newVacancy = prompt("Enter new vacancy number:", currentVacancy);
+async function editVacancy(jobId, currentVacancy, company, position) {
+    const newVacancy = prompt(`Enter new vacancy number for "${position}" at "${company}":`, currentVacancy);
     if (newVacancy !== null && !isNaN(newVacancy) && newVacancy >= 0) {
         try {
             const user = auth.currentUser;
@@ -200,6 +209,9 @@ async function editVacancy(jobId, currentVacancy) {
                 updateJobTable();
             });
             console.log(`Updated job ${jobId} vacancy to ${newVacancy}`);
+
+            // Show an alert that the vacancy was updated
+            alert(`Vacancy for "${position}" at "${company}" updated to ${newVacancy}.`);
         } catch (error) {
             console.error(`Failed to update job vacancy for ${jobId}`, error);
         }
