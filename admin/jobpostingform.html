@@ -3,7 +3,7 @@
 <head>
     <title>Job Posting Form</title>
     <link rel="stylesheet" href="jobpostingform.css">
-    <script src="jobpostingform.js" type="module"></script> <!-- Updated script src -->
+    <script src="jobpostingform.js" type="module"></script>
 </head>
 <body>
     <div class="nav">
@@ -11,46 +11,67 @@
     </div>
 
     <form id="jobForm">
-        <label for="position">Position:</label>
-        <input type="text" id="position" name="position" placeholder="Enter job position" required>
-        
-        <label for="company">Company:</label>
-        <input type="text" id="company" name="company" placeholder="Enter company name" required>
-        
-        <label for="location">Location:</label>
-        <input type="text" id="location" name="location" placeholder="Enter job location" required>
-        
-        <label for="type">Job Type:</label>
-        <select id="type" name="type">
-            <option value="full-time">Full-Time</option>
-            <option value="part-time">Part-Time</option>
-            <option value="contract">Contract</option>
-        </select>
-        
-        <label for="age">Age Requirement:</label>
-        <input type="number" id="age" name="age" placeholder="Enter Age Requirement" min="18" max="60" required>
-        
-        <label for="skills">Required Skills:</label>
-        <input type="text" id="skills" name="skills" placeholder="Enter required skills" required>
-        
-        <label for="contact">Contact Email:</label>
-        <input type="email" id="contact" name="contact" placeholder="Enter contact email" required>
-        
-        <label for="vacancy">Vacancy:</label>
-        <input type="number" id="vacancy" name="vacancy" placeholder="Enter number of vacancies" required>
-        
-        <label for="facilities">Facilities:<div id="facilitiesCount">500 characters remaining</div> </label>
-        <textarea id="facilities" name="facilities" placeholder="Enter work environment"></textarea>
-    
-        <label for="description">Description: <div id="descriptionCount">500 characters remaining</div> </label>
-        <textarea id="description" name="description" placeholder="Enter job description"></textarea>
-        
+        <!-- Row 1 -->
+        <div class="form-group">
+            <label for="position">Position:</label>
+            <input type="text" id="position" name="position" placeholder="Enter job position" required>
+        </div>
+        <div class="form-group">
+            <label for="company">Company:</label>
+            <input type="text" id="company" name="company" placeholder="Enter company name" required>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="form-group">
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" placeholder="Enter job location" required>
+        </div>
+        <div class="form-group">
+            <label for="type">Job Type:</label>
+            <select id="type" name="type">
+                <option value="full-time">Full-Time</option>
+                <option value="part-time">Part-Time</option>
+                <option value="contract">Contract</option>
+            </select>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="form-group">
+            <label for="age">Age Requirement:</label>
+            <input type="number" id="age" name="age" placeholder="Enter Age Requirement" min="18" max="60" required>
+        </div>
+        <div class="form-group">
+            <label for="vacancy">Vacancy:</label>
+            <input type="number" id="vacancy" name="vacancy" placeholder="Enter number of vacancies" required>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="form-group">
+            <label for="skills">Qualifications:</label>
+            <input type="text" id="skills" name="skills" placeholder="Enter required skills" required>
+        </div>
+        <div class="form-group">
+            <label for="contact">Contact Email:</label>
+            <input type="email" id="contact" name="contact" placeholder="Enter contact email" required>
+        </div>
+
+        <!-- Row 5 -->
+        <div class="form-group full-width">
+            <label for="facilities">Facilities:</label>
+            <textarea id="facilities" name="facilities" placeholder="Enter work environment"></textarea>
+        </div>
+
+        <!-- Row 6 -->
+        <div class="form-group full-width">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" placeholder="Enter job description"></textarea>
+        </div>
+
+        <!-- Buttons -->
         <div class="button-container">
             <input type="button" value="Go Back">
             <input type="submit" value="Add Job">
         </div>
     </form>
-     
-    <script type="module" src="jobpostingform.js"></script> <!-- Moved this script reference down for execution order -->
 </body>
 </html>
