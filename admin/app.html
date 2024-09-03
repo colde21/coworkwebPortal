@@ -22,8 +22,14 @@
   <!-- Main content -->
   <div class="container">
     <div class="header-container">
-        <h1>Application List</h1>
-        <input type="text" id="searchBar" placeholder="Search by company">
+        <div class="dropdown">
+            <button class="dropbtn">Jobs ▼</button>
+            <div class="dropdown-content">
+                <a href="#">Jobs</a>
+                <a href="#">People</a>
+            </div>
+        </div>
+        <input type="text" id="searchBar" placeholder="Search job titles or companies">
     </div>
     
     <!-- Application list -->
@@ -34,6 +40,5 @@
 
   <script type="module" src="app.js"> </script>
   
-
 </body>
 </html>
