@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="home.css">
     <title>Home</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
     <script type="module" src="home.js" defer></script>
 </head>
@@ -39,9 +38,22 @@
         </div>
     </div>
 
-    <!-- Chart Section -->
-    <div class="chart-container">
-        <canvas id="summaryChart"></canvas> <!-- Canvas for the chart -->
+    <!-- Charts Section -->
+    <div class="charts-wrapper">
+        <!-- Applications by Company Chart -->
+        <div class="chart-container">
+            <canvas id="applicationsByCompanyChart"></canvas>
+        </div>
+
+        <!-- Employed by Position Chart  -->
+        <div class="chart-container">
+            <canvas id="employedByPositionChart"></canvas>
+        </div>
+
+        <!-- Employed by Company Chart -->
+        <div class="chart-container">
+            <canvas id="employedByCompanyChart"></canvas>
+        </div>
     </div>
 </body>
 </html>
