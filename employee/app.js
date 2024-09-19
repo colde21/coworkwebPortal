@@ -1,6 +1,6 @@
 import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { fetchAllApplications, hireApplicant, archiveJobIfNeeded } from './database.js';
+import { fetchAllApplications, hireApplicant, archiveJobIfNeeded, logAudit } from './database.js';
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 
@@ -21,14 +21,32 @@ const firestore = getFirestore(app);
 
 let allApplications = [];  // To store all applications globally
 let refreshInterval; // To store the interval ID
-
+//Sign out button
 function performSignOut() { 
-    firebaseSignOut(auth).then(() => {
-        window.location.href = "../login.html";
-    }).catch((error) => {
-        console.error("Error signing out:", error);
-    });
+    // Show confirmation dialog
+    const confirmSignOut = confirm("Are you sure you want to sign out?");
+
+    if (confirmSignOut) {
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
+
+        firebaseSignOut(auth).then(() => {
+            // Log the successful sign-out
+            logAudit(userEmail, "Sign out", { status: "Success" });
+
+            // Redirect to login page
+            window.location.href = "../login.html";
+        }).catch((error) => {
+            // Log the sign-out failure
+            logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+
+            console.error("Error signing out:", error);
+        });
+    } else {
+        console.log("Sign out cancelled");
+    }
 }
+//Signout 
 
 // Ensure elements exist before attaching event listeners
 document.addEventListener('DOMContentLoaded', () => {
@@ -52,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
     fetchApplicationsAndUpdateUI();
 });
+
 
 function fetchApplicationsAndUpdateUI() {
     fetchAllApplications().then(applications => {

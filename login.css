@@ -28,8 +28,9 @@ body {
 }
 
 .img img {
-    width: 80px; /* Adjust as necessary */
+    width: 80px;
 }
+
 
 /* Login Form Fields */
 .elements {
@@ -77,7 +78,7 @@ button {
     background-color: #f72222;
     color: #fff;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
@@ -89,7 +90,7 @@ button:hover {
 }
 
 button:active {
-    transform: scale(0.98);
+    transform: scale(0.1s);
 }
 
 /* Error Message */
@@ -120,7 +121,26 @@ button:active {
     height: 60px;
     animation: spin 1s linear infinite;
 }
+.toggle-password {
+    position: absolute;
+    right: 1px;
+    top: 49%;
+    transform: translateY(-58%);
+    width: 50px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 1px;
+    padding-right: 1px;
+    border: none;
+    border-radius: 10;
+    font-size: 12px;
+    color: #ffffff;
+    cursor: pointer;
+}
 
+.toggle-password:hover {
+    color: #ffffff;
+}
 @keyframes spin {
     0% {
         transform: rotate(0deg);

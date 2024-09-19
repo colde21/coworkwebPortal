@@ -19,20 +19,29 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 
+// Signout 
 function performSignOut() {
     const user = auth.currentUser;
     const userEmail = user ? user.email : "Unknown user";
 
-    firebaseSignOut(auth).then(() => {
-        logAudit(userEmail, "Sign out", { status: "Success" });
-        window.location.href = "../login.html";
-    }).catch((error) => {
-        logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
-        console.error("Error signing out:", error);
-    });
+    // Show confirmation dialog
+    const confirmSignOut = confirm("Are you sure you want to sign out?");
+
+    if (confirmSignOut) {
+        firebaseSignOut(auth).then(() => {
+            logAudit(userEmail, "Sign out", { status: "Success" });
+            window.location.href = "../login.html";
+        }).catch((error) => {
+            logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+            console.error("Error signing out:", error);
+        });
+    } else {
+        console.log("Sign out cancelled");
+    }
 }
 
 document.getElementById('signOutBtn').addEventListener('click', performSignOut);
+// Signout 
 
 document.addEventListener('DOMContentLoaded', () => {
     updateDashboardData();

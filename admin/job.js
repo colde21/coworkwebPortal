@@ -23,26 +23,34 @@ const firestore = getFirestore(app);
 const itemsPerPage = 10;
 let currentPage = 1;
 let filteredJobs = [];
+//Sign out button
+function performSignOut() { 
+    // Show confirmation dialog
+    const confirmSignOut = confirm("Are you sure you want to sign out?");
 
-async function performSignOut() {
-    const user = auth.currentUser;
-    const userEmail = user ? user.email : "Unknown user";
+    if (confirmSignOut) {
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
 
-    try {
-        await logAudit(userEmail, "Sign out", { status: "Success" });
-    } catch (error) {
-        console.error("Error logging sign out action:", error);
-    } finally {
-        try {
-            await firebaseSignOut(auth);
+        firebaseSignOut(auth).then(() => {
+            // Log the successful sign-out
+            logAudit(userEmail, "Sign out", { status: "Success" });
+
+            // Redirect to login page
             window.location.href = "../login.html";
-        } catch (error) {
+        }).catch((error) => {
+            // Log the sign-out failure
+            logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+
             console.error("Error signing out:", error);
-        }
+        });
+    } else {
+        console.log("Sign out cancelled");
     }
 }
 
 document.getElementById('signOutBtn').addEventListener('click', performSignOut);
+//Signout 
 
 document.addEventListener('DOMContentLoaded', () => {
     const archiveButton = document.getElementById('archiveSelectedJobsButton');

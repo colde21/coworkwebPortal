@@ -23,25 +23,29 @@ const itemsPerPage = 10;
 let currentPage = 1;
 let filteredJobs = [];
 
-async function performSignOut() {
+// Signout 
+function performSignOut() {
     const user = auth.currentUser;
     const userEmail = user ? user.email : "Unknown user";
 
-    try {
-        await logAudit(userEmail, "Sign out", { status: "Success" });
-    } catch (error) {
-        console.error("Error logging sign out action:", error);
-    } finally {
-        try {
-            await firebaseSignOut(auth);
+    // Show confirmation dialog
+    const confirmSignOut = confirm("Are you sure you want to sign out?");
+
+    if (confirmSignOut) {
+        firebaseSignOut(auth).then(() => {
+            logAudit(userEmail, "Sign out", { status: "Success" });
             window.location.href = "../login.html";
-        } catch (error) {
+        }).catch((error) => {
+            logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
             console.error("Error signing out:", error);
-        }
+        });
+    } else {
+        console.log("Sign out cancelled");
     }
 }
 
 document.getElementById('signOutBtn').addEventListener('click', performSignOut);
+// Signout 
 
 document.addEventListener('DOMContentLoaded', () => {
     const searchBar = document.getElementById('searchBar');
