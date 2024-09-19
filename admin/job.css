@@ -48,22 +48,23 @@ body {
 .job-container {
     padding: 16px;
     padding-top: 100px;
-    margin-top: 1px; /* Reduced margin to bring the container closer to the navbar */
+    margin-top: 1px;
     display: flex;
-    justify-content: space-between;
-    gap: 10px; /* Add a small gap between the two sections */
+    flex-wrap: wrap; /* Allows the content to wrap */
+    gap: 10px;
 }
 
 .job-actions {
     align-content: center;
     display: flex;
     flex-direction: column;
-    padding: 50px;
+    padding: 30px;
     background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
-    border-radius: 8px;  /* Slightly rounded corners */
-    flex-shrink: 0; /* Prevent the actions column from shrinking */
-    transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 250px;   
 }
 
 .job-actions h2 {
@@ -121,6 +122,7 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 600px; /* Set minimum width for table for smaller viewports */
 }
 
 th, td {
@@ -132,15 +134,14 @@ th, td {
 th {
     background-color: #f2f2f2;
 }
-
 .jable {
     display: flex;
     padding: 30px;
-    width: 75%;
+    width: 76%; /* Adjust width */
     background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
-    border-radius: 8px;  /* Slightly rounded corners */
-    transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow-x: auto;
 }
 
 /* Circular checkboxes */
@@ -192,15 +193,13 @@ table td button:active {
     transform: translateY(0); /* Return to original position on click */
 }
 
-/* Add pagination styles */
+
+/* Pagination */
 .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 20px;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 14px;
-    color: #333;
 }
 
 .pagination span {
@@ -236,4 +235,36 @@ table td button:active {
     background-color: #333;
     color: #fff;
     border-color: #333;
+}
+
+/* Responsive styles */
+@media only screen and (max-width: 768px) {
+    .job-actions {
+        width: 100%;
+        max-width: none; /* Remove the max width constraint */
+    }
+
+    .jable {
+        width: 100%; /* Ensure table container takes full width */
+        padding: 10px; /* Adjust padding for smaller screens */
+    }
+
+    table {
+        min-width: 100%; /* Allow the table to resize for smaller viewports */
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .links button {
+        font-size: 12px; /* Reduce font size on navigation for small screens */
+        padding: 10px;
+    }
+
+    th, td {
+        padding: 5px; /* Adjust table padding */
+    }
+
+    button {
+        font-size: 12px; /* Reduce button font size */
+    }
 }
