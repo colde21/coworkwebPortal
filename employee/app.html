@@ -14,19 +14,31 @@
         <button onclick="location.href='home.html'">HOME</button>
         <button onclick="location.href='job.html'">JOB</button>
         <button onclick="location.href='app.html'">APPLICATION</button>
-        <button onclick="location.href='emp.html'">EMPLOYED</button>
-        <button id="signOutBtn">SIGN OUT</button>  <!-- Updated button with id -->
+        <button onclick="location.href='archive.html'">ARCHIVE JOBS</button>
+        <button id="signOutBtn">SIGN OUT</button>
     </div>
-</div> 
-<!-- Navigation bar-->  
-<div class="container">
-  <h1>Application List</h1>
-  <ul id="applicationList">
-      <!-- List items will be dynamically added here using JavaScript -->
-  </ul>
-</div>
+  </div> 
 
-<script type="module"src="app.js"></script>
+  <!-- Main content -->
+  <div class="container">
+    <div class="header-container">
+        <div class="dropdown">
+            <button class="dropbtn">Jobs ▼</button>
+            <div class="dropdown-content">
+                <a href="#">Jobs</a>
+                <a href="#">People</a>
+            </div>
+        </div>
+        <input type="text" id="searchBar" placeholder="Search job titles or companies">
+    </div>
+    
+    <!-- Application list -->
+    <ul id="applicationList">
+        <!-- List items will be dynamically added here using JavaScript -->
+    </ul>
+  </div>
 
+  <script type="module" src="app.js"> </script>
+  
 </body>
 </html>

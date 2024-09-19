@@ -102,31 +102,6 @@ li:last-child {
     font-size: 14px;
 }
 
-/* Button Styles */
-button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-left: 10px;
-    flex-shrink: 0; /* Prevent buttons from shrinking */
-}
-
-button:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px); /* Subtle lift effect */
-}
-
-button:active {
-    background-color: #a93226;
-    transform: translateY(0); /* Return to original position on click */
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
     li {

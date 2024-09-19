@@ -16,7 +16,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
 }
 
 .links {
@@ -25,15 +24,15 @@ body {
 }
 
 .links button {
-    background: none;
-    border: none;
+    background: none; 
+    border: none; 
     color: #f2f2f2;
     padding: 16px 10px;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     margin-right: 10px;
-    cursor: pointer;
+    cursor: pointer; /* Ensure it's clear this is clickable */
 }
 
 .nav h2 {
@@ -44,7 +43,7 @@ body {
 }
 
 .links button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.1); /* Change background color on hover */
 }
 
 /* Main container */

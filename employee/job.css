@@ -5,7 +5,6 @@ body {
 
 /* Navigation bar */
 .nav {
-    background: rgb(223, 75, 75);
     background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
     position: fixed;
     width: 100%;
@@ -15,7 +14,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure the navbar stays on top */
 }
 
 .links {
@@ -24,12 +22,12 @@ body {
 }
 
 .links button {
-    background: none; /* Remove default button background */
-    border: none; /* Remove default border */
+    background: none; 
+    border: none; 
     color: #f2f2f2;
     padding: 16px 10px;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     margin-right: 10px;
     cursor: pointer; /* Ensure it's clear this is clickable */
@@ -53,6 +51,7 @@ body {
     margin-top: 1px; /* Reduced margin to bring the container closer to the navbar */
     display: flex;
     justify-content: space-between;
+    gap: 10px; /* Add a small gap between the two sections */
 }
 
 .job-actions {
@@ -61,7 +60,10 @@ body {
     flex-direction: column;
     padding: 50px;
     background-color: white;
-    border: 1px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    border-radius: 8px;  /* Slightly rounded corners */
+    flex-shrink: 0; /* Prevent the actions column from shrinking */
+    transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
 }
 
 .job-actions h2 {
@@ -136,62 +138,76 @@ th {
     padding: 30px;
     width: 75%;
     background-color: white;
-    border: 1px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    border-radius: 8px;  /* Slightly rounded corners */
+    transition: transform 0.2s ease-in-out; /* Smooth transition for hover effect */
 }
 
-/* Circular checkboxes */
-.circular-checkbox {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
+/* Edit Button Styles */
+table td button {
+    background-color: red; /* Primary blue color */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+table td button:hover {
+    background-color: darkred; /* Darker blue on hover */
+    transform: translateY(-2px); /* Subtle lift effect */
+}
+
+table td button:active {
+    background-color: darkred; /* Even darker blue when clicked */
+    transform: translateY(0); /* Return to original position on click */
+}
+
+/* Add pagination styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    color: #333;
+}
+
+.pagination span {
+    margin-right: 10px;
+}
+
+.pagination button {
+    background-color: #fff;
+    color: #333;
     border: 1px solid #ccc;
-    border-radius: 50%;
-    outline: none;
+    padding: 8px 12px;
+    margin: 0 5px;
     cursor: pointer;
-    position: relative;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.circular-checkbox:checked::before {
-    content: '';
-    width: 12px;
-    height: 12px;
-    background-color: red;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.pagination button:hover {
+    background-color: #f0f0f0;
 }
 
-/* Circular Toggle Button */
-.toggle-button {
-    position: relative;
-    width: 40px;
-    height: 20px;
-    background-color: #ccc;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+.pagination button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    border-color: #eee;
 }
 
-.toggle-button::before {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    background-color: white;
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: transform 0.3s;
+.pagination button:disabled:hover {
+    background-color: #fff;
 }
 
-.toggle-button.active {
-    background-color: red;
-}
-
-.toggle-button.active::before {
-    transform: translateX(20px);
+.pagination button.active {
+    background-color: #333;
+    color: #fff;
+    border-color: #333;
 }

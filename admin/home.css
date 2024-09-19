@@ -1,6 +1,6 @@
 /* Main body styles */
 body {
-    background-color: #d3d3d3;
+    background-color: #F2F2F2;
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
     padding-top: 70px; /* Ensure content is below the navbar */
@@ -8,7 +8,6 @@ body {
 
 /* Navigation bar */
 .nav {
-    background: rgb(223, 75, 75);
     background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
     position: fixed;
     width: 100%;
@@ -26,15 +25,26 @@ body {
 }
 
 .links button {
-    background: none; /* Remove default button background */
-    border: none; /* Remove default border */
+    background: none; 
+    border: none; 
     color: #f2f2f2;
     padding: 16px 10px;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     margin-right: 10px;
     cursor: pointer; /* Ensure it's clear this is clickable */
+}
+
+.nav h2 {
+    font-size: 30px;
+    color: #f2f2f2;
+    margin-left: 20px;
+    margin-right: auto;
+}
+
+.links button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Change background color on hover */
 }
 
 /* Chart containers section */
@@ -55,7 +65,6 @@ body {
     border-radius: 8px;  /* Slightly rounded corners */
     padding: 10px; /* Add some padding inside the border */
     margin: 20px auto; /* Space between stacked charts and center the chart */
-    
 }
 
 /* Cards (for total count display) */

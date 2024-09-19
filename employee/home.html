@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="hstyle.css">
     <title>Home</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
     <script type="module" src="home.js" defer></script>
 </head>
 <body>
     <div class="nav">
-    
         <div class="links">
             <button onclick="location.href='home.html'">HOME</button>
             <button onclick="location.href='job.html'">JOB</button>
             <button onclick="location.href='app.html'">APPLICATION</button>
-            <button onclick="location.href='emp.html'">EMPLOYED</button>
+            <button onclick="location.href='archive.html'">ARCHIVE JOBS</button>
             <button id="signOutBtn">SIGN OUT</button>
         </div>
     </div>
+    
     <div class="container">
         <div class="card job">
             <h3>JOB</h3>
@@ -26,19 +26,34 @@
         </div>
         <div class="card app">
             <h3>APPLICATION</h3>
-            <p id="applicationCount">Total: 0</p> <!-- Added this line -->
+            <p id="applicationCount">Total: 0</p>
         </div>
         <div class="card emp">
             <h3>EMPLOYED</h3>
-            <p id="employedCount">Total: 0</p> <!-- Added this line -->
+            <p id="employedCount">Total: 0</p>
         </div>
         <div class="card vac">
-            <h3>VACANTS</h3>
-            <p id="vacanciesCount">Total: 0</p> <!-- Added this line -->
+            <h3>VACANCIES</h3>
+            <p id="vacanciesCount">Total: 0</p>
         </div>
     </div>
-    <div class="logo">
-        <img src="logo.jpeg">
+
+    <!-- Charts Section -->
+    <div class="charts-wrapper">
+        <!-- Applications by Company Chart -->
+        <div class="chart-container">
+            <canvas id="applicationsByCompanyChart"></canvas>
+        </div>
+
+        <!-- Employed by Position Chart  -->
+        <div class="chart-container">
+            <canvas id="employedByPositionChart"></canvas>
+        </div>
+
+        <!-- Employed by Company Chart -->
+        <div class="chart-container">
+            <canvas id="employedByCompanyChart"></canvas>
+        </div>
     </div>
 </body>
 </html>

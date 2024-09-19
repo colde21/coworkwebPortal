@@ -1,5 +1,6 @@
+/* Main body styles */
 body {
-    background-color: #9c0100;
+    background-color: #F2F2F2;
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
     padding-top: 70px; /* Ensure content is below the navbar */
@@ -7,7 +8,6 @@ body {
 
 /* Navigation bar */
 .nav {
-    background: rgb(223, 75, 75);
     background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
     position: fixed;
     width: 100%;
@@ -25,12 +25,12 @@ body {
 }
 
 .links button {
-    background: none; /* Remove default button background */
-    border: none; /* Remove default border */
+    background: none; 
+    border: none; 
     color: #f2f2f2;
     padding: 16px 10px;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     margin-right: 10px;
     cursor: pointer; /* Ensure it's clear this is clickable */
@@ -48,6 +48,28 @@ body {
 }
 /* End Navigation bar */
 
+
+/* Chart containers section */
+.charts-wrapper {
+    display: flex;
+    flex-direction: column;  /* Stack the charts vertically */
+    justify-content: space-between;
+    align-items: center;
+    margin: 50px auto;
+    width: 79%;  /* Adjust overall width */
+}
+
+.chart-container {
+    width: 80%;  /* Set width to 80% to reduce extra space */
+    height: 500px;  /* Set a fixed height for each chart */
+    background-color: #f4f4f4;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    border-radius: 8px;  /* Slightly rounded corners */
+    padding: 10px; /* Add some padding inside the border */
+    margin: 20px auto; /* Space between stacked charts and center the chart */
+}
+
+/* Cards (for total count display) */
 .container {
     display: flex;
     justify-content: space-around;
@@ -57,7 +79,7 @@ body {
 }
 
 .card {
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     border-radius: 8px;
     padding: 20px;
     text-align: center;
@@ -77,29 +99,4 @@ body {
     margin: 10px 0 0;
     font-size: 16px;
     color: #666;
-}
-
-#exportAuditLogBtn {
-    margin-top: 20px;
-    background-color: #ff0000; /* Example color */
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#exportAuditLogBtn:hover {
-    background-color: #cc0000; /* Darker color on hover */
-}
-.logo {
-    display: flex;       /* Enables flexbox */
-    justify-content: center; /* Center horizontally */
-    align-items: center;     /* Center vertically */
-    height: 500px;       /* Set a specific height if needed */
-}
-
-.logo img {
-    height: 100%;        /* Make image take full height of its container */
-    max-width: 100%;     /* Ensures the image is responsive and does not overflow */
 }

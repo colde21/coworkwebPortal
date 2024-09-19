@@ -12,38 +12,38 @@
             <button onclick="location.href='home.html'">HOME</button>
             <button onclick="location.href='job.html'">JOB</button>
             <button onclick="location.href='app.html'">APPLICATION</button>
-            <button onclick="location.href='emp.html'">EMPLOYED</button>
-            <button id="signOutBtn">SIGN OUT</button>  <!-- Updated button with id -->
+            <button onclick="location.href='archive.html'">ARCHIVE JOBS</button>
+            <button id="signOutBtn">SIGN OUT</button>
         </div>
     </div> 
-    <!-- Navigation bar--> 
-    
+
     <div class="job-container">
         <div class="job-actions">
             <h2>Job List | <span id="jobCount">Total Jobs: 0</span></h2>
-            <input type="text" id="searchBar" placeholder="Search for Keywords..">
+            <input type="text" id="searchBar" placeholder="Search by Company">
+            <br>
             <div>
                 <label for="sortBy">Sort by:</label>
                 <select id="sortBy">
                     <option value="company">Company</option>
                     <option value="position">Position</option>
                     <option value="type">Type</option>
-                    <option value="status">Status</option>
                 </select>
                 <button id="sortAsc">Ascending</button>
                 <button id="sortDesc">Descending</button>
             </div>
         </div>
-       <div class="jable">
+        <div class="jable">
             <table id="jobTable">
                 <thead>
                     <tr>
                         <th>Position</th>
                         <th>Company</th>
-                        <th>Location  </th>
+                        <th>Location</th>
                         <th>Vacancy</th>
                         <th>Type</th>
                         <th>Email</th>
+                        <th>Edit</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,6 +52,8 @@
             </table>
         </div>
     </div>
+
+    <div id="paginationControls" class="pagination"></div>
 
     <script type="module" src="job.js"></script>
 </body>

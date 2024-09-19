@@ -1,26 +1,43 @@
-import { fetchAllJobs, updateJobStatus, logAudit } from './database.js';
+import { fetchAllJobs, updateJobStatus, logAudit, exportAuditLog } from './database.js';
 import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getFirestore, getDoc, addDoc, doc, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
+// Firebase configuration
 const firebaseConfig = {
-    // Your Firebase config
+    apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
+    authDomain: "cowork-195c0.firebaseapp.com",
+    databaseURL: "https://cowork-195c0-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "cowork-195c0",
+    storageBucket: "cowork-195c0.appspot.com",
+    messagingSenderId: "151400704939",
+    appId: "1:151400704939:web:934d6d15c66390055440ee",
+    measurementId: "G-8DL6T09CP4"
 };
 
-// Initialize Firebase if not already initialized
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const firestore = getFirestore(app);
+
+const itemsPerPage = 10;
+let currentPage = 1;
+let filteredJobs = [];
 
 async function performSignOut() {
     const user = auth.currentUser;
     const userEmail = user ? user.email : "Unknown user";
 
     try {
-        await firebaseSignOut(auth);
         await logAudit(userEmail, "Sign out", { status: "Success" });
-        window.location.href = "../login.html";
     } catch (error) {
-        await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
-        console.error("Error signing out:", error);
+        console.error("Error logging sign out action:", error);
+    } finally {
+        try {
+            await firebaseSignOut(auth);
+            window.location.href = "../login.html";
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
     }
 }
 
@@ -35,16 +52,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchAllJobs().then(jobs => {
         window.allJobs = jobs; // Store all jobs in a global variable for filtering and sorting
-        updateJobTable(jobs);
+        filteredJobs = jobs;
+        updateJobTable();
     }).catch(err => console.error("Failed to fetch jobs:", err));
 });
 
-function updateJobTable(jobs) {
+function updateJobTable() {
     const tableBody = document.getElementById('jobTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = ''; // Clear existing rows
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const jobsToDisplay = filteredJobs.slice(start, end);
+
     let count = 0; // Initialize job count
 
-    jobs.forEach(job => {
+    jobsToDisplay.forEach(job => {
         count++; // Increment for each job
         const newRow = tableBody.insertRow(-1);
         newRow.dataset.id = job.id;
@@ -55,55 +78,98 @@ function updateJobTable(jobs) {
             const cell = newRow.insertCell();
             cell.textContent = job[field] || 'N/A';
         });
+
+        // Create the edit button for vacancy
+        const editCell = newRow.insertCell();
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.addEventListener('click', () => editVacancy(job.id, job.vacancy, job.company, job.position));
+        editCell.appendChild(editButton);
     });
 
-    document.getElementById('jobCount').textContent = `Total Jobs: ${count}`;
+    document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
+    updatePaginationControls();
 }
-
-
+//Search bar 
 function handleSearch() {
     const query = document.getElementById('searchBar').value.toLowerCase();
-    const filteredJobs = window.allJobs.filter(job => {
+    filteredJobs = window.allJobs.filter(job => {
         return job.company.toLowerCase().includes(query);
     });
-    updateJobTable(filteredJobs);
+    currentPage = 1; // Reset to first page when search is performed
+    updateJobTable();
 }
-
-
+//Sort
 function handleSort(order) {
     const sortBy = document.getElementById('sortBy').value;
-    const sortedJobs = [...window.allJobs].sort((a, b) => {
+    filteredJobs.sort((a, b) => {
         if (a[sortBy] < b[sortBy]) return order === 'asc' ? -1 : 1;
         if (a[sortBy] > b[sortBy]) return order === 'asc' ? 1 : -1;
         return 0;
     });
-    updateJobTable(sortedJobs);
+    currentPage = 1; // Reset to first page when sorting is performed
+    updateJobTable();
 }
-//delete selected job
-async function deleteSelectedJobs() {
-    const checkedBoxes = document.querySelectorAll('#jobTable tbody input[type="checkbox"]:checked');
-    if (checkedBoxes.length === 0) {
-        alert("No jobs selected for deletion.");
-        return;
-    }
+//PaginationControls
+function updatePaginationControls() {
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = ''; // Clear existing controls
 
-    const confirmation = confirm("Are you sure you want to delete the selected jobs?");
-    if (!confirmation) {
-        return; // User cancelled the deletion
-    }
+    const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
 
-    const user = auth.currentUser;
-    const userEmail = user ? user.email : "Unknown user";
+    const pageDisplay = document.createElement('span');
+    pageDisplay.textContent = `${currentPage}-${totalPages}`;
+    paginationControls.appendChild(pageDisplay);
 
-    checkedBoxes.forEach(async (box) => {
-        const jobId = box.closest('tr').dataset.id;
-        try {
-            await deleteJobById(jobId);
-            box.closest('tr').remove();
-            console.log(`Deleted job with ID: ${jobId}`);
-            await logAudit(userEmail, "Job Deleted", { jobId });
-        } catch (error) {
-            console.error(`Failed to delete job with ID: ${jobId}`, error);
-        }
+    const prevButton = document.createElement('button');
+    prevButton.textContent = '<';
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener('click', () => {
+        currentPage--;
+        updateJobTable();
     });
+    paginationControls.appendChild(prevButton);
+
+    const nextButton = document.createElement('button');
+    nextButton.textContent = '>';
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.addEventListener('click', () => {
+        currentPage++;
+        updateJobTable();
+    });
+    paginationControls.appendChild(nextButton);
+}
+//Edit Vacancy 
+async function editVacancy(jobId, currentVacancy, company, position) {
+    const newVacancy = prompt(`Enter new vacancy number for "${position}" at "${company}":`, currentVacancy);
+    if (newVacancy !== null && !isNaN(newVacancy) && newVacancy >= 0) {
+        try {
+            const user = auth.currentUser;
+            const userEmail = user ? user.email : "Unknown user";
+            const updatedVacancy = parseInt(newVacancy, 10);
+
+            // Update the job vacancy
+            await updateJobStatus(jobId, { vacancy: updatedVacancy });
+            await logAudit(userEmail, "Vacancy Updated", { jobId, updatedVacancy });
+            console.log(`Updated job ${jobId} vacancy to ${updatedVacancy}`);
+
+            // Check if the vacancy is 0, and if so, archive the job
+            if (updatedVacancy === 0) {
+                await archiveJobIfNeeded(jobId, company, position, userEmail);
+            }
+
+            fetchAllJobs().then(jobs => {
+                window.allJobs = jobs;
+                filteredJobs = jobs;
+                updateJobTable();
+            });
+
+            // Show an alert that the vacancy was updated
+            alert(`Vacancy for "${position}" at "${company}" updated to ${updatedVacancy}.`);
+        } catch (error) {
+            console.error(`Failed to update job vacancy for ${jobId}`, error);
+        }
+    } else {
+        alert("Invalid input. Please enter a valid number.");
+    }
 }
