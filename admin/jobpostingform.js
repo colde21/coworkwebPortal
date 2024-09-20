@@ -48,7 +48,6 @@ goBackButton.addEventListener('click', () => {
     // Redirect to the previous page
     window.location.href = "../admin/job.html" || "job.html";
 });
-
 document.getElementById('facilities').addEventListener('input', function() {
     const maxLength = 500;
     const currentLength = this.value.length;

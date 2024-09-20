@@ -1,7 +1,6 @@
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
     authDomain: "cowork-195c0.firebaseapp.com",
@@ -22,7 +21,7 @@ export async function submitJobData(formData) {
     try {
         const jobsCol = collection(firestore, 'jobs');
         const docRef = await addDoc(jobsCol, formData);
-        return docRef.id;  // Returns the document ID of the new document
+        return docRef.id; 
     } catch (error) {
         console.error("Error adding job:", error);
         throw error;
