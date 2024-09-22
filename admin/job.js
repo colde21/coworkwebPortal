@@ -253,6 +253,28 @@ document.getElementById('saveJobButton').addEventListener('click', async functio
         description: document.getElementById('description').value,
     };
 
+    // Validate age restriction (between 18 and 60)
+    const age = parseInt(updatedData.age, 10);
+    if (isNaN(age) || age < 18 || age > 60) {
+        alert('Please enter a valid age between 18 and 60.');
+        return;
+    }
+
+    // Validate vacancy, if 0, ask the user for confirmation to archive the job
+    const vacancy = parseInt(updatedData.vacancy, 10);
+    if (isNaN(vacancy) || vacancy < 0) {
+        alert('Please enter a valid number for vacancy.');
+        return;
+    }
+
+    if (vacancy === 0) {
+        const confirmArchive = confirm('Vacancy is set to 0. Do you want to archive this job?');
+        if (confirmArchive) {
+            await archiveJobIfNeeded(jobId, updatedData.company, updatedData.position);
+            return; // Exit after archiving the job
+        }
+    }
+
     try {
         // Update the job in Firestore
         await updateDoc(jobDocRef, updatedData);
@@ -277,6 +299,39 @@ document.getElementById('saveJobButton').addEventListener('click', async functio
         alert('Failed to update the job. Please try again.');
     }
 });
+
+// Function to archive the job if vacancy is 0
+async function archiveJobIfNeeded(jobId, company, position) {
+    try {
+        const jobDocRef = doc(firestore, 'jobs', jobId);
+        const jobDocSnap = await getDoc(jobDocRef);
+        if (jobDocSnap.exists()) {
+            const jobData = jobDocSnap.data();
+
+            // Archive the job
+            await addDoc(collection(firestore, 'archive'), jobData);
+            await deleteDoc(jobDocRef);
+            console.log(`Archived job with ID: ${jobId}`);
+
+            // Log the audit action
+            await logAudit(auth.currentUser.email, 'Job Archived', { jobId });
+
+            // Show a confirmation alert with company name and position
+            alert(`Job "${position}" at "${company}" was successfully archived because the vacancy is 0.`);
+            
+            // Refresh the job table after archiving
+            fetchAllJobs().then(jobs => {
+                window.allJobs = jobs;
+                filteredJobs = jobs;
+                updateJobTable();
+            });
+        }
+    } catch (error) {
+        console.error(`Failed to archive job with ID: ${jobId}`, error);
+        alert(`Failed to archive job with ID: ${jobId}.`);
+    }
+}
+
 
 // "Go Back" button functionality
 document.getElementById('goBackButton').addEventListener('click', function () {
@@ -314,3 +369,4 @@ async function editJob(jobId) {
         console.error('Error fetching job for editing:', error);
     }
 }
+// Exporting the archiveJobIfNeeded function
