@@ -41,7 +41,6 @@ function performSignOut() {
 }
 
 document.getElementById('signOutBtn').addEventListener('click', performSignOut);
-// Signout 
 
 document.addEventListener('DOMContentLoaded', () => {
     updateDashboardData();
@@ -60,10 +59,6 @@ async function fetchApplicationsAndEmployed() {
         const applications = applicationsSnapshot.docs.map(doc => doc.data()) || [];
         const employed = employedSnapshot.docs.map(doc => doc.data()) || [];
 
-        // Log data to see what Firestore returns
-        console.log("Applications fetched:", applications);
-        console.log("Employed fetched:", employed);
-
         return { applications, employed };
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -80,16 +75,12 @@ function updateDashboardData() {
         fetchApplicationsAndEmployed()
     ])
     .then(([jobCount, vacanciesCount, applicationCount, employedCount, { applications, employed }]) => {
-        console.log("Applications:", applications);
-        console.log("Employed:", employed);
-
         createCharts(applications, employed);
     })
     .catch(error => {
         console.error("Error updating dashboard:", error);
     });
 }
-
 
 function updateJobCount() {
     return fetchAllJobs().then(jobs => {
@@ -165,92 +156,245 @@ function aggregateDataByCompany(applications, employed) {
 
         employedByCompany[company] = (employedByCompany[company] || 0) + 1;
 
-        if (!employedByPosition[company]) employedByPosition[company] = {};
-        employedByPosition[company][position] = (employedByPosition[company][position] || 0) + 1;
+        if (!employedByPosition[position]) {
+            employedByPosition[position] = {};
+        }
+        employedByPosition[position][company] = (employedByPosition[position][company] || 0) + 1;
     });
 
     return { applicationsByCompany, employedByCompany, employedByPosition };
 }
 
-// Render the charts
-function createCharts(applications, employed) {
+// Function to calculate percentage
+function calculatePercentage(data) {
+    const total = data.reduce((sum, value) => sum + value, 0);
+    return data.map(value => ((value / total) * 100).toFixed(2) + '%');
+}
+
+// Create a list of distinct colors for each chart
+function getCompanyColors(numCompanies) {
+    const predefinedColors = [
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)'
+    ];
+
+    const predefinedBorderColors = [
+        'rgba(75, 192, 192, 1)',
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)'
+    ];
+
+    while (numCompanies > predefinedColors.length) {
+        predefinedColors.push(`rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.2)`);
+        predefinedBorderColors.push(`rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 1)`);
+    }
+
+    return { colors: predefinedColors.slice(0, numCompanies), borders: predefinedBorderColors.slice(0, numCompanies) };
+}
+
+// Applications by Company Chart
+function createApplicationsByCompanyChart(applicationsByCompany) {
     const ctxApplications = document.getElementById('applicationsByCompanyChart').getContext('2d');
-    const ctxEmployedByPosition = document.getElementById('employedByPositionChart').getContext('2d');
-    const ctxEmployedByCompany = document.getElementById('employedByCompanyChart').getContext('2d');
+    const companies = Object.keys(applicationsByCompany);
+    const applications = Object.values(applicationsByCompany);
+    const percentages = calculatePercentage(applications);
+    const { colors, borders } = getCompanyColors(companies.length);
 
-    const { applicationsByCompany, employedByCompany, employedByPosition } = aggregateDataByCompany(applications, employed);
-
-    // Applications by Company Chart
     new Chart(ctxApplications, {
         type: 'bar',
         data: {
-            labels: Object.keys(applicationsByCompany),
+            labels: companies,
             datasets: [{
                 label: 'Applications by Company',
-                data: Object.values(applicationsByCompany),
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                data: applications,
+                backgroundColor: colors,
+                borderColor: borders,
                 borderWidth: 1
             }]
         },
         options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Applications by Company'
+                },
+                legend: {
+                    display: true,
+                    labels: {
+                        generateLabels: function (chart) {
+                            const labels = chart.data.labels;
+                            const datasets = chart.data.datasets[0];
+                            return labels.map((label, index) => {
+                                return {
+                                    text: `${label}: ${datasets.data[index]} (${percentages[index]})`,
+                                    fillStyle: datasets.backgroundColor[index],
+                                    strokeStyle: datasets.borderColor[index]
+                                };
+                            });
+                        }
+                    }
+                }
+            },
             scales: {
                 y: { beginAtZero: true }
             }
         }
     });
 
-    // Employed by Position Chart
-    const companies = Object.keys(employedByPosition);
-    const datasets = [];
-    const positions = new Set();
+    // Create Text Summary
+    createTextSummary('applicationsByCompanySummary', companies, applications, percentages);
+}
 
-    companies.forEach(company => {
-        Object.keys(employedByPosition[company]).forEach(position => positions.add(position));
+// Employed by Position Chart with properly aligned bars
+function createEmployedByPositionChart(employedByPosition) {
+    const ctxEmployedByPosition = document.getElementById('employedByPositionChart').getContext('2d');
+    
+    const positions = Object.keys(employedByPosition);
+    const companySet = new Set();
+    positions.forEach(position => {
+        Object.keys(employedByPosition[position]).forEach(company => {
+            companySet.add(company);
+        });
     });
+    
+    const companies = Array.from(companySet); // Convert Set back to Array
+    const datasets = [];
 
-    companies.forEach(company => {
-        const data = Array.from(positions).map(position => employedByPosition[company][position] || 0);
+    const { colors, borders } = getCompanyColors(companies.length);
+
+    companies.forEach((company, index) => {
+        const data = positions.map(position => employedByPosition[position][company] || 0);
+
         datasets.push({
             label: company,
             data,
-            backgroundColor: 'rgba(255, 206, 86, 0.2)',
-            borderColor: 'rgba(255, 206, 86, 1)',
-            borderWidth: 1
+            backgroundColor: colors[index],
+            borderColor: borders[index],
+            borderWidth: 1,
+            barPercentage: 0.8,  // Adjusts the bar width
+            categoryPercentage: 0.8  // Adjusts the space between bars
         });
     });
 
     new Chart(ctxEmployedByPosition, {
         type: 'bar',
         data: {
-            labels: Array.from(positions),
+            labels: positions,
             datasets
         },
         options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Employed by Position'
+                }
+            },
             scales: {
-                y: { beginAtZero: true }
+                x: {
+                    stacked: true
+                },
+                y: {
+                    beginAtZero: true,
+                    stacked: true
+                }
             }
         }
     });
 
-    // Employed by Company Chart
+    // Create Text Summary
+    const summaryData = datasets.map(d => d.data.reduce((acc, curr) => acc + curr, 0));
+    const summaryPercentages = calculatePercentage(summaryData);
+    createTextSummary('employedByPositionSummary', positions, summaryData, summaryPercentages);
+}
+
+// Employed by Company Chart
+function createEmployedByCompanyChart(employedByCompany) {
+    const ctxEmployedByCompany = document.getElementById('employedByCompanyChart').getContext('2d');
+    const companies = Object.keys(employedByCompany);
+    const employedCounts = Object.values(employedByCompany);
+    const percentages = calculatePercentage(employedCounts);
+    const { colors, borders } = getCompanyColors(companies.length);
+
     new Chart(ctxEmployedByCompany, {
         type: 'bar',
         data: {
-            labels: Object.keys(employedByCompany),
+            labels: companies,
             datasets: [{
                 label: 'Employed by Company',
-                data: Object.values(employedByCompany),
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                borderColor: 'rgba(153, 102, 255, 1)',
+                data: employedCounts,
+                backgroundColor: colors,
+                borderColor: borders,
                 borderWidth: 1
             }]
         },
         options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Employed by Company'
+                },
+                legend: {
+                    display: true,
+                    labels: {
+                        generateLabels: function (chart) {
+                            const labels = chart.data.labels;
+                            const datasets = chart.data.datasets[0];
+                            return labels.map((label, index) => {
+                                return {
+                                    text: `${label}: ${datasets.data[index]} (${percentages[index]})`,
+                                    fillStyle: datasets.backgroundColor[index],
+                                    strokeStyle: datasets.borderColor[index]
+                                };
+                            });
+                        }
+                    }
+                }
+            },
             scales: {
                 y: { beginAtZero: true }
             }
         }
     });
+
+    // Create Text Summary
+    createTextSummary('employedByCompanySummary', companies, employedCounts, percentages);
 }
 
+// Function to create a text summary next to the chart
+function createTextSummary(summaryElementId, labels, data, percentages) {
+    const summaryElement = document.getElementById(summaryElementId);
+    if (!summaryElement) {
+        console.error(`Summary element with ID '${summaryElementId}' not found.`);
+        return;
+    }
+    summaryElement.innerHTML = ''; // Clear previous content
+
+    let summaryHTML = '<h3>Summary</h3><ul>';
+    labels.forEach((label, index) => {
+        summaryHTML += `<li>${label}: ${data[index]} (${percentages[index]})</li>`;
+    });
+    summaryHTML += '</ul>';
+
+    summaryElement.innerHTML = summaryHTML;
+}
+
+// Render the charts
+function createCharts(applications, employed) {
+    const { applicationsByCompany, employedByCompany, employedByPosition } = aggregateDataByCompany(applications, employed);
+
+    // Create Applications by Company chart
+    createApplicationsByCompanyChart(applicationsByCompany);
+
+    // Create Employed by Position chart
+    createEmployedByPositionChart(employedByPosition);
+
+    // Create Employed by Company chart
+    createEmployedByCompanyChart(employedByCompany);
+}
