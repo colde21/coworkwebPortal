@@ -1,7 +1,7 @@
-import { fetchAllJobs, updateJobStatus, logAudit, exportAuditLog } from './database.js';
+import { fetchAllJobs, logAudit, exportAuditLog } from './database.js';
 import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, getDoc, addDoc, doc, collection, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, getDoc, addDoc, doc, collection, deleteDoc, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -59,8 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchBar = document.getElementById('searchBar');
     searchBar.addEventListener('input', handleSearch);
 
-    document.getElementById('sortAsc').addEventListener('click', () => handleSort('asc'));
-    document.getElementById('sortDesc').addEventListener('click', () => handleSort('desc'));
+    /*document.getElementById('sortAsc').addEventListener('click', () => handleSort('asc'));
+    document.getElementById('sortDesc').addEventListener('click', () => handleSort('desc'));*/
 
     fetchAllJobs().then(jobs => {
         window.allJobs = jobs; // Store all jobs in a global variable for filtering and sorting
@@ -68,19 +68,23 @@ document.addEventListener('DOMContentLoaded', () => {
         updateJobTable();
     }).catch(err => console.error("Failed to fetch jobs:", err));
 });
-
+//Update tables
 function updateJobTable() {
     const tableBody = document.getElementById('jobTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = ''; // Clear existing rows
+
+    // Sort jobs by `unarchivedAt` first, then by `createdAt` (descending order)
+    filteredJobs.sort((a, b) => {
+        const timeA = a.unarchivedAt ? a.unarchivedAt.seconds : (a.createdAt ? a.createdAt.seconds : 0);
+        const timeB = b.unarchivedAt ? b.unarchivedAt.seconds : (b.createdAt ? b.createdAt.seconds : 0);
+        return timeB - timeA; // Sort by most recent first
+    });
 
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const jobsToDisplay = filteredJobs.slice(start, end);
 
-    let count = 0; // Initialize job count
-
     jobsToDisplay.forEach(job => {
-        count++; // Increment for each job
         const newRow = tableBody.insertRow(-1);
         newRow.dataset.id = job.id;
 
@@ -103,24 +107,34 @@ function updateJobTable() {
         editButton.textContent = 'Edit';
         editButton.addEventListener('click', () => editJob(job.id));
         editCell.appendChild(editButton);
-        
-        
     });
 
     document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
     updatePaginationControls();
 }
 
+
+//Search 
 function handleSearch() {
     const query = document.getElementById('searchBar').value.toLowerCase();
+
+    // Search across multiple fields
     filteredJobs = window.allJobs.filter(job => {
-        return job.company.toLowerCase().includes(query);
+        return (
+            (job.position && job.position.toLowerCase().includes(query)) ||
+            (job.company && job.company.toLowerCase().includes(query)) ||
+            (job.location && job.location.toLowerCase().includes(query)) ||
+            (job.vacancy && job.vacancy.toString().toLowerCase().includes(query)) ||
+            (job.type && job.type.toLowerCase().includes(query)) ||
+            (job.contact && job.contact.toLowerCase().includes(query))
+        );
     });
+
     currentPage = 1; // Reset to first page when search is performed
     updateJobTable();
 }
-
-function handleSort(order) {
+//Sort
+/*function handleSort(order) {
     const sortBy = document.getElementById('sortBy').value;
     filteredJobs.sort((a, b) => {
         if (a[sortBy] < b[sortBy]) return order === 'asc' ? -1 : 1;
@@ -129,8 +143,8 @@ function handleSort(order) {
     });
     currentPage = 1; // Reset to first page when sorting is performed
     updateJobTable();
-}
-
+}*/
+//Pagination
 function updatePaginationControls() {
     const paginationControls = document.getElementById('paginationControls');
     paginationControls.innerHTML = ''; // Clear existing controls
@@ -159,6 +173,7 @@ function updatePaginationControls() {
     });
     paginationControls.appendChild(nextButton);
 }
+
 //Archived Selected Jobs
 async function archiveSelectedJobs() {
     const checkedBoxes = document.querySelectorAll('#jobTable tbody input[type="checkbox"]:checked');
@@ -169,7 +184,7 @@ async function archiveSelectedJobs() {
 
     const confirmation = confirm("Are you sure you want to archive the selected jobs?");
     if (!confirmation) {
-        return; // User cancelled the archiving
+        return; // User canceled the archiving
     }
 
     const user = auth.currentUser;
@@ -184,15 +199,22 @@ async function archiveSelectedJobs() {
                 const jobData = jobDocSnap.data();
                 const { company, position } = jobData;
 
-                await addDoc(collection(firestore, 'archive'), jobData);
-                await deleteDoc(jobDocRef);
-                console.log(`Archived job with ID: ${jobId}`);
+                // Archive the job with a timestamp
+                const archiveData = {
+                    ...jobData,
+                    archivedAt: Timestamp.now() // Set the archive timestamp
+                };
+
+                // Add the job to the 'archive' collection
+                await addDoc(collection(firestore, 'archive'), archiveData);
+                await deleteDoc(jobDocRef); // Remove the job from the jobs collection
+
+                // Log the action in the audit trail
                 await logAudit(userEmail, "Job Archived", { jobId });
 
                 // Show a confirmation alert with company name and position
                 alert(`Job "${position}" at "${company}" was successfully archived.`);
-
-                box.closest('tr').remove();
+                box.closest('tr').remove(); // Remove the row from the table
             }
         } catch (error) {
             console.error(`Failed to archive job with ID: ${jobId}`, error);
@@ -201,7 +223,7 @@ async function archiveSelectedJobs() {
     }
 
     // Reload the page after all jobs are processed
-    window.location.reload();  
+    window.location.reload();
 }
 
 
@@ -308,9 +330,15 @@ async function archiveJobIfNeeded(jobId, company, position) {
         if (jobDocSnap.exists()) {
             const jobData = jobDocSnap.data();
 
-            // Archive the job
-            await addDoc(collection(firestore, 'archive'), jobData);
-            await deleteDoc(jobDocRef);
+            // Archive the job with a timestamp
+            const archiveData = {
+                ...jobData,
+                archivedAt: Timestamp.now() // Set the archive timestamp
+            };
+
+            // Add the job to the 'archive' collection
+            await addDoc(collection(firestore, 'archive'), archiveData);
+            await deleteDoc(jobDocRef); // Remove the job from the jobs collection
             console.log(`Archived job with ID: ${jobId}`);
 
             // Log the audit action
@@ -318,7 +346,7 @@ async function archiveJobIfNeeded(jobId, company, position) {
 
             // Show a confirmation alert with company name and position
             alert(`Job "${position}" at "${company}" was successfully archived because the vacancy is 0.`);
-            
+
             // Refresh the job table after archiving
             fetchAllJobs().then(jobs => {
                 window.allJobs = jobs;
@@ -369,4 +397,3 @@ async function editJob(jobId) {
         console.error('Error fetching job for editing:', error);
     }
 }
-// Exporting the archiveJobIfNeeded function

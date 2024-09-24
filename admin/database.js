@@ -20,7 +20,11 @@ const firestore = getFirestore(app);
 export async function submitJobData(formData) {
     try {
         const jobsCol = collection(firestore, 'jobs');
-        const docRef = await addDoc(jobsCol, formData);
+        // Add the job data along with the timestamp
+        const docRef = await addDoc(jobsCol, {
+            ...formData, 
+            createdAt: formData.createdAt // Ensure the timestamp is sent
+        });
         return docRef.id; 
     } catch (error) {
         console.error("Error adding job:", error);
