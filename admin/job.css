@@ -88,7 +88,7 @@ body {
 }
 
 .job-actions button {
-    background-color: red; /* example color */
+    background-color: #e74c3c;  /* example color */
     color: white;
     padding: 10px 20px;
     border: none;
@@ -162,7 +162,7 @@ th {
     content: '';
     width: 12px;
     height: 12px;
-    background-color: red;
+    background-color: #e74c3c; 
     border-radius: 50%;
     position: absolute;
     top: 50%;
@@ -172,7 +172,7 @@ th {
 
 /* Edit Button Styles */
 table td button {
-    background-color: red; /* Primary blue color */
+    background-color: #e74c3c; /* Primary blue color */
     color: white;
     border: none;
     padding: 8px 15px;
@@ -185,12 +185,6 @@ table td button {
 
 table td button:hover {
     background-color: darkred; /* Darker blue on hover */
-    transform: translateY(-2px); /* Subtle lift effect */
-}
-
-table td button:active {
-    background-color: darkred; /* Even darker blue when clicked */
-    transform: translateY(0); /* Return to original position on click */
 }
 
 
@@ -236,7 +230,7 @@ table td button:active {
     color: #fff;
     border-color: #333;
 }
-/* Edit Job Form Styles */
+
 /* Edit Job Form Styles */
 #editJobForm {
     display: none; /* Hidden by default */
@@ -297,7 +291,7 @@ table td button:active {
 }
 
 .form-buttons button {
-    background-color: #d32f2f; /* Same red color for consistency */
+    background-color: #e74c3c;  /* Same red color for consistency */
     color: white;
     padding: 12px 20px;
     border: none;

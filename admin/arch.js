@@ -1,7 +1,7 @@
-import { fetchArchivedJobs, updateJobStatus, logAudit, deleteArchivedJob } from './database.js';
+import { fetchArchivedJobs, logAudit, deleteArchivedJob } from './database.js';
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, getDoc, doc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, getDoc, doc, addDoc, collection, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -19,9 +19,29 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);  // Initialize Firestore
 
-document.addEventListener('DOMContentLoaded', () => {
+// Check for old archived jobs and delete them if they are older than 5 years
+async function deleteOldArchivedJobs() {
+    const archivedJobs = await fetchArchivedJobs(); // Fetch all archived jobs
+    const fiveYearsInMillis = 5 * 365 * 24 * 60 * 60 * 1000; // 5 years in milliseconds
+    const now = Date.now(); // Get current time
+
+    archivedJobs.forEach(async job => {
+        if (job.archivedAt) {
+            const archivedTime = job.archivedAt.toMillis(); // Convert Firestore timestamp to milliseconds
+            if (now - archivedTime > fiveYearsInMillis) {
+                // Job is older than 5 years, delete it
+                await deleteArchivedJob(job.id);
+                console.log(`Deleted archived job with ID: ${job.id} because it was older than 5 years.`);
+            }
+        }
+    });
+}
+
+// Event listener for when the document content is loaded
+document.addEventListener('DOMContentLoaded', async () => {
+    await deleteOldArchivedJobs(); // Check and delete old archived jobs
     fetchArchivedJobs().then(jobs => {
-        updateArchiveTable(jobs);
+        updateArchiveTable(jobs); // Your function that displays the archived jobs
     }).catch(err => console.error("Failed to fetch archived jobs:", err));
 });
 
@@ -92,13 +112,14 @@ async function unarchiveJob(jobId) {
                     const user = auth.currentUser;
                     const userEmail = user ? user.email : "Unknown user";
                     
-                    // Update the vacancy in the job data
+                    // Update the job data to include a new vacancy and timestamp
                     const updatedJobData = {
                         ...jobData.data(),
-                        vacancy: parseInt(newVacancy, 10)
+                        vacancy: parseInt(newVacancy, 10),
+                        unarchivedAt: Timestamp.now() // Add unarchived timestamp
                     };
 
-                    // Add the updated job back to the jobs collection with a new ID
+                    // Add the updated job back to the jobs collection
                     await addDoc(collection(firestore, 'jobs'), updatedJobData);
 
                     // Remove the job from the archive collection
@@ -120,8 +141,6 @@ async function unarchiveJob(jobId) {
         alert("Job data not found.");
     }
 }
-
-
 
 // Function to delete a job permanently
 async function deleteJob(jobId, listItem) {

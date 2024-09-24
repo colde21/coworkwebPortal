@@ -1,6 +1,6 @@
 import { submitJobData, logAudit } from './database.js';
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-
+import { Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js"; // Import Firestore Timestamp
 const auth = getAuth();
 
 document.getElementById('jobForm').addEventListener('submit', async function(event) {
@@ -14,7 +14,8 @@ document.getElementById('jobForm').addEventListener('submit', async function(eve
 
     // Set the status to 'open'
     entries.status = 'open';
-
+    
+    entries.createdAt = Timestamp.now();
     // Validate required fields
     if (!entries.position || !entries.company || !entries.age) {
         alert('Please fill in all required fields.');
@@ -31,7 +32,7 @@ document.getElementById('jobForm').addEventListener('submit', async function(eve
     try {
         const jobId = await submitJobData(entries);
         console.log('Job added with ID:', jobId);
-        await logAudit(userEmail, "Job Added", { jobId, jobData: entries, timestamp });
+        await logAudit(userEmail, "Job Added", { jobId, jobData: entries, timestamp: entries.createdAt  });
         
         alert("Job posted successfully!");
         window.location.href = '../admin/job.html' || 'job.html'; // Redirect on success

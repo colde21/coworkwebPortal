@@ -1,6 +1,6 @@
 // Import necessary Firebase functions
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword,  onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 import { logAudit } from './database.js';
 
@@ -41,6 +41,18 @@ document.getElementById('submit').addEventListener("click", async function (even
 
             // Log audit for successful login
             await logAudit(email, "Sign in", { status: "Success" });
+
+            // Block back button navigation after login
+            window.onload = function() {
+                // Add a new entry to the browser history (to override the back button)
+                history.pushState(null, null, window.location.href);
+                window.onpopstate = function() {
+                    // When the user presses the back button, prevent the action and redirect them to the login page
+                    history.pushState(null, null, window.location.href);
+                    alert('You cannot go back to the previous page after logging in.');
+                    window.location.href = "../login.html"; // Redirect to the login page or any other page
+                };
+            };
 
             // Redirect based on the role
             if (role === "admin") {

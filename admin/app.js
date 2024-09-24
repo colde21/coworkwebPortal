@@ -183,9 +183,15 @@ function handleSearch() {
         updateApplicationList(allApplications);
         refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
     } else {
-        const filteredApplications = allApplications.filter(application =>
-            application.company.toLowerCase().includes(query)
-        );
+        const filteredApplications = allApplications.filter(application => {
+            return (
+                (application.userName && application.userName.toLowerCase().includes(query)) ||
+                (application.position && application.position.toLowerCase().includes(query)) ||
+                (application.company && application.company.toLowerCase().includes(query)) ||
+                (application.userEmail && application.userEmail.toLowerCase().includes(query)) ||
+                (application.userPhone && application.userPhone.toLowerCase().includes(query))
+            );
+        });
         updateApplicationList(filteredApplications);
         clearInterval(refreshInterval);
     }
