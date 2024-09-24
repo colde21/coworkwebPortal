@@ -1,5 +1,5 @@
 import { fetchAllJobs, logAudit, exportAuditLog } from './database.js';
-import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
+import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, getDoc, addDoc, doc, collection, deleteDoc, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
@@ -23,6 +23,18 @@ const firestore = getFirestore(app);
 const itemsPerPage = 10;
 let currentPage = 1;
 let filteredJobs = [];
+//Prevent user Jump Page 
+function requireLogin() {
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // If the user is not logged in, redirect to the login page
+            window.location.href = '/login.html';
+        } else {
+            // Optionally log that the user has accessed the page
+            logAudit(user.email, "Accessed Home", { status: "Success" });
+        }
+    });
+}
 //Sign out button
 function performSignOut() { 
     // Show confirmation dialog
@@ -53,6 +65,8 @@ document.getElementById('signOutBtn').addEventListener('click', performSignOut);
 //Signout 
 
 document.addEventListener('DOMContentLoaded', () => {
+    requireLogin();  // Ensure login
+
     const archiveButton = document.getElementById('archiveSelectedJobsButton');
     archiveButton.addEventListener('click', archiveSelectedJobs);
 

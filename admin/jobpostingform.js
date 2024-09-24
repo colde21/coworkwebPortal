@@ -1,9 +1,24 @@
 import { submitJobData, logAudit } from './database.js';
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js"; // Import Firestore Timestamp
 const auth = getAuth();
 
-document.getElementById('jobForm').addEventListener('submit', async function(event) {
+
+
+function requireLogin() {
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // If the user is not logged in, redirect to the login page
+            window.location.href = '/login.html';
+        } else {
+            // Optionally log that the user has accessed the page
+            logAudit(user.email, "Accessed Home", { status: "Success" });
+        }
+    });
+}
+requireLogin(); 
+
+document.getElementById('jobForm').addEventListener('submit', async function(event) { 
     event.preventDefault();
     const formData = new FormData(this);
     const entries = Object.fromEntries(formData.entries());
@@ -78,3 +93,4 @@ document.getElementById('description').addEventListener('input', function() {
         facilitiesCount.style.color = 'black';
     }
 });
+

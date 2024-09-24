@@ -1,4 +1,4 @@
-import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
+import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { fetchAllApplications, hireApplicant, archiveJobIfNeeded, logAudit } from './database.js';
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
@@ -18,6 +18,19 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
+
+// prevent jump
+function requireLogin() {
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // If the user is not logged in, redirect to the login page
+            window.location.href = '/login.html';
+        } else {
+            // Optionally log that the user has accessed the page
+            logAudit(user.email, "Accessed Home", { status: "Success" });
+        }
+    });
+}
 
 let allApplications = [];  // To store all applications globally
 let refreshInterval; // To store the interval ID
@@ -47,9 +60,11 @@ function performSignOut() {
     }
 }
 
-
 // Ensure elements exist before attaching event listeners
 document.addEventListener('DOMContentLoaded', () => {
+    requireLogin();  // Ensure login
+
+
     const signOutBtn = document.getElementById('signOutBtn');
     const searchBar = document.getElementById('searchBar');
 

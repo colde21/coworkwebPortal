@@ -1,5 +1,5 @@
 import { fetchArchivedJobs, logAudit, deleteArchivedJob } from './database.js';
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, getDoc, doc, addDoc, collection, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
@@ -19,6 +19,17 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);  // Initialize Firestore
 
+function requireLogin() {
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // If the user is not logged in, redirect to the login page
+            window.location.href = '/login.html';
+        } else {
+            // Optionally log that the user has accessed the page
+            logAudit(user.email, "Accessed Home", { status: "Success" });
+        }
+    });
+}
 // Check for old archived jobs and delete them if they are older than 5 years
 async function deleteOldArchivedJobs() {
     const archivedJobs = await fetchArchivedJobs(); // Fetch all archived jobs
@@ -39,6 +50,7 @@ async function deleteOldArchivedJobs() {
 
 // Event listener for when the document content is loaded
 document.addEventListener('DOMContentLoaded', async () => {
+    requireLogin(); 
     await deleteOldArchivedJobs(); // Check and delete old archived jobs
     fetchArchivedJobs().then(jobs => {
         updateArchiveTable(jobs); // Your function that displays the archived jobs
