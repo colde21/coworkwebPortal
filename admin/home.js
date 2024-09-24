@@ -126,10 +126,6 @@ function aggregateDataByCompany(applications, employed) {
     const employedByCompany = {};
     const employedByPosition = {};
 
-    // Handle undefined or empty arrays
-    applications = applications || [];
-    employed = employed || [];
-
     applications.forEach(app => {
         const company = app.company || 'Unknown';
         applicationsByCompany[company] = (applicationsByCompany[company] || 0) + 1;
@@ -154,7 +150,7 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
     const companies = Object.keys(applicationsByCompany);
     const applications = Object.values(applicationsByCompany);
 
-    new Chart(ctxApplications, {
+    const chart = new Chart(ctxApplications, {
         type: 'bar',
         data: {
             labels: companies,
@@ -169,23 +165,41 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true } }
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Applications per Company'
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
         }
     });
+
+    const resizeObserver = new ResizeObserver(() => {
+        chart.resize();
+    });
+    resizeObserver.observe(document.getElementById('applicationsByCompanyChart'));
 }
 
 function createEmployedByPositionChart(employedByPosition) {
     const ctxEmployedByPosition = document.getElementById('employedByPositionChart').getContext('2d');
-    const positions = Object.keys(employedByPosition);
+    
+    const positions = Object.keys(employedByPosition);  
     const companies = [...new Set(Object.values(employedByPosition).flatMap(position => Object.keys(position)))];
+    
     const datasets = companies.map((company, index) => {
         const data = positions.map(position => employedByPosition[position][company] || 0);
-        const colors = ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'];
+        const colors = ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)'];
         const borderColors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'];
 
         return {
             label: company,
-            data,
+            data,  
             backgroundColor: colors[index % colors.length],
             borderColor: borderColors[index % borderColors.length],
             borderWidth: 1,
@@ -196,11 +210,31 @@ function createEmployedByPositionChart(employedByPosition) {
 
     new Chart(ctxEmployedByPosition, {
         type: 'bar',
-        data: { labels: positions, datasets },
+        data: {
+            labels: positions,  
+            datasets  
+        },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: { x: { stacked: true }, y: { beginAtZero: true, stacked: true } }
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Positions per Company'
+                },
+                legend: {
+                    display: false  
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true  
+                },
+                y: {
+                    beginAtZero: true,
+                    stacked: true  
+                }
+            }
         }
     });
 }
@@ -210,7 +244,7 @@ function createEmployedByCompanyChart(employedByCompany) {
     const companies = Object.keys(employedByCompany);
     const employedCounts = Object.values(employedByCompany);
 
-    new Chart(ctxEmployedByCompany, {
+    const chart = new Chart(ctxEmployedByCompany, {
         type: 'bar',
         data: {
             labels: companies,
@@ -225,15 +259,63 @@ function createEmployedByCompanyChart(employedByCompany) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true } }
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Employed per Company'
+                },
+                legend: {
+                    display: false  
+                }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
         }
     });
+
+    const resizeObserver = new ResizeObserver(() => {
+        chart.resize();
+    });
+    resizeObserver.observe(document.getElementById('employedByCompanyChart'));
+}
+
+function createTextSummary(summaryElementId, labels, data, percentages) {
+    const summaryElement = document.getElementById(summaryElementId);
+    if (!summaryElement) {
+        console.error(`Summary element with ID '${summaryElementId}' not found.`);
+        return;
+    }
+    summaryElement.innerHTML = ''; 
+
+    let summaryHTML = '<h3>Legend:</h3><ul>';
+    labels.forEach((label, index) => {
+        summaryHTML += `<li>${label}</li>`;
+    });
+    summaryHTML += '</ul><h3>Summary:</h3><ul>';
+    labels.forEach((label, index) => {
+        const total = typeof data[index] === 'object' ? Object.values(data[index]).reduce((sum, count) => sum + count, 0) : data[index];
+        summaryHTML += `<li><b>${label}: ${total} - ${percentages[index]}</b></li>`;
+    });
+    summaryHTML += '</ul>';
+
+    summaryElement.innerHTML = summaryHTML;
 }
 
 function createCharts(applications, employed) {
     const { applicationsByCompany, employedByCompany, employedByPosition } = aggregateDataByCompany(applications, employed);
+
     createApplicationsByCompanyChart(applicationsByCompany);
     createEmployedByPositionChart(employedByPosition);
     createEmployedByCompanyChart(employedByCompany);
+
+    // Generate summary for each chart
+    createTextSummary('applicationsByCompanySummary', Object.keys(applicationsByCompany), Object.values(applicationsByCompany), calculatePercentage(Object.values(applicationsByCompany)));
+    createTextSummary('employedByPositionSummary', Object.keys(employedByPosition), Object.values(employedByPosition), calculatePercentage(Object.values(employedByPosition).map(position => Object.values(position).reduce((sum, val) => sum + val, 0))));
+    createTextSummary('employedByCompanySummary', Object.keys(employedByCompany), Object.values(employedByCompany), calculatePercentage(Object.values(employedByCompany)));
 }
-    
+
+function calculatePercentage(data) {
+    const total = data.reduce((sum, value) => sum + value, 0);
+    return data.map(value => ((value / total) * 100).toFixed(2) + '%');
+}
