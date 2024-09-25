@@ -1,7 +1,7 @@
-import { fetchAllJobs, updateJobStatus, logAudit, exportAuditLog } from './database.js';
-import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
+import { fetchAllJobs, logAudit, exportAuditLog } from './database.js';
+import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, getDoc, addDoc, doc, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, getDoc, addDoc, doc, collection, deleteDoc, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,6 +15,7 @@ const firebaseConfig = {
     measurementId: "G-8DL6T09CP4"
 };
 
+// Initialize Firebase if not already initialized
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
@@ -22,21 +23,37 @@ const firestore = getFirestore(app);
 const itemsPerPage = 10;
 let currentPage = 1;
 let filteredJobs = [];
-
-// Signout 
-function performSignOut() {
-    const user = auth.currentUser;
-    const userEmail = user ? user.email : "Unknown user";
-
+//Prevent user Jump Page 
+function requireLogin() {
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // If the user is not logged in, redirect to the login page
+            window.location.href = '/login.html';
+        } else {
+            // Optionally log that the user has accessed the page
+            logAudit(user.email, "Accessed Home", { status: "Success" });
+        }
+    });
+}
+//Sign out button
+function performSignOut() { 
     // Show confirmation dialog
     const confirmSignOut = confirm("Are you sure you want to sign out?");
 
     if (confirmSignOut) {
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
+
         firebaseSignOut(auth).then(() => {
+            // Log the successful sign-out
             logAudit(userEmail, "Sign out", { status: "Success" });
+
+            // Redirect to login page
             window.location.href = "../login.html";
         }).catch((error) => {
+            // Log the sign-out failure
             logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+
             console.error("Error signing out:", error);
         });
     } else {
@@ -45,14 +62,16 @@ function performSignOut() {
 }
 
 document.getElementById('signOutBtn').addEventListener('click', performSignOut);
-// Signout 
+//Signout 
 
 document.addEventListener('DOMContentLoaded', () => {
+    requireLogin();  // Ensure login
+
     const searchBar = document.getElementById('searchBar');
     searchBar.addEventListener('input', handleSearch);
 
-    document.getElementById('sortAsc').addEventListener('click', () => handleSort('asc'));
-    document.getElementById('sortDesc').addEventListener('click', () => handleSort('desc'));
+    /*document.getElementById('sortAsc').addEventListener('click', () => handleSort('asc'));
+    document.getElementById('sortDesc').addEventListener('click', () => handleSort('desc'));*/
 
     fetchAllJobs().then(jobs => {
         window.allJobs = jobs; // Store all jobs in a global variable for filtering and sorting
@@ -60,61 +79,65 @@ document.addEventListener('DOMContentLoaded', () => {
         updateJobTable();
     }).catch(err => console.error("Failed to fetch jobs:", err));
 });
-
+//Update tables
 function updateJobTable() {
     const tableBody = document.getElementById('jobTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = ''; // Clear existing rows
+
+    // Sort jobs by `unarchivedAt` first, then by `createdAt` (descending order)
+    filteredJobs.sort((a, b) => {
+        const timeA = a.unarchivedAt ? a.unarchivedAt.seconds : (a.createdAt ? a.createdAt.seconds : 0);
+        const timeB = b.unarchivedAt ? b.unarchivedAt.seconds : (b.createdAt ? b.createdAt.seconds : 0);
+        return timeB - timeA; // Sort by most recent first
+    });
 
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const jobsToDisplay = filteredJobs.slice(start, end);
 
-    let count = 0; // Initialize job count
-
     jobsToDisplay.forEach(job => {
-        count++; // Increment for each job
         const newRow = tableBody.insertRow(-1);
         newRow.dataset.id = job.id;
 
-        // Append cells for specific columns
+            // Append cells for specific columns
         const cells = ['position', 'company', 'location', 'vacancy', 'type', 'contact'];
         cells.forEach(field => {
             const cell = newRow.insertCell();
             cell.textContent = job[field] || 'N/A';
         });
 
-        // Create the edit button for vacancy
         const editCell = newRow.insertCell();
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
-        editButton.addEventListener('click', () => editVacancy(job.id, job.vacancy, job.company, job.position));
+        editButton.addEventListener('click', () => editJob(job.id));
         editCell.appendChild(editButton);
     });
 
     document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
     updatePaginationControls();
 }
-//Search bar 
+
+
+//Search 
 function handleSearch() {
     const query = document.getElementById('searchBar').value.toLowerCase();
+
+    // Search across multiple fields
     filteredJobs = window.allJobs.filter(job => {
-        return job.company.toLowerCase().includes(query);
+        return (
+            (job.position && job.position.toLowerCase().includes(query)) ||
+            (job.company && job.company.toLowerCase().includes(query)) ||
+            (job.location && job.location.toLowerCase().includes(query)) ||
+            (job.vacancy && job.vacancy.toString().toLowerCase().includes(query)) ||
+            (job.type && job.type.toLowerCase().includes(query)) ||
+            (job.contact && job.contact.toLowerCase().includes(query))
+        );
     });
+
     currentPage = 1; // Reset to first page when search is performed
     updateJobTable();
 }
-//Sort
-function handleSort(order) {
-    const sortBy = document.getElementById('sortBy').value;
-    filteredJobs.sort((a, b) => {
-        if (a[sortBy] < b[sortBy]) return order === 'asc' ? -1 : 1;
-        if (a[sortBy] > b[sortBy]) return order === 'asc' ? 1 : -1;
-        return 0;
-    });
-    currentPage = 1; // Reset to first page when sorting is performed
-    updateJobTable();
-}
-//PaginationControls
+//Pagination
 function updatePaginationControls() {
     const paginationControls = document.getElementById('paginationControls');
     paginationControls.innerHTML = ''; // Clear existing controls
@@ -143,37 +166,213 @@ function updatePaginationControls() {
     });
     paginationControls.appendChild(nextButton);
 }
-//Edit Vacancy 
-async function editVacancy(jobId, currentVacancy, company, position) {
-    const newVacancy = prompt(`Enter new vacancy number for "${position}" at "${company}":`, currentVacancy);
-    if (newVacancy !== null && !isNaN(newVacancy) && newVacancy >= 0) {
-        try {
-            const user = auth.currentUser;
-            const userEmail = user ? user.email : "Unknown user";
-            const updatedVacancy = parseInt(newVacancy, 10);
 
-            // Update the job vacancy
-            await updateJobStatus(jobId, { vacancy: updatedVacancy });
-            await logAudit(userEmail, "Vacancy Updated", { jobId, updatedVacancy });
-            console.log(`Updated job ${jobId} vacancy to ${updatedVacancy}`);
+//Archived Selected Jobs
+async function archiveSelectedJobs() {
+    const checkedBoxes = document.querySelectorAll('#jobTable tbody input[type="checkbox"]:checked');
+    if (checkedBoxes.length === 0) {
+        alert("No jobs selected for archiving.");
+        return;
+    }
 
-            // Check if the vacancy is 0, and if so, archive the job
-            if (updatedVacancy === 0) {
-                await archiveJobIfNeeded(jobId, company, position, userEmail);
+    // Show the confirmation dialog
+    const confirmationDialog = document.getElementById('confirmationDialog');
+    confirmationDialog.style.display = 'flex'; // Show dialog
+
+    // Handle confirmation logic
+    document.getElementById('confirmArchiveBtn').onclick = async () => {
+        confirmationDialog.style.display = 'none'; // Hide dialog
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
+
+        for (const box of checkedBoxes) {
+            const jobId = box.closest('tr').dataset.id;
+            try {
+                const jobDocRef = doc(firestore, 'jobs', jobId);
+                const jobDocSnap = await getDoc(jobDocRef);
+                if (jobDocSnap.exists()) {
+                    const jobData = jobDocSnap.data();
+                    const { company, position } = jobData;
+
+                    // Archive the job with a timestamp
+                    const archiveData = {
+                        ...jobData,
+                        archivedAt: Timestamp.now() // Set the archive timestamp
+                    };
+
+                    // Add the job to the 'archive' collection
+                    await addDoc(collection(firestore, 'archive'), archiveData);
+                    await deleteDoc(jobDocRef); // Remove the job from the jobs collection
+
+                    // Log the action in the audit trail
+                    await logAudit(userEmail, "Job Archived", { jobId });
+
+                    box.closest('tr').remove(); // Remove the row from the table
+                }
+            } catch (error) {
+                console.error(`Failed to archive job with ID: ${jobId}`, error);
+                alert(`Failed to archive job with ID: ${jobId}.`);
             }
+        }
 
+        // Reload the page after all jobs are processed
+        window.location.reload();
+    };
+
+    // Handle cancellation
+    document.getElementById('cancelArchiveBtn').onclick = () => {
+        confirmationDialog.style.display = 'none'; // Hide dialog
+    };
+}
+
+//EditJob
+// Event listener for the "Save Changes" button
+document.getElementById('saveJobButton').addEventListener('click', async function (event) {
+    event.preventDefault(); // Prevent page reload
+
+    // Get job ID (you must store jobId somewhere)
+    const jobId = document.getElementById('editJobForm').dataset.jobId;
+
+    if (!jobId) {
+        alert('No job ID found. Please refresh and try again.');
+        return;
+    }
+
+    const jobDocRef = doc(firestore, 'jobs', jobId);
+
+    // Collect data from the form
+    const updatedData = {
+        position: document.getElementById('position').value,
+        company: document.getElementById('company').value,
+        location: document.getElementById('location').value,
+        age: document.getElementById('age').value,
+        type: document.getElementById('type').value,
+        vacancy: document.getElementById('vacancy').value,
+        contact: document.getElementById('email').value,
+        qualifications: document.getElementById('qualifications').value,
+        facilities: document.getElementById('facilities').value,
+        description: document.getElementById('description').value,
+    };
+
+    // Validate age restriction (between 18 and 60)
+    const age = parseInt(updatedData.age, 10);
+    if (isNaN(age) || age < 18 || age > 60) {
+        alert('Please enter a valid age between 18 and 60.');
+        return;
+    }
+
+    // Validate vacancy, if 0, ask the user for confirmation to archive the job
+    const vacancy = parseInt(updatedData.vacancy, 10);
+    if (isNaN(vacancy) || vacancy < 0) {
+        alert('Please enter a valid number for vacancy.');
+        return;
+    }
+
+    if (vacancy === 0) {
+        const confirmArchive = confirm('Vacancy is set to 0. Do you want to archive this job?');
+        if (confirmArchive) {
+            await archiveJobIfNeeded(jobId, updatedData.company, updatedData.position);
+            return; // Exit after archiving the job
+        }
+    }
+
+    try {
+        // Update the job in Firestore
+        await updateDoc(jobDocRef, updatedData);
+
+        // Log the audit trail
+        await logAudit(auth.currentUser.email, 'Job Edited', { jobId, updatedData });
+
+        // Show a success message
+        alert('Job updated successfully!');
+
+        // Hide the edit form
+        document.getElementById('editJobForm').style.display = 'none';
+
+        // Refresh the job table to reflect the updates
+        fetchAllJobs().then(jobs => {
+            window.allJobs = jobs;
+            filteredJobs = jobs;
+            updateJobTable();
+        });
+    } catch (error) {
+        console.error('Error updating job:', error);
+        alert('Failed to update the job. Please try again.');
+    }
+});
+
+// Function to archive the job if vacancy is 0
+async function archiveJobIfNeeded(jobId, company, position) {
+    try {
+        const jobDocRef = doc(firestore, 'jobs', jobId);
+        const jobDocSnap = await getDoc(jobDocRef);
+        if (jobDocSnap.exists()) {
+            const jobData = jobDocSnap.data();
+
+            // Archive the job with a timestamp
+            const archiveData = {
+                ...jobData,
+                archivedAt: Timestamp.now() // Set the archive timestamp
+            };
+
+            // Add the job to the 'archive' collection
+            await addDoc(collection(firestore, 'archive'), archiveData);
+            await deleteDoc(jobDocRef); // Remove the job from the jobs collection
+            console.log(`Archived job with ID: ${jobId}`);
+
+            // Log the audit action
+            await logAudit(auth.currentUser.email, 'Job Archived', { jobId });
+
+            // Show a confirmation alert with company name and position
+            alert(`Job "${position}" at "${company}" was successfully archived because the vacancy is 0.`);
+
+            // Refresh the job table after archiving
             fetchAllJobs().then(jobs => {
                 window.allJobs = jobs;
                 filteredJobs = jobs;
                 updateJobTable();
             });
-
-            // Show an alert that the vacancy was updated
-            alert(`Vacancy for "${position}" at "${company}" updated to ${updatedVacancy}.`);
-        } catch (error) {
-            console.error(`Failed to update job vacancy for ${jobId}`, error);
         }
-    } else {
-        alert("Invalid input. Please enter a valid number.");
+    } catch (error) {
+        console.error(`Failed to archive job with ID: ${jobId}`, error);
+        alert(`Failed to archive job with ID: ${jobId}.`);
+    }
+}
+
+
+// "Go Back" button functionality
+document.getElementById('goBackButton').addEventListener('click', function () {
+    window.location.href = "job.html"; // This will navigate the user to the previous page
+});
+
+// Function to load job data into the form for editing
+async function editJob(jobId) {
+    try {
+        const jobDocRef = doc(firestore, 'jobs', jobId);
+        const jobDocSnap = await getDoc(jobDocRef);
+
+        if (jobDocSnap.exists()) {
+            const jobData = jobDocSnap.data();
+
+            // Populate the form with the job data
+            document.getElementById('position').value = jobData.position || '';
+            document.getElementById('company').value = jobData.company || '';
+            document.getElementById('location').value = jobData.location || '';
+            document.getElementById('age').value = jobData.age || '';
+            document.getElementById('type').value = jobData.type || '';
+            document.getElementById('vacancy').value = jobData.vacancy || '';
+            document.getElementById('email').value = jobData.contact || '';
+            document.getElementById('qualifications').value = jobData.qualifications || '';
+            document.getElementById('facilities').value = jobData.facilities || '';
+            document.getElementById('description').value = jobData.description || '';
+
+            // Show the edit form and set the jobId in the dataset
+            document.getElementById('editJobForm').dataset.jobId = jobId;
+            document.getElementById('editJobForm').style.display = 'block';
+        } else {
+            alert('Job not found!');
+        }
+    } catch (error) {
+        console.error('Error fetching job for editing:', error);
     }
 }

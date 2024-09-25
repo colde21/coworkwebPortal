@@ -196,48 +196,54 @@ async function archiveSelectedJobs() {
         return;
     }
 
-    const confirmation = confirm("Are you sure you want to archive the selected jobs?");
-    if (!confirmation) {
-        return; // User canceled the archiving
-    }
+    // Show the confirmation dialog
+    const confirmationDialog = document.getElementById('confirmationDialog');
+    confirmationDialog.style.display = 'flex'; // Show dialog
 
-    const user = auth.currentUser;
-    const userEmail = user ? user.email : "Unknown user";
+    // Handle confirmation logic
+    document.getElementById('confirmArchiveBtn').onclick = async () => {
+        confirmationDialog.style.display = 'none'; // Hide dialog
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
 
-    for (const box of checkedBoxes) {
-        const jobId = box.closest('tr').dataset.id;
-        try {
-            const jobDocRef = doc(firestore, 'jobs', jobId);
-            const jobDocSnap = await getDoc(jobDocRef);
-            if (jobDocSnap.exists()) {
-                const jobData = jobDocSnap.data();
-                const { company, position } = jobData;
+        for (const box of checkedBoxes) {
+            const jobId = box.closest('tr').dataset.id;
+            try {
+                const jobDocRef = doc(firestore, 'jobs', jobId);
+                const jobDocSnap = await getDoc(jobDocRef);
+                if (jobDocSnap.exists()) {
+                    const jobData = jobDocSnap.data();
+                    const { company, position } = jobData;
 
-                // Archive the job with a timestamp
-                const archiveData = {
-                    ...jobData,
-                    archivedAt: Timestamp.now() // Set the archive timestamp
-                };
+                    // Archive the job with a timestamp
+                    const archiveData = {
+                        ...jobData,
+                        archivedAt: Timestamp.now() // Set the archive timestamp
+                    };
 
-                // Add the job to the 'archive' collection
-                await addDoc(collection(firestore, 'archive'), archiveData);
-                await deleteDoc(jobDocRef); // Remove the job from the jobs collection
+                    // Add the job to the 'archive' collection
+                    await addDoc(collection(firestore, 'archive'), archiveData);
+                    await deleteDoc(jobDocRef); // Remove the job from the jobs collection
 
-                // Log the action in the audit trail
-                await logAudit(userEmail, "Job Archived", { jobId });
+                    // Log the action in the audit trail
+                    await logAudit(userEmail, "Job Archived", { jobId });
 
-                // Show a confirmation alert with company name and position
-                alert(`Job "${position}" at "${company}" was successfully archived.`);
-                box.closest('tr').remove(); // Remove the row from the table
+                    box.closest('tr').remove(); // Remove the row from the table
+                }
+            } catch (error) {
+                console.error(`Failed to archive job with ID: ${jobId}`, error);
+                alert(`Failed to archive job with ID: ${jobId}.`);
             }
-        } catch (error) {
-            console.error(`Failed to archive job with ID: ${jobId}`, error);
-            alert(`Failed to archive job with ID: ${jobId}.`);
         }
-    }
 
-    // Reload the page after all jobs are processed
-    window.location.reload();
+        // Reload the page after all jobs are processed
+        window.location.reload();
+    };
+
+    // Handle cancellation
+    document.getElementById('cancelArchiveBtn').onclick = () => {
+        confirmationDialog.style.display = 'none'; // Hide dialog
+    };
 }
 
 

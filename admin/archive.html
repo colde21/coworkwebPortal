@@ -16,6 +16,28 @@
         </div>
     </div> 
     <!-- Navigation bar-->  
+<!-- Unarchive dialog and delete -->
+    <div id="confirmationDialog" class="confirmation-dialog" style="display: none;">
+        <div class="confirmation-dialog-content">
+            <p id="confirmationMessage">Are you sure?</p>
+            <div class="confirmation-dialog-buttons">
+                <button id="confirmActionBtn">Confirm</button>
+                <button id="cancelActionBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Vacancy -->
+    <div id="vacancyDialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog-content">
+            <p id="vacancyDialogMessage">Edit the vacancy number:</p>
+            <input type="number" id="vacancyInput" min="0" placeholder="Enter vacancy number">
+            <div class="dialog-buttons">
+                <button id="confirmVacancyBtn">OK</button>
+                <button id="cancelVacancyBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <h1>Archived Jobs</h1>
@@ -23,6 +45,7 @@
             <!-- Archived jobs will be listed here -->
         </ul>
     </div>
+
 
     <script type="module" src="arch.js"></script>
 </body>

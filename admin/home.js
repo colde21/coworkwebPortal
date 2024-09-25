@@ -1,4 +1,4 @@
-import { fetchAllJobs, logAudit, exportAuditLog } from './database.js';
+import { fetchAllJobs, logAudit, } from './database.js';
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
@@ -36,6 +36,7 @@ function performSignOut() {
     const userEmail = user ? user.email : "Unknown user";
     const confirmSignOut = confirm("Are you sure you want to sign out?");
     if (confirmSignOut) {
+        
         firebaseSignOut(auth).then(() => {
             logAudit(userEmail, "Sign out", { status: "Success" });
             window.location.href = "../login.html";
@@ -45,7 +46,6 @@ function performSignOut() {
         });
     }
 }
-
 document.getElementById('signOutBtn').addEventListener('click', performSignOut);
 
 document.addEventListener('DOMContentLoaded', () => {

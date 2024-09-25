@@ -26,10 +26,66 @@ function requireLogin() {
             window.location.href = '/login.html';
         } else {
             // Optionally log that the user has accessed the page
-            logAudit(user.email, "Accessed Home", { status: "Success" });
+            logAudit(user.email, "Accessed Archive Page ", { status: "Success" });
         }
     });
 }
+// display unarchive function and delete //
+function showConfirmationDialog(message, onConfirm) {
+    const confirmationDialog = document.getElementById('confirmationDialog');
+    const confirmationMessage = document.getElementById('confirmationMessage');
+    const confirmButton = document.getElementById('confirmActionBtn');
+    const cancelButton = document.getElementById('cancelActionBtn');
+
+    confirmationMessage.textContent = message;
+    confirmationDialog.style.display = 'flex'; // Show the dialog
+
+    // Remove any previously attached event listeners to avoid conflicts
+    confirmButton.replaceWith(confirmButton.cloneNode(true));
+    cancelButton.replaceWith(cancelButton.cloneNode(true));
+
+    // Attach the event listeners for confirmation and cancellation
+    document.getElementById('confirmActionBtn').onclick = () => {
+        confirmationDialog.style.display = 'none'; // Hide the dialog
+        onConfirm();
+    };
+    
+    document.getElementById('cancelActionBtn').onclick = () => {
+        confirmationDialog.style.display = 'none'; // Just hide the dialog on cancel
+    };
+}
+//Display Edit Vacancy//
+function showVacancyInputDialog(message, defaultValue, onConfirm) {
+    const vacancyDialog = document.getElementById('vacancyDialog');
+    const vacancyMessage = document.getElementById('vacancyDialogMessage');
+    const vacancyInput = document.getElementById('vacancyInput');
+    const confirmButton = document.getElementById('confirmVacancyBtn');
+    const cancelButton = document.getElementById('cancelVacancyBtn');
+
+    vacancyMessage.textContent = message;
+    vacancyInput.value = defaultValue; // Set the default value in the input
+    vacancyDialog.style.display = 'flex'; // Show the dialog
+
+    // Remove any previously attached event listeners to avoid conflicts
+    confirmButton.replaceWith(confirmButton.cloneNode(true));
+    cancelButton.replaceWith(cancelButton.cloneNode(true));
+
+    // Attach the event listeners for confirming and canceling
+    document.getElementById('confirmVacancyBtn').onclick = () => {
+        const newValue = vacancyInput.value;
+        if (newValue !== null && !isNaN(newValue) && newValue >= 0) {
+            vacancyDialog.style.display = 'none'; // Hide the dialog
+            onConfirm(newValue); // Call the confirmation callback with the new value
+        } else {
+            alert('Please enter a valid vacancy number.');
+        }
+    };
+
+    document.getElementById('cancelVacancyBtn').onclick = () => {
+        vacancyDialog.style.display = 'none'; // Just hide the dialog on cancel
+    };
+}
+
 // Check for old archived jobs and delete them if they are older than 5 years
 async function deleteOldArchivedJobs() {
     const archivedJobs = await fetchArchivedJobs(); // Fetch all archived jobs
@@ -101,54 +157,47 @@ function updateArchiveTable(jobs) {
 
 // Function to unarchive a job with vacancy editing
 async function unarchiveJob(jobId) {
-    // Fetch the job data from the archive
     const jobDocRef = doc(firestore, `archive/${jobId}`);
     const jobData = await getDoc(jobDocRef);
 
     if (jobData.exists()) {
-        // Confirmation before editing the vacancy
-        const editConfirmation = confirm("Do you want to unarchive this job?");
-        if (!editConfirmation) {
-            alert("Unarchiving canceled.");
-            return;
-        }
+        // Use custom vacancy input dialog instead of prompt
+        showConfirmationDialog("Do you want to unarchive this job?", async () => {
+            const currentVacancy = jobData.data().vacancy || 0;
+            showVacancyInputDialog(
+                `Edit the vacancy number for "${jobData.data().position}" at "${jobData.data().company}":`,
+                currentVacancy,
+                async (newVacancy) => {
+                    // Second confirmation before unarchiving
+                    showConfirmationDialog("Are you sure you want to unarchive this job with the updated vacancy?", async () => {
+                        try {
+                            const user = auth.currentUser;
+                            const userEmail = user ? user.email : "Unknown user";
+                            
+                            // Update the job data with the new vacancy number
+                            const updatedJobData = {
+                                ...jobData.data(),
+                                vacancy: parseInt(newVacancy, 10),
+                                unarchivedAt: Timestamp.now() // Add unarchived timestamp
+                            };
 
-        // Prompt the user to edit the vacancy number before unarchiving
-        const currentVacancy = jobData.data().vacancy || 0;
-        const newVacancy = prompt(`Edit the vacancy number for "${jobData.data().position}" at "${jobData.data().company}":`, currentVacancy);
+                            // Add the updated job back to the jobs collection
+                            await addDoc(collection(firestore, 'jobs'), updatedJobData);
 
-        if (newVacancy !== null && !isNaN(newVacancy) && newVacancy >= 0) {
-            const confirmation = confirm("Are you sure you want to unarchive this job with the updated vacancy?");
-            if (confirmation) {
-                try {
-                    const user = auth.currentUser;
-                    const userEmail = user ? user.email : "Unknown user";
-                    
-                    // Update the job data to include a new vacancy and timestamp
-                    const updatedJobData = {
-                        ...jobData.data(),
-                        vacancy: parseInt(newVacancy, 10),
-                        unarchivedAt: Timestamp.now() // Add unarchived timestamp
-                    };
+                            // Remove the job from the archive collection
+                            await deleteArchivedJob(jobId);
 
-                    // Add the updated job back to the jobs collection
-                    await addDoc(collection(firestore, 'jobs'), updatedJobData);
+                            // Log the unarchive action
+                            await logAudit(userEmail, "Job Unarchived", { jobId, newVacancy });
 
-                    // Remove the job from the archive collection
-                    await deleteArchivedJob(jobId);
-
-                    // Log the unarchive action
-                    await logAudit(userEmail, "Job Unarchived", { jobId, newVacancy });
-
-                    alert(`Job "${updatedJobData.position}" at "${updatedJobData.company}" was successfully unarchived with updated vacancy ${newVacancy}.`);
-                    window.location.reload(); // Reload to update the archive list
-                } catch (error) {
-                    console.error(`Failed to unarchive job ${jobId}:`, error);
+                            window.location.reload(); // Reload to update the archive list
+                        } catch (error) {
+                            console.error(`Failed to unarchive job ${jobId}:`, error);
+                        }
+                    });
                 }
-            }
-        } else {
-            alert("Invalid input. The job was not unarchived.");
-        }
+            );
+        });
     } else {
         alert("Job data not found.");
     }
@@ -156,14 +205,12 @@ async function unarchiveJob(jobId) {
 
 // Function to delete a job permanently
 async function deleteJob(jobId, listItem) {
-    const confirmation = confirm("Are you sure you want to delete this job permanently?");
-    if (confirmation) {
+    showConfirmationDialog("Are you sure you want to delete this job permanently?", async () => {
         try {
             await deleteArchivedJob(jobId);
             listItem.remove(); // Remove the list item from the DOM
-            alert("Job successfully deleted.");
         } catch (error) {
             console.error(`Failed to delete job ${jobId}:`, error);
         }
-    }
+    });
 }

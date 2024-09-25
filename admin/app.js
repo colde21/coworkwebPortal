@@ -27,7 +27,7 @@ function requireLogin() {
             window.location.href = '/login.html';
         } else {
             // Optionally log that the user has accessed the page
-            logAudit(user.email, "Accessed Home", { status: "Success" });
+            logAudit(user.email, "Accessed Application Page", { status: "Success" });
         }
     });
 }

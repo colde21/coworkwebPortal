@@ -52,21 +52,41 @@ body {
 /* Chart containers section */
 .charts-wrapper {
     display: flex;
-    flex-direction: column;  /* Stack the charts vertically */
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
     margin: 50px auto;
-    width: 79%;  /* Adjust overall width */
+    width: 90%;
+}
+
+.chart-summary-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin: 20px 0;
 }
 
 .chart-container {
-    width: 80%;  /* Set width to 80% to reduce extra space */
-    height: 500px;  /* Set a fixed height for each chart */
+    width: 70%;
+    height: 400px;
     background-color: #f4f4f4;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
-    border-radius: 8px;  /* Slightly rounded corners */
-    padding: 10px; /* Add some padding inside the border */
-    margin: 20px auto; /* Space between stacked charts and center the chart */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.summary-container {
+    width: 25%;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 /* Cards (for total count display) */
@@ -85,8 +105,8 @@ body {
     text-align: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin: 10px;
-    flex: 1; /* Allow cards to grow and shrink equally */
-    max-width: 250px; /* Optional: limit the max width of each card */
+    flex: 1;
+    max-width: 250px;
 }
 
 .card h3 {
@@ -100,3 +120,4 @@ body {
     font-size: 16px;
     color: #666;
 }
+
