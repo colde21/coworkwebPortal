@@ -1,4 +1,16 @@
+# Pretty URLs without .html extension
+[build]
+  publish = "public" # Change this to your build folder if it's different
+  command = "npm run build" # Adjust this based on your build process
+
 [[redirects]]
-from = "/*"
-to ="login.html"
-status = 200
+  from = "/*"
+  to = "/login"
+  status = 200
+
+# Serve all URLs without .html extension
+[[redirects]]
+  from = "/:splat"
+  to = "/:splat.html"
+  status = 200
+  force = true
