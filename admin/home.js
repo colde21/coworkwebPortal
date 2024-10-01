@@ -1,7 +1,8 @@
-import { fetchAllJobs, logAudit, exportAuditLog } from './database.js';
+import { fetchAllJobs, logAudit, } from './database.js';
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { ref, getDatabase } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -24,33 +25,63 @@ function requireLogin() {
         if (!user) {
             // If the user is not logged in, redirect to the login page
             window.location.href = '/login.html';
-        } else {
-            // Optionally log that the user has accessed the page
-            logAudit(user.email, "Accessed Home", { status: "Success" });
+        } else{
+            console.log("Page Accessed.")
         }
     });
 }
+//sign out function should be working by now 
+async function performSignOut() {
+    const loadingScreen = document.getElementById('loading-screen'); // Reference to the loading screen element
+    const errorMessageContainer = document.getElementById('error-message'); // Reference to show errors
 
-function performSignOut() {
-    const user = auth.currentUser;
-    const userEmail = user ? user.email : "Unknown user";
-    const confirmSignOut = confirm("Are you sure you want to sign out?");
-    if (confirmSignOut) {
-        firebaseSignOut(auth).then(() => {
-            logAudit(userEmail, "Sign out", { status: "Success" });
-            window.location.href = "../login.html";
-        }).catch(error => {
-            logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
-            console.error("Error signing out:", error);
-        });
+    if (loadingScreen) loadingScreen.style.display = 'flex'; // Show the loading screen
+
+    try {
+        const user = auth.currentUser; // Get the currently authenticated user
+
+        if (!user) {
+            throw new Error("No authenticated user found."); // Handle the case when there's no logged-in user
+        }
+
+        const userEmail = user.email;
+        console.log('User Email:', userEmail); // Useful for debugging
+
+        // Log audit for successful sign-out
+        await logAudit(userEmail, "Sign out", { status: "Success" });
+        console.log("Audit logged for sign-out.");
+
+        // Perform Firebase sign-out
+        await firebaseSignOut(auth);
+        console.log("User successfully signed out.");
+
+        // Redirect to the login page or show a sign-out success message
+        window.location.href = "/login.html";
+    } catch (error) {
+        console.error("Error during sign-out:", error);
+
+        // Log audit for failed sign-out
+        const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
+        await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+
+        // Show the error message in the error message container
+        if (errorMessageContainer) {
+            errorMessageContainer.textContent = error.message || 'Sign out failed. Please try again.';
+        }
+    } finally {
+        if (loadingScreen) loadingScreen.style.display = 'none'; // Hide the loading screen
     }
 }
-
-document.getElementById('signOutBtn').addEventListener('click', performSignOut);
-
 document.addEventListener('DOMContentLoaded', () => {
+    const signOutBtn = document.getElementById('signOutBtn'); // don porget
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', performSignOut);
+    } else {
+    }// this also
+    
     requireLogin();  // Ensure login
     updateDashboardData();
+
 });
 
 async function fetchApplicationsAndEmployed() {

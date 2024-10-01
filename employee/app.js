@@ -1,4 +1,4 @@
-import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
+import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { fetchAllApplications, hireApplicant, archiveJobIfNeeded, logAudit } from './database.js';
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
@@ -19,9 +19,22 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 
+// prevent jump
+function requireLogin() {
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // If the user is not logged in, redirect to the login page
+            window.location.href = '/login.html';
+        } else {
+            // Optionally log that the user has accessed the page
+            logAudit(user.email, "Accessed Application Page", { status: "Success" });
+        }
+    });
+}
+
 let allApplications = [];  // To store all applications globally
 let refreshInterval; // To store the interval ID
-//Sign out button
+
 function performSignOut() { 
     // Show confirmation dialog
     const confirmSignOut = confirm("Are you sure you want to sign out?");
@@ -46,10 +59,12 @@ function performSignOut() {
         console.log("Sign out cancelled");
     }
 }
-//Signout 
 
 // Ensure elements exist before attaching event listeners
 document.addEventListener('DOMContentLoaded', () => {
+    requireLogin();  // Ensure login
+
+
     const signOutBtn = document.getElementById('signOutBtn');
     const searchBar = document.getElementById('searchBar');
 
@@ -97,21 +112,6 @@ function updateApplicationList(applications) {
             <strong>Contact number:</strong> ${application.userPhone}
         `;
 
-        const contactButton = document.createElement('button');
-        contactButton.textContent = 'Contact';
-        contactButton.addEventListener('click', () => {
-            const subject = `Application Status for ${application.position} at ${application.company}`;
-            const body = `Dear ${application.userName},\n\nCongratulations! You have been approved by ${application.company} for the position of ${application.position}.\n\nBest regards,\nYour Company Name`;
-            const mailtoLink = `mailto:${application.userEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.location.href = mailtoLink;
-        });
-
-        const hireButton = document.createElement('button');
-        hireButton.textContent = 'Hire';
-        hireButton.addEventListener('click', async () => {
-            await hireApplicantAndDecrementVacancy(application.id, application);
-        });
-
         listItem.appendChild(detailsDiv);
         listItem.appendChild(contactButton);
         listItem.appendChild(hireButton);
@@ -129,10 +129,6 @@ async function hireApplicantAndDecrementVacancy(applicationId, application) {
             alert("Job ID not found for the selected application.");
             return;
         }
-
-        // Hire the applicant
-        await hireApplicant(applicationId, application);
-
         // Fetch the job and decrement the vacancy
         const jobDocRef = doc(firestore, 'jobs', application.jobId);
         const jobDocSnap = await getDoc(jobDocRef);
@@ -183,9 +179,15 @@ function handleSearch() {
         updateApplicationList(allApplications);
         refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
     } else {
-        const filteredApplications = allApplications.filter(application =>
-            application.company.toLowerCase().includes(query)
-        );
+        const filteredApplications = allApplications.filter(application => {
+            return (
+                (application.userName && application.userName.toLowerCase().includes(query)) ||
+                (application.position && application.position.toLowerCase().includes(query)) ||
+                (application.company && application.company.toLowerCase().includes(query)) ||
+                (application.userEmail && application.userEmail.toLowerCase().includes(query)) ||
+                (application.userPhone && application.userPhone.toLowerCase().includes(query))
+            );
+        });
         updateApplicationList(filteredApplications);
         clearInterval(refreshInterval);
     }

@@ -1,4 +1,10 @@
 [[redirects]]
-from = "/*"
-to ="login.html"
-status = 200
+  from = "/*"
+  to = "/login"
+  status = 200
+
+[[redirects]]
+  from = "/:splat"
+  to = "/:splat.html"
+  status = 200
+  force = true

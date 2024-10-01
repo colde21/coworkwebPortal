@@ -29,42 +29,63 @@ function requireLogin() {
         if (!user) {
             // If the user is not logged in, redirect to the login page
             window.location.href = '/login.html';
-        } else {
-            // Optionally log that the user has accessed the page
-            logAudit(user.email, "Accessed Home", { status: "Success" });
+        } else{
+            console.log("Page Accessed.")
         }
     });
 }
+
 //Sign out button
-function performSignOut() { 
-    // Show confirmation dialog
-    const confirmSignOut = confirm("Are you sure you want to sign out?");
+//sign out function should be working by now 
+async function performSignOut() {
+    const loadingScreen = document.getElementById('loading-screen'); // Reference to the loading screen element
+    const errorMessageContainer = document.getElementById('error-message'); // Reference to show errors
 
-    if (confirmSignOut) {
-        const user = auth.currentUser;
-        const userEmail = user ? user.email : "Unknown user";
+    if (loadingScreen) loadingScreen.style.display = 'flex'; // Show the loading screen
 
-        firebaseSignOut(auth).then(() => {
-            // Log the successful sign-out
-            logAudit(userEmail, "Sign out", { status: "Success" });
+    try {
+        const user = auth.currentUser; // Get the currently authenticated user
 
-            // Redirect to login page
-            window.location.href = "../login.html";
-        }).catch((error) => {
-            // Log the sign-out failure
-            logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+        if (!user) {
+            throw new Error("No authenticated user found."); // Handle the case when there's no logged-in user
+        }
 
-            console.error("Error signing out:", error);
-        });
-    } else {
-        console.log("Sign out cancelled");
+        const userEmail = user.email;
+        console.log('User Email:', userEmail); // Useful for debugging
+
+        // Log audit for successful sign-out
+        await logAudit(userEmail, "Sign out", { status: "Success" });
+        console.log("Audit logged for sign-out.");
+
+        // Perform Firebase sign-out
+        await firebaseSignOut(auth);
+        console.log("User successfully signed out.");
+
+        // Redirect to the login page or show a sign-out success message
+        window.location.href = "/login.html";
+    } catch (error) {
+        console.error("Error during sign-out:", error);
+
+        // Log audit for failed sign-out
+        const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
+        await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+
+        // Show the error message in the error message container
+        if (errorMessageContainer) {
+            errorMessageContainer.textContent = error.message || 'Sign out failed. Please try again.';
+        }
+    } finally {
+        if (loadingScreen) loadingScreen.style.display = 'none'; // Hide the loading screen
     }
 }
 
-document.getElementById('signOutBtn').addEventListener('click', performSignOut);
-//Signout 
-
 document.addEventListener('DOMContentLoaded', () => {
+    const signOutBtn = document.getElementById('signOutBtn'); // don porget
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', performSignOut);
+    } else {
+    }//
+
     requireLogin();  // Ensure login
 
     const archiveButton = document.getElementById('archiveSelectedJobsButton');
@@ -82,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateJobTable();
     }).catch(err => console.error("Failed to fetch jobs:", err));
 });
+
 //Update tables
 function updateJobTable() {
     const tableBody = document.getElementById('jobTable').getElementsByTagName('tbody')[0];
@@ -159,6 +181,7 @@ function handleSearch() {
     updateJobTable();
 }*/
 //Pagination
+
 function updatePaginationControls() {
     const paginationControls = document.getElementById('paginationControls');
     paginationControls.innerHTML = ''; // Clear existing controls
@@ -196,48 +219,54 @@ async function archiveSelectedJobs() {
         return;
     }
 
-    const confirmation = confirm("Are you sure you want to archive the selected jobs?");
-    if (!confirmation) {
-        return; // User canceled the archiving
-    }
+    // Show the confirmation dialog
+    const confirmationDialog = document.getElementById('confirmationDialog');
+    confirmationDialog.style.display = 'flex'; // Show dialog
 
-    const user = auth.currentUser;
-    const userEmail = user ? user.email : "Unknown user";
+    // Handle confirmation logic
+    document.getElementById('confirmArchiveBtn').onclick = async () => {
+        confirmationDialog.style.display = 'none'; // Hide dialog
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
 
-    for (const box of checkedBoxes) {
-        const jobId = box.closest('tr').dataset.id;
-        try {
-            const jobDocRef = doc(firestore, 'jobs', jobId);
-            const jobDocSnap = await getDoc(jobDocRef);
-            if (jobDocSnap.exists()) {
-                const jobData = jobDocSnap.data();
-                const { company, position } = jobData;
+        for (const box of checkedBoxes) {
+            const jobId = box.closest('tr').dataset.id;
+            try {
+                const jobDocRef = doc(firestore, 'jobs', jobId);
+                const jobDocSnap = await getDoc(jobDocRef);
+                if (jobDocSnap.exists()) {
+                    const jobData = jobDocSnap.data();
+                    const { company, position } = jobData;
 
-                // Archive the job with a timestamp
-                const archiveData = {
-                    ...jobData,
-                    archivedAt: Timestamp.now() // Set the archive timestamp
-                };
+                    // Archive the job with a timestamp
+                    const archiveData = {
+                        ...jobData,
+                        archivedAt: Timestamp.now() // Set the archive timestamp
+                    };
 
-                // Add the job to the 'archive' collection
-                await addDoc(collection(firestore, 'archive'), archiveData);
-                await deleteDoc(jobDocRef); // Remove the job from the jobs collection
+                    // Add the job to the 'archive' collection
+                    await addDoc(collection(firestore, 'archive'), archiveData);
+                    await deleteDoc(jobDocRef); // Remove the job from the jobs collection
 
-                // Log the action in the audit trail
-                await logAudit(userEmail, "Job Archived", { jobId });
+                    // Log the action in the audit trail
+                    await logAudit(userEmail, "Job Archived", { jobId });
 
-                // Show a confirmation alert with company name and position
-                alert(`Job "${position}" at "${company}" was successfully archived.`);
-                box.closest('tr').remove(); // Remove the row from the table
+                    box.closest('tr').remove(); // Remove the row from the table
+                }
+            } catch (error) {
+                console.error(`Failed to archive job with ID: ${jobId}`, error);
+                alert(`Failed to archive job with ID: ${jobId}.`);
             }
-        } catch (error) {
-            console.error(`Failed to archive job with ID: ${jobId}`, error);
-            alert(`Failed to archive job with ID: ${jobId}.`);
         }
-    }
 
-    // Reload the page after all jobs are processed
-    window.location.reload();
+        // Reload the page after all jobs are processed
+        window.location.reload();
+    };
+
+    // Handle cancellation
+    document.getElementById('cancelArchiveBtn').onclick = () => {
+        confirmationDialog.style.display = 'none'; // Hide dialog
+    };
 }
 
 

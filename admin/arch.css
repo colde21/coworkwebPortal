@@ -119,14 +119,7 @@ button {
 
 button:hover {
     background-color: #c0392b;
-    transform: translateY(-2px); /* Subtle lift effect */
 }
-
-button:active {
-    background-color: #a93226;
-    transform: translateY(0); /* Return to original position on click */
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
     li {
@@ -146,3 +139,95 @@ button:active {
         margin-top: 10px;
     }
 }
+
+/* Confirmation Dialog Styles */
+.confirmation-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Transparent dark background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.confirmation-dialog-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.confirmation-dialog-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.confirmation-dialog-buttons button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.confirmation-dialog-buttons button:hover {
+    background-color: darkred;
+}
+
+/* Vacancy Dialog Styles */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.dialog-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.dialog-buttons {
+    margin-top: 20px;
+    display: flex;
+    display: block;
+}
+
+.dialog-buttons button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.dialog-buttons button:hover {
+    background-color: darkred;
+}
+
+#vacancyInput {
+    width: 45%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+

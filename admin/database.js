@@ -1,4 +1,4 @@
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { initializeApp} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -13,7 +13,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase if not already initialized
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
 
 // Function to submit job data
@@ -86,23 +86,28 @@ export async function logAudit(user, action, details) {
     try {
         const auditsCol = collection(firestore, 'auditLogs');
         const auditEntry = {
-            timestamp: Timestamp.now(), // Use Firestore Timestamp
             user,
             action,
-            details
+            details,
+            timestamp: Timestamp.now()  // Use Firestore Timestamp
         };
         await addDoc(auditsCol, auditEntry);
     } catch (error) {
         console.error("Error logging audit:", error);
-        throw error;
     }
 }
-
 // Function to fetch all audit logs
 export async function exportAuditLog() {
     try {
+        console.log("Starting export of audit logs...");
         const auditCol = collection(firestore, 'auditLogs');
         const snapshot = await getDocs(auditCol);
+
+        if (snapshot.empty) {
+            console.warn("No audit logs found in the 'auditLogs' collection.");
+            return "No audit logs found.";
+        }
+
         const logs = [];
         snapshot.forEach(doc => {
             const data = doc.data();
@@ -110,16 +115,20 @@ export async function exportAuditLog() {
             logs.push({ user: data.user, action: data.action, timestamp, details: data.details });
         });
 
+        console.log(`Fetched ${logs.length} audit log entries.`);
+
         // Sort logs by timestamp, most recent first
         logs.sort((a, b) => b.timestamp - a.timestamp);
 
         const logStrings = logs.map(log => `${log.user},${log.action},${log.timestamp.toISOString()}`);
+        console.log("Audit logs successfully exported.");
         return logStrings.join('\n');
     } catch (error) {
         console.error("Error exporting audit log:", error);
         throw error;
     }
 }
+
 
 // Function to update job status or other properties
 export async function updateJobStatus(jobId, updates) {
