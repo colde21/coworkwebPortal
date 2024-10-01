@@ -203,8 +203,7 @@ function handleSearch() {
                 (application.userName && application.userName.toLowerCase().includes(query)) ||
                 (application.position && application.position.toLowerCase().includes(query)) ||
                 (application.company && application.company.toLowerCase().includes(query)) ||
-                (application.userEmail && application.userEmail.toLowerCase().includes(query)) ||
-                (application.userPhone && application.userPhone.toLowerCase().includes(query))
+                (application.userEmail && application.userEmail.toLowerCase().includes(query)) 
             );
         });
         updateApplicationList(filteredApplications);
