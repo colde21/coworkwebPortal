@@ -1,9 +1,9 @@
 import { submitJobData, logAudit } from './database.js';
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js"; // Import Firestore Timestamp
+
+
 const auth = getAuth();
-
-
 
 function requireLogin() {
     onAuthStateChanged(auth, (user) => {
@@ -17,19 +17,19 @@ function requireLogin() {
 }
 requireLogin(); 
 
-document.getElementById('jobForm').addEventListener('submit', async function(event) { 
-    event.preventDefault();
+document.getElementById('jobForm').addEventListener('submit', async function(event) { //Update the log audit here
+    event.preventDefault(); // Prevent default form submission behavior
+    
     const formData = new FormData(this);
-    const entries = Object.fromEntries(formData.entries());
-    const timestamp = new Date().toISOString();
+    const entries = Object.fromEntries(formData.entries()); // Convert FormData entries into a plain object
+    entries.createdAt = Timestamp.now(); // Set Firestore timestamp for the createdAt field
 
     const user = auth.currentUser;
-    const userEmail = user ? user.email : "Unknown user";
+    const userEmail = user ? user.email : "Unknown user"; // Get the logged-in user's email
 
-    // Set the status to 'open'
+    // Set the job status to 'open' by default
     entries.status = 'open';
     
-    entries.createdAt = Timestamp.now();
     // Validate required fields
     if (!entries.position || !entries.company || !entries.age) {
         alert('Please fill in all required fields.');
@@ -44,18 +44,35 @@ document.getElementById('jobForm').addEventListener('submit', async function(eve
     }
 
     try {
+        // Submit the job data to Firestore
         const jobId = await submitJobData(entries);
         console.log('Job added with ID:', jobId);
-        await logAudit(userEmail, "Job Added", { jobId, jobData: entries, timestamp: entries.createdAt  });
+
+        // Log the audit entry with detailed information
+        await logAudit(userEmail, "Job Added", {
+            jobId, 
+            jobData: entries,
+            status: "Success", 
+            timestamp: new Date().toISOString() // Use ISO format for logging
+        });
         
         alert("Job posted successfully!");
-        window.location.href = '../admin/job.html' || 'job.html'; // Redirect on success
+        window.location.href = '../admin/job.html' || 'job.html'; // Redirect to the job list page on success
 
     } catch (error) {
         console.error("Error posting job:", error);
+
+        // Log the error to the audit trail for troubleshooting
+        await logAudit(userEmail, "Job Posting Failed", {
+            status: "Failed",
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+        
         alert("Failed to post job.");
     }
 });
+
 
 const goBackButton = document.querySelector('#jobForm input[type="button"]');
 

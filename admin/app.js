@@ -165,6 +165,16 @@ async function hireApplicantAndDecrementVacancy(applicationId, application) {
         // Hire the applicant
         await hireApplicant(applicationId, application);
 
+        // Log audit for hiring the applicant
+        await logAudit(userEmail, "Applicant Hired", {
+            applicationId: applicationId,
+            applicantName: application.userName,
+            position: application.position,
+            company: application.company,
+            status: "Success",
+            timestamp: new Date().toISOString()
+        });
+
         // Fetch the job and decrement the vacancy
         const jobDocRef = doc(firestore, 'jobs', application.jobId);
         const jobDocSnap = await getDoc(jobDocRef);
@@ -186,7 +196,6 @@ async function hireApplicantAndDecrementVacancy(applicationId, application) {
                     fetchApplicationsAndUpdateUI();
                     return;  // Exit the function to prevent further execution
                 }
-                
 
                 // Refresh the job table after updating the vacancy
                 fetchApplicationsAndUpdateUI();
@@ -200,6 +209,17 @@ async function hireApplicantAndDecrementVacancy(applicationId, application) {
         }
     } catch (error) {
         console.error("Error hiring applicant and updating vacancy:", error);
+
+        // Log audit for hiring failure
+        await logAudit(userEmail, "Applicant Hire Failed", {
+            applicationId: applicationId,
+            applicantName: application.userName,
+            position: application.position,
+            company: application.company,
+            status: "Failed",
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
     }
 }
 

@@ -426,7 +426,10 @@ async function editJob(jobId) {
             document.getElementById('type').value = jobData.type || '';
             document.getElementById('vacancy').value = jobData.vacancy || '';
             document.getElementById('email').value = jobData.contact || '';
+            
+            // Ensure the qualifications field is populated correctly
             document.getElementById('qualifications').value = jobData.qualifications || '';
+            
             document.getElementById('facilities').value = jobData.facilities || '';
             document.getElementById('description').value = jobData.description || '';
 
@@ -440,3 +443,4 @@ async function editJob(jobId) {
         console.error('Error fetching job for editing:', error);
     }
 }
+

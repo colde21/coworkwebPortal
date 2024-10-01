@@ -112,7 +112,7 @@ export async function exportAuditLog() {
         snapshot.forEach(doc => {
             const data = doc.data();
             const timestamp = data.timestamp.toDate();
-            logs.push({ user: data.user, action: data.action, timestamp, details: data.details });
+            logs.push({ user: data.user, action: data.action, timestamp});
         });
 
         console.log(`Fetched ${logs.length} audit log entries.`);
