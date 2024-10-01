@@ -100,6 +100,27 @@ button:active {
     margin-top: 10px;
 }
 
+
+.toggle-password {
+    position: absolute;
+    right: 1px;
+    top: 49%;
+    transform: translateY(-58%);
+    width: 50px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 1px;
+    padding-right: 1px;
+    border: none;
+    border-radius: 10;
+    font-size: 12px;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.toggle-password:hover {
+    color: #ffffff;
+}
 /* Loading Screen */
 .loading-screen {
     display: none;
@@ -120,26 +141,6 @@ button:active {
     width: 60px;
     height: 60px;
     animation: spin 1s linear infinite;
-}
-.toggle-password {
-    position: absolute;
-    right: 1px;
-    top: 49%;
-    transform: translateY(-58%);
-    width: 50px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 1px;
-    padding-right: 1px;
-    border: none;
-    border-radius: 10;
-    font-size: 12px;
-    color: #ffffff;
-    cursor: pointer;
-}
-
-.toggle-password:hover {
-    color: #ffffff;
 }
 @keyframes spin {
     0% {

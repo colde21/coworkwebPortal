@@ -6,8 +6,18 @@
     <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
     <link rel="stylesheet" href="hstyle.css">
     <title>Home</title>
+    <script>  function preventBack() {
+        window.history.forward();
+    }
+    setTimeout("preventBack()", 0);
+    window.onunload = function () { null };
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
     <script type="module" src="home.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+
 </head>
 <body>
     <div class="nav">
@@ -15,11 +25,11 @@
             <button onclick="location.href='home.html'">HOME</button>
             <button onclick="location.href='job.html'">JOB LIST</button>
             <button onclick="location.href='app.html'">APPLICATION</button>
-            <button onclick="location.href='archive.html'">ARCHIVED </button>
+            <button onclick="location.href='archive.html'">ARCHIVED</button>
             <button id="signOutBtn">SIGN OUT</button>
         </div>
     </div>
-    
+
     <div class="container">
         <div class="card job">
             <h3>JOB</h3>
@@ -64,6 +74,15 @@
             </div>
             <div id="employedByCompanySummary" class="summary-container"></div>
         </div>
+    </div>
+
+    <!-- Most Applied Jobs Section -->
+    <div class="most-applied-jobs">
+        <h3>Most Applied Jobs</h3>
+        <ul id="mostAppliedJobsList"></ul>
+    </div>
+    <div id="loading-screen" class="loading-screen">
+        <div class="spinner"></div>
     </div>
 </body>
 </html>
