@@ -247,3 +247,4 @@ function handleSearch() {
         clearInterval(refreshInterval);
     }
 }
+

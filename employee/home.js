@@ -3,6 +3,7 @@ import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https:/
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
     authDomain: "cowork-195c0.firebaseapp.com",
@@ -14,6 +15,7 @@ const firebaseConfig = {
     measurementId: "G-8DL6T09CP4"
 };
 
+// Initialize Firebase app
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
@@ -22,70 +24,77 @@ const firestore = getFirestore(app);
 function requireLogin() {
     onAuthStateChanged(auth, (user) => {
         if (!user) {
-            // If the user is not logged in, redirect to the login page
             window.location.href = '/login.html';
         } else {
-            // Optionally log that the user has accessed the page
-            console.log("Page Accessed.")
+            console.log("Page Accessed.");
         }
     });
 }
 
-//sign out function should be working by now 
+// Sign out functionality
 async function performSignOut() {
-    const loadingScreen = document.getElementById('loading-screen'); // Reference to the loading screen element
-    const errorMessageContainer = document.getElementById('error-message'); // Reference to show errors
+    const loadingScreen = document.getElementById('loading-screen');
+    const errorMessageContainer = document.getElementById('error-message');
 
-    if (loadingScreen) loadingScreen.style.display = 'flex'; // Show the loading screen
+    if (loadingScreen) loadingScreen.style.display = 'flex';
 
     try {
-        const user = auth.currentUser; // Get the currently authenticated user
-
-        if (!user) {
-            throw new Error("No authenticated user found."); // Handle the case when there's no logged-in user
-        }
+        const user = auth.currentUser;
+        if (!user) throw new Error("No authenticated user found.");
 
         const userEmail = user.email;
-        console.log('User Email:', userEmail); // Useful for debugging
-
-        // Log audit for successful sign-out
         await logAudit(userEmail, "Sign out", { status: "Success" });
-        console.log("Audit logged for sign-out.");
-
-        // Perform Firebase sign-out
         await firebaseSignOut(auth);
-        console.log("User successfully signed out.");
-
-        // Redirect to the login page or show a sign-out success message
         window.location.href = "/login.html";
     } catch (error) {
-        console.error("Error during sign-out:", error);
-
-        // Log audit for failed sign-out
         const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
         await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
-
-        // Show the error message in the error message container
         if (errorMessageContainer) {
             errorMessageContainer.textContent = error.message || 'Sign out failed. Please try again.';
         }
     } finally {
-        if (loadingScreen) loadingScreen.style.display = 'none'; // Hide the loading screen
+        if (loadingScreen) loadingScreen.style.display = 'none';
     }
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
-    requireLogin();  // Ensure login
-    updateDashboardData();
-
-    const signOutBtn = document.getElementById('signOutBtn'); // don porget
+    const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
         signOutBtn.addEventListener('click', performSignOut);
-    } else {
-    }// this also   
+    }
+    requireLogin();
+    updateDashboardData();
+    loadMostAppliedJobs();
 });
 
+// Load "Most Applied Jobs"
+async function loadMostAppliedJobs() {
+    const mostAppliedJobsList = document.getElementById('mostAppliedJobsList');
+    const applicationCol = collection(firestore, 'applied');
+    
+    try {
+        const applicationsSnapshot = await getDocs(applicationCol);
+        const applications = applicationsSnapshot.docs.map(doc => doc.data());
+        const positionsByCount = {};
+
+        applications.forEach(app => {
+            const position = app.position || 'Unknown Position';
+            positionsByCount[position] = (positionsByCount[position] || 0) + 1;
+        });
+
+        const sortedJobs = Object.entries(positionsByCount).sort(([, a], [, b]) => b - a).slice(0, 5);
+        mostAppliedJobsList.innerHTML = '';
+        sortedJobs.forEach(([job, count]) => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${job} - ${count} applications`;
+            mostAppliedJobsList.appendChild(listItem);
+        });
+    } catch (error) {
+        console.error("Error fetching most applied jobs:", error);
+    }
+}
+
+// Fetch applications and employed data
 async function fetchApplicationsAndEmployed() {
     const applicationCol = collection(firestore, 'applied');
     const employedCol = collection(firestore, 'employed');
@@ -100,6 +109,7 @@ async function fetchApplicationsAndEmployed() {
     }
 }
 
+// Update dashboard data
 function updateDashboardData() {
     Promise.all([
         updateJobCount(),
@@ -114,6 +124,7 @@ function updateDashboardData() {
     });
 }
 
+// Update Job Count
 function updateJobCount() {
     return fetchAllJobs().then(jobs => {
         const count = jobs.length;
@@ -126,6 +137,7 @@ function updateJobCount() {
     });
 }
 
+// Update Vacancies Count
 function updateVacanciesCount() {
     return fetchAllJobs().then(jobs => {
         const totalVacancies = jobs.reduce((sum, job) => sum + (parseInt(job.vacancy, 10) || 0), 0);
@@ -138,6 +150,7 @@ function updateVacanciesCount() {
     });
 }
 
+// Update Application Count
 function updateApplicationCount() {
     return new Promise((resolve, reject) => {
         const applicationCol = collection(firestore, 'applied');
@@ -153,6 +166,7 @@ function updateApplicationCount() {
     });
 }
 
+// Update Employed Count
 function updateEmployedCount() {
     return new Promise((resolve, reject) => {
         const employedCol = collection(firestore, 'employed');
@@ -168,6 +182,7 @@ function updateEmployedCount() {
     });
 }
 
+// Aggregate data by company
 function aggregateDataByCompany(applications, employed) {
     const applicationsByCompany = {};
     const employedByCompany = {};
@@ -192,6 +207,16 @@ function aggregateDataByCompany(applications, employed) {
     return { applicationsByCompany, employedByCompany, employedByPosition };
 }
 
+// Shades of red for bars
+const redShades = [
+    'rgba(255, 99, 132, 0.7)', // Soft Red
+    'rgba(255, 77, 77, 0.7)',  // Coral Red
+    'rgba(255, 127, 80, 0.7)', // Light Red
+    'rgba(240, 128, 128, 0.7)', // Salmon
+    'rgba(220, 20, 60, 0.7)',  // Crimson
+];
+
+// Create Applications by Company Chart
 function createApplicationsByCompanyChart(applicationsByCompany) {
     const ctxApplications = document.getElementById('applicationsByCompanyChart').getContext('2d');
     const companies = Object.keys(applicationsByCompany);
@@ -204,8 +229,8 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
             datasets: [{
                 label: 'Applications by Company',
                 data: applications,
-                backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)'],
-                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+                backgroundColor: redShades,
+                borderColor: redShades.map(shade => shade.replace('0.7', '1')),
                 borderWidth: 1
             }]
         },
@@ -219,12 +244,22 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
                 },
                 legend: {
                     display: false
+                },
+                datalabels: {
+                    anchor: 'center',
+                    align: 'center',
+                    color: 'white',
+                    font: {
+                        weight: 'bold'
+                    },
+                    formatter: (value) => `${value} applications`
                 }
             },
             scales: {
                 y: { beginAtZero: true }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 
     const resizeObserver = new ResizeObserver(() => {
@@ -233,22 +268,19 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
     resizeObserver.observe(document.getElementById('applicationsByCompanyChart'));
 }
 
+// Create Employed by Position Chart
 function createEmployedByPositionChart(employedByPosition) {
     const ctxEmployedByPosition = document.getElementById('employedByPositionChart').getContext('2d');
-    
-    const positions = Object.keys(employedByPosition);  
+    const positions = Object.keys(employedByPosition);
     const companies = [...new Set(Object.values(employedByPosition).flatMap(position => Object.keys(position)))];
-    
+
     const datasets = companies.map((company, index) => {
         const data = positions.map(position => employedByPosition[position][company] || 0);
-        const colors = ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)'];
-        const borderColors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'];
-
         return {
             label: company,
-            data,  
-            backgroundColor: colors[index % colors.length],
-            borderColor: borderColors[index % borderColors.length],
+            data,
+            backgroundColor: redShades[index % redShades.length],
+            borderColor: redShades[index % redShades.length].replace('0.7', '1'),
             borderWidth: 1,
             barPercentage: 0.8,
             categoryPercentage: 0.8
@@ -258,8 +290,8 @@ function createEmployedByPositionChart(employedByPosition) {
     new Chart(ctxEmployedByPosition, {
         type: 'bar',
         data: {
-            labels: positions,  
-            datasets  
+            labels: positions,
+            datasets
         },
         options: {
             responsive: true,
@@ -270,22 +302,33 @@ function createEmployedByPositionChart(employedByPosition) {
                     text: 'Positions per Company'
                 },
                 legend: {
-                    display: false  
+                    display: false
+                },
+                datalabels: {
+                    anchor: 'center',
+                    align: 'center',
+                    color: 'white',
+                    font: {
+                        weight: 'bold'
+                    },
+                    formatter: (value) => value > 0 ? `${value} employed` : ''
                 }
             },
             scales: {
                 x: {
-                    stacked: true  
+                    stacked: true
                 },
                 y: {
                     beginAtZero: true,
-                    stacked: true  
+                    stacked: true
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
 }
 
+// Create Employed by Company Chart
 function createEmployedByCompanyChart(employedByCompany) {
     const ctxEmployedByCompany = document.getElementById('employedByCompanyChart').getContext('2d');
     const companies = Object.keys(employedByCompany);
@@ -298,8 +341,8 @@ function createEmployedByCompanyChart(employedByCompany) {
             datasets: [{
                 label: 'Employed by Company',
                 data: employedCounts,
-                backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)'],
-                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
+                backgroundColor: redShades,
+                borderColor: redShades.map(shade => shade.replace('0.7', '1')),
                 borderWidth: 1
             }]
         },
@@ -312,21 +355,27 @@ function createEmployedByCompanyChart(employedByCompany) {
                     text: 'Employed per Company'
                 },
                 legend: {
-                    display: false  
+                    display: false
+                },
+                datalabels: {
+                    anchor: 'center',
+                    align: 'center',
+                    color: 'white',
+                    font: {
+                        weight: 'bold'
+                    },
+                    formatter: (value) => `${value} employed`
                 }
             },
             scales: {
                 y: { beginAtZero: true }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     });
-
-    const resizeObserver = new ResizeObserver(() => {
-        chart.resize();
-    });
-    resizeObserver.observe(document.getElementById('employedByCompanyChart'));
 }
 
+// Create Text Summary
 function createTextSummary(summaryElementId, labels, data, percentages) {
     const summaryElement = document.getElementById(summaryElementId);
     if (!summaryElement) {
@@ -349,6 +398,7 @@ function createTextSummary(summaryElementId, labels, data, percentages) {
     summaryElement.innerHTML = summaryHTML;
 }
 
+// Create Charts
 function createCharts(applications, employed) {
     const { applicationsByCompany, employedByCompany, employedByPosition } = aggregateDataByCompany(applications, employed);
 
@@ -356,12 +406,12 @@ function createCharts(applications, employed) {
     createEmployedByPositionChart(employedByPosition);
     createEmployedByCompanyChart(employedByCompany);
 
-    // Generate summary for each chart
     createTextSummary('applicationsByCompanySummary', Object.keys(applicationsByCompany), Object.values(applicationsByCompany), calculatePercentage(Object.values(applicationsByCompany)));
     createTextSummary('employedByPositionSummary', Object.keys(employedByPosition), Object.values(employedByPosition), calculatePercentage(Object.values(employedByPosition).map(position => Object.values(position).reduce((sum, val) => sum + val, 0))));
     createTextSummary('employedByCompanySummary', Object.keys(employedByCompany), Object.values(employedByCompany), calculatePercentage(Object.values(employedByCompany)));
 }
 
+// Calculate Percentage
 function calculatePercentage(data) {
     const total = data.reduce((sum, value) => sum + value, 0);
     return data.map(value => ((value / total) * 100).toFixed(2) + '%');

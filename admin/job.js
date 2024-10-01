@@ -410,6 +410,7 @@ document.getElementById('goBackButton').addEventListener('click', function () {
 });
 
 // Function to load job data into the form for editing
+// Function to load job data into the form for editing and add blur effect
 async function editJob(jobId) {
     try {
         const jobDocRef = doc(firestore, 'jobs', jobId);
@@ -426,16 +427,16 @@ async function editJob(jobId) {
             document.getElementById('type').value = jobData.type || '';
             document.getElementById('vacancy').value = jobData.vacancy || '';
             document.getElementById('email').value = jobData.contact || '';
-            
-            // Ensure the qualifications field is populated correctly
             document.getElementById('qualifications').value = jobData.qualifications || '';
-            
             document.getElementById('facilities').value = jobData.facilities || '';
             document.getElementById('description').value = jobData.description || '';
 
             // Show the edit form and set the jobId in the dataset
             document.getElementById('editJobForm').dataset.jobId = jobId;
             document.getElementById('editJobForm').style.display = 'block';
+
+            // Add blur effect to the background container
+            document.querySelector('.job-container').classList.add('blur');
         } else {
             alert('Job not found!');
         }
@@ -443,4 +444,11 @@ async function editJob(jobId) {
         console.error('Error fetching job for editing:', error);
     }
 }
+
+// Function to hide the edit form and remove blur effect
+document.getElementById('goBackButton').addEventListener('click', function () {
+    document.getElementById('editJobForm').style.display = 'none'; // Hide the edit form
+    document.querySelector('.job-container').classList.remove('blur'); // Remove the blur effect
+});
+
 
