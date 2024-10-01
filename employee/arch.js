@@ -26,7 +26,7 @@ function requireLogin() {
             window.location.href = '/login.html';
         } else {
             // Optionally log that the user has accessed the page
-            logAudit(user.email, "Accessed Archive Page ", { status: "Success" });
+            console.log("Page Accessed.")
         }
     });
 }

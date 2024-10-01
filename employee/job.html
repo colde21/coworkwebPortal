@@ -12,9 +12,9 @@
     <div class="nav">
         <div class="links"> 
             <button onclick="location.href='home.html'">HOME</button>
-            <button onclick="location.href='job.html'">JOB</button>
+            <button onclick="location.href='job.html'">JOB LIST</button>
             <button onclick="location.href='app.html'">APPLICATION</button>
-            <button onclick="location.href='archive.html'">ARCHIVE JOBS</button>
+            <button onclick="location.href='archive.html'">ARCHIVED </button>
             <button id="signOutBtn">SIGN OUT</button>
         </div>
     </div> 
@@ -35,7 +35,6 @@
                         <th>Vacancy</th>
                         <th>Type</th>
                         <th>Email</th>
-                        <th>Edit</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,68 +42,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
-    <!--Edit Job Form-->
-    <div id="editJobForm" style="display: none;">
-        <h2>Edit Job</h2>
-        <form id="editForm">
-            <div class="form-grid">
-                <div>
-                    <label for="position">Position:</label>
-                    <input type="text" id="position" name="position" required>
-                </div>
-                
-                <div>
-                    <label for="company">Company:</label>
-                    <input type="text" id="company" name="company" required>
-                </div>
-        
-                <div>
-                    <label for="location">Location:</label>
-                    <input type="text" id="location" name="location" required>
-                </div>
-        
-                <div>
-                    <label for="type">Job Type:</label>
-                    <input type="text" id="type" name="type" required>
-                </div>
-    
-                <div>
-                    <label for="age">Age Requirement:</label>
-                    <input type="number" id="age" name="age" min="18" max="60" required>
-                </div>
-        
-                <div>
-                    <label for="vacancy">Vacancy:</label>
-                    <input type="number" id="vacancy" name="vacancy" required>
-                </div>
-    
-                <div>
-                    <label for="email">Contact Email:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-    
-                <div>
-                    <label for="qualifications">Qualifications:</label>
-                    <input type="text" id="qualifications" name="qualifications">
-                </div>
-        
-                <div class="full-width">
-                    <label for="facilities">Facilities:</label>
-                    <textarea id="facilities" name="facilities"></textarea>
-                </div>
-        
-                <div class="full-width">
-                    <label for="description">Description:</label>
-                    <textarea id="description" name="description"></textarea>
-                </div>
-            </div>
-    
-             <div class="form-buttons">
-            <button type="button" id="goBackButton">Go Back</button>
-            <button type="button" id="saveJobButton">Save Changes</button>
-        </div>
-        </form>
     </div>
     
     <div id="paginationControls" class="pagination"></div>
