@@ -3,7 +3,6 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.
 import { fetchAllApplications, hireApplicant, archiveJobIfNeeded, logAudit } from './database.js';
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
     authDomain: "cowork-195c0.firebaseapp.com",
@@ -19,75 +18,53 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 
-// prevent jump
+// Pagination Variables
+let allApplications = [];  // To store all applications globally
+let currentPage = 1;  // Current page in pagination
+const applicationsPerPage = 5;  // Limit applications per page
+
 function requireLogin() {
     onAuthStateChanged(auth, (user) => {
         if (!user) {
-            // If the user is not logged in, redirect to the login page
             window.location.href = '/login.html';
         } else {
-            // Optionally log that the user has accessed the page
-           console.log("Page Accessed.")
+            console.log("Page Accessed.");
         }
     });
 }
 
-let allApplications = [];  // To store all applications globally
-let refreshInterval; // To store the interval ID
-
 async function performSignOut() {
-    const loadingScreen = document.getElementById('loading-screen'); // Reference to the loading screen element
-    const errorMessageContainer = document.getElementById('error-message'); // Reference to show errors
+    const loadingScreen = document.getElementById('loading-screen');
+    const errorMessageContainer = document.getElementById('error-message');
 
-    if (loadingScreen) loadingScreen.style.display = 'flex'; // Show the loading screen
+    if (loadingScreen) loadingScreen.style.display = 'flex';
 
     try {
-        const user = auth.currentUser; // Get the currently authenticated user
-
-        if (!user) {
-            throw new Error("No authenticated user found."); // Handle the case when there's no logged-in user
-        }
+        const user = auth.currentUser;
+        if (!user) throw new Error("No authenticated user found.");
 
         const userEmail = user.email;
-        console.log('User Email:', userEmail); // Useful for debugging
-
-        // Log audit for successful sign-out
         await logAudit(userEmail, "Sign out", { status: "Success" });
-        console.log("Audit logged for sign-out.");
-
-        // Perform Firebase sign-out
         await firebaseSignOut(auth);
-        console.log("User successfully signed out.");
-
-        // Redirect to the login page or show a sign-out success message
         window.location.href = "/login.html";
     } catch (error) {
-        console.error("Error during sign-out:", error);
-
-        // Log audit for failed sign-out
         const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
         await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
-
-        // Show the error message in the error message container
         if (errorMessageContainer) {
             errorMessageContainer.textContent = error.message || 'Sign out failed. Please try again.';
         }
     } finally {
-        if (loadingScreen) loadingScreen.style.display = 'none'; // Hide the loading screen
+        if (loadingScreen) loadingScreen.style.display = 'none';
     }
 }
 
-
-// Ensure elements exist before attaching event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    requireLogin();  // Ensure login
-
-    const signOutBtn = document.getElementById('signOutBtn'); // don porget
+    requireLogin();
+    const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
         signOutBtn.addEventListener('click', performSignOut);
-    } else {
-    }// this also
-
+    }
+    
     const searchBar = document.getElementById('searchBar');
     if (searchBar) {
         searchBar.addEventListener('input', handleSearch);
@@ -103,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchApplicationsAndUpdateUI();
 });
 
-
 function fetchApplicationsAndUpdateUI() {
     fetchAllApplications().then(applications => {
         allApplications = applications;
@@ -113,11 +89,16 @@ function fetchApplicationsAndUpdateUI() {
 
 function updateApplicationList(applications) {
     const applicationList = document.getElementById('applicationList');
-    if (!applicationList) return; // Exit if the element does not exist
+    if (!applicationList) return;
 
     applicationList.innerHTML = ''; 
 
-    applications.forEach((application) => {
+    // Get the applications for the current page
+    const startIndex = (currentPage - 1) * applicationsPerPage;
+    const endIndex = startIndex + applicationsPerPage;
+    const paginatedApplications = applications.slice(startIndex, endIndex);
+
+    paginatedApplications.forEach((application) => {
         const listItem = document.createElement('li');
 
         const detailsDiv = document.createElement('div');
@@ -149,6 +130,47 @@ function updateApplicationList(applications) {
         listItem.appendChild(hireButton);
         applicationList.appendChild(listItem);
     });
+
+    // Update pagination controls
+    updatePaginationControls(applications);
+}
+
+function updatePaginationControls(applications) {
+    const paginationControls = document.getElementById('paginationControls');
+    if (!paginationControls) return;
+
+    paginationControls.innerHTML = '';
+
+    const totalPages = Math.ceil(applications.length / applicationsPerPage);
+
+    // Create "Previous" button
+    const prevButton = document.createElement('button');
+    prevButton.textContent = '<';
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            updateApplicationList(allApplications);
+        }
+    });
+    paginationControls.appendChild(prevButton);
+
+    // Create page numbers
+    const pageNumbers = document.createElement('span');
+    pageNumbers.textContent = `${currentPage}-${totalPages}`;
+    paginationControls.appendChild(pageNumbers);
+
+    // Create "Next" button
+    const nextButton = document.createElement('button');
+    nextButton.textContent = '>';
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            updateApplicationList(allApplications);
+        }
+    });
+    paginationControls.appendChild(nextButton);
 }
 
 async function hireApplicantAndDecrementVacancy(applicationId, application) {
@@ -156,16 +178,13 @@ async function hireApplicantAndDecrementVacancy(applicationId, application) {
         const user = auth.currentUser;
         const userEmail = user ? user.email : "Unknown user";
 
-        // Ensure jobId exists in the application
         if (!application.jobId) {
             alert("Job ID not found for the selected application.");
             return;
         }
 
-        // Hire the applicant
         await hireApplicant(applicationId, application);
 
-        // Log audit for hiring the applicant
         await logAudit(userEmail, "Applicant Hired", {
             applicationId: applicationId,
             applicantName: application.userName,
@@ -175,7 +194,6 @@ async function hireApplicantAndDecrementVacancy(applicationId, application) {
             timestamp: new Date().toISOString()
         });
 
-        // Fetch the job and decrement the vacancy
         const jobDocRef = doc(firestore, 'jobs', application.jobId);
         const jobDocSnap = await getDoc(jobDocRef);
 
@@ -183,23 +201,16 @@ async function hireApplicantAndDecrementVacancy(applicationId, application) {
             let vacancy = jobDocSnap.data().vacancy;
             if (vacancy > 0) {
                 vacancy--;
-
-                // Update the job vacancy
                 await updateDoc(jobDocRef, { vacancy });
 
-                // Archive the job if vacancy is 0
                 if (vacancy === 0) {
                     await archiveJobIfNeeded(application.jobId, application.company, application.position, userEmail);
-                
-                    // Update the UI after archiving the job
                     window.location.href = "archive.html";
                     fetchApplicationsAndUpdateUI();
-                    return;  // Exit the function to prevent further execution
+                    return;
                 }
 
-                // Refresh the job table after updating the vacancy
                 fetchApplicationsAndUpdateUI();
-
                 alert(`${application.userName} has been hired and vacancy updated.`);
             } else {
                 alert("The job has no more vacancies.");
@@ -210,7 +221,6 @@ async function hireApplicantAndDecrementVacancy(applicationId, application) {
     } catch (error) {
         console.error("Error hiring applicant and updating vacancy:", error);
 
-        // Log audit for hiring failure
         await logAudit(userEmail, "Applicant Hire Failed", {
             applicationId: applicationId,
             applicantName: application.userName,
@@ -223,8 +233,6 @@ async function hireApplicantAndDecrementVacancy(applicationId, application) {
     }
 }
 
-
-//handle Search function..
 function handleSearch() {
     const searchBar = document.getElementById('searchBar');
     if (!searchBar) return;
@@ -233,7 +241,6 @@ function handleSearch() {
 
     if (query === '') {
         updateApplicationList(allApplications);
-        refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
     } else {
         const filteredApplications = allApplications.filter(application => {
             return (
@@ -244,6 +251,5 @@ function handleSearch() {
             );
         });
         updateApplicationList(filteredApplications);
-        clearInterval(refreshInterval);
     }
 }
