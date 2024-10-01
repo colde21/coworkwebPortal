@@ -10,9 +10,8 @@ function requireLogin() {
         if (!user) {
             // If the user is not logged in, redirect to the login page
             window.location.href = '/login.html';
-        } else {
-            // Optionally log that the user has accessed the page
-            logAudit(user.email, "Accessed Home", { status: "Success" });
+        } else{
+            console.log("Page Accessed.")
         }
     });
 }
