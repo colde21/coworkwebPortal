@@ -1,4 +1,4 @@
-import { fetchAllJobs, logAudit, } from './database.js';
+import { fetchAllJobs, logAudit } from './database.js';
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
@@ -243,7 +243,12 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
                     text: 'Applications per Company'
                 },
                 legend: {
-                    display: false
+                    display: true,
+                    position: 'right',  // Move the legend inside the chart
+                    labels: {
+                        boxWidth: 20,
+                        padding: 15
+                    }
                 },
                 datalabels: {
                     anchor: 'center',
@@ -252,7 +257,11 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
                     font: {
                         weight: 'bold'
                     },
-                    formatter: (value) => `${value} applications`
+                    formatter: (value, context) => {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(2) + '%';
+                        return `${value} applications\n(${percentage})`;
+                    }
                 }
             },
             scales: {
@@ -261,11 +270,6 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
         },
         plugins: [ChartDataLabels]
     });
-
-    const resizeObserver = new ResizeObserver(() => {
-        chart.resize();
-    });
-    resizeObserver.observe(document.getElementById('applicationsByCompanyChart'));
 }
 
 // Create Employed by Position Chart
@@ -273,6 +277,11 @@ function createEmployedByPositionChart(employedByPosition) {
     const ctxEmployedByPosition = document.getElementById('employedByPositionChart').getContext('2d');
     const positions = Object.keys(employedByPosition);
     const companies = [...new Set(Object.values(employedByPosition).flatMap(position => Object.keys(position)))];
+
+    // Calculate total number of employees for all positions
+    const totalEmployees = positions.reduce((sum, position) => {
+        return sum + Object.values(employedByPosition[position]).reduce((posSum, val) => posSum + val, 0);
+    }, 0);
 
     const datasets = companies.map((company, index) => {
         const data = positions.map(position => employedByPosition[position][company] || 0);
@@ -302,7 +311,12 @@ function createEmployedByPositionChart(employedByPosition) {
                     text: 'Positions per Company'
                 },
                 legend: {
-                    display: false
+                    display: true,
+                    position: 'right',  // Move the legend inside the chart
+                    labels: {
+                        boxWidth: 20,
+                        padding: 15
+                    }
                 },
                 datalabels: {
                     anchor: 'center',
@@ -311,7 +325,10 @@ function createEmployedByPositionChart(employedByPosition) {
                     font: {
                         weight: 'bold'
                     },
-                    formatter: (value) => value > 0 ? `${value} employed` : ''
+                    formatter: (value) => {
+                        const percentage = ((value / totalEmployees) * 100).toFixed(2) + '%';
+                        return value > 0 ? `${value} employed\n(${percentage})` : '';
+                    }
                 }
             },
             scales: {
@@ -327,6 +344,7 @@ function createEmployedByPositionChart(employedByPosition) {
         plugins: [ChartDataLabels]
     });
 }
+
 
 // Create Employed by Company Chart
 function createEmployedByCompanyChart(employedByCompany) {
@@ -355,7 +373,12 @@ function createEmployedByCompanyChart(employedByCompany) {
                     text: 'Employed per Company'
                 },
                 legend: {
-                    display: false
+                    display: true,
+                    position: 'right',  // Move the legend inside the chart
+                    labels: {
+                        boxWidth: 20,
+                        padding: 15
+                    }
                 },
                 datalabels: {
                     anchor: 'center',
@@ -364,7 +387,11 @@ function createEmployedByCompanyChart(employedByCompany) {
                     font: {
                         weight: 'bold'
                     },
-                    formatter: (value) => `${value} employed`
+                    formatter: (value, context) => {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(2) + '%';
+                        return `${value} employed\n(${percentage})`;
+                    }
                 }
             },
             scales: {
@@ -375,7 +402,7 @@ function createEmployedByCompanyChart(employedByCompany) {
     });
 }
 
-// Create Text Summary
+// Create Text Summary (Updated with Bold for Job Titles)
 function createTextSummary(summaryElementId, labels, data, percentages) {
     const summaryElement = document.getElementById(summaryElementId);
     if (!summaryElement) {
@@ -384,19 +411,16 @@ function createTextSummary(summaryElementId, labels, data, percentages) {
     }
     summaryElement.innerHTML = ''; 
 
-    let summaryHTML = '<h3>Legend:</h3><ul>';
-    labels.forEach((label, index) => {
-        summaryHTML += `<li>${label}</li>`;
-    });
-    summaryHTML += '</ul><h3>Summary:</h3><ul>';
+    let summaryHTML = '<h3>Summary:</h3><ul>';
     labels.forEach((label, index) => {
         const total = typeof data[index] === 'object' ? Object.values(data[index]).reduce((sum, count) => sum + count, 0) : data[index];
-        summaryHTML += `<li><b>${label}: ${total} - ${percentages[index]}</b></li>`;
+        summaryHTML += `<li><b>${label}</b> (${percentages[index]}) - ${total}</li>`;
     });
     summaryHTML += '</ul>';
 
     summaryElement.innerHTML = summaryHTML;
 }
+
 
 // Create Charts
 function createCharts(applications, employed) {
