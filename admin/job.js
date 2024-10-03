@@ -352,7 +352,7 @@ document.getElementById('saveJobButton').addEventListener('click', async functio
 
         // Hide the edit form
         document.getElementById('editJobForm').style.display = 'none';
-
+        document.querySelector('.job-container').classList.remove('blur');
         // Refresh the job table to reflect the updates
         fetchAllJobs().then(jobs => {
             window.allJobs = jobs;
@@ -407,6 +407,8 @@ async function archiveJobIfNeeded(jobId, company, position) {
 // "Go Back" button functionality
 document.getElementById('goBackButton').addEventListener('click', function () {
     window.location.href = "job.html"; // This will navigate the user to the previous page
+    document.getElementById('editJobForm').style.display = 'none'; // Hide the edit form
+    document.querySelector('.job-container').classList.remove('blur'); // Remove the blur effect
 });
 
 // Function to load job data into the form for editing
