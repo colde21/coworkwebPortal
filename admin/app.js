@@ -20,6 +20,7 @@ const firestore = getFirestore(app);
 
 // Pagination Variables
 let allApplications = [];  // To store all applications globally
+let filteredApplications = []; // To store filtered applications
 let currentPage = 1;  // Current page in pagination
 const applicationsPerPage = 5;  // Limit applications per page
 
@@ -73,17 +74,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleSearch();
             }
         });
-        searchBar.addEventListener('focus', () => clearInterval(refreshInterval));
     }
 
-    refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
-    fetchApplicationsAndUpdateUI();
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', handleRefresh);  // Added the refresh button functionality
+    }
+
+    fetchApplicationsAndUpdateUI();  // Initial load
 });
 
 function fetchApplicationsAndUpdateUI() {
     fetchAllApplications().then(applications => {
         allApplications = applications;
-        updateApplicationList(allApplications);
+        filteredApplications = applications; // Initialize filteredApplications with all applications
+        updateApplicationList(filteredApplications);
     }).catch(err => console.error("Failed to fetch applications:", err));
 }
 
@@ -150,14 +155,15 @@ function updatePaginationControls(applications) {
     prevButton.addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
-            updateApplicationList(allApplications);
+            updateApplicationList(filteredApplications);
         }
     });
     paginationControls.appendChild(prevButton);
 
-    // Create page numbers
+    // Create page numbers display
     const pageNumbers = document.createElement('span');
     pageNumbers.textContent = `${currentPage}-${totalPages}`;
+    pageNumbers.classList.add('page-numbers');
     paginationControls.appendChild(pageNumbers);
 
     // Create "Next" button
@@ -167,7 +173,7 @@ function updatePaginationControls(applications) {
     nextButton.addEventListener('click', () => {
         if (currentPage < totalPages) {
             currentPage++;
-            updateApplicationList(allApplications);
+            updateApplicationList(filteredApplications);
         }
     });
     paginationControls.appendChild(nextButton);
@@ -240,9 +246,9 @@ function handleSearch() {
     const query = searchBar.value.toLowerCase();
 
     if (query === '') {
-        updateApplicationList(allApplications);
+        filteredApplications = allApplications;
     } else {
-        const filteredApplications = allApplications.filter(application => {
+        filteredApplications = allApplications.filter(application => {
             return (
                 (application.userName && application.userName.toLowerCase().includes(query)) ||
                 (application.position && application.position.toLowerCase().includes(query)) ||
@@ -250,6 +256,12 @@ function handleSearch() {
                 (application.userEmail && application.userEmail.toLowerCase().includes(query)) 
             );
         });
-        updateApplicationList(filteredApplications);
     }
+    currentPage = 1; // Reset to first page after search
+    updateApplicationList(filteredApplications);
+}
+
+function handleRefresh() {
+    currentPage = 1; // Reset the page to 1
+    fetchApplicationsAndUpdateUI(); // Reload the application list
 }

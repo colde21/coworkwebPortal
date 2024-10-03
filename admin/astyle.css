@@ -102,11 +102,18 @@ li button:hover {
     background-color: #0077b6;
 }
 
+/* Pagination styling */
 .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 20px;
+}
+
+.pagination .page-numbers {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 10px;
 }
 
 .pagination button {
@@ -122,12 +129,7 @@ li button:hover {
     align-items: center;
     font-size: 18px;
     color: #333;
-}
-
-.pagination button.active {
-    background-color: #0077b6;
-    color: white;
-    border-color: #0077b6;
+    margin-left: 5px;
 }
 
 .pagination button:disabled {
@@ -140,32 +142,9 @@ li button:hover {
     background-color: #e0e0e0;
 }
 
-@media (max-width: 768px) {
-    .header-container {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    h1 {
-        margin-bottom: 10px;
-    }
-
-    li {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .details {
-        margin-bottom: 10px;
-    }
-
-    li button {
-        width: 100%;
-        text-align: center;
-        margin-left: 0;
-    }
-
-    #searchBar {
-        width: 100%;
-    }
+.pagination button.active {
+    background-color: #0077b6;
+    color: white;
+    border-color: #0077b6;
 }
+
