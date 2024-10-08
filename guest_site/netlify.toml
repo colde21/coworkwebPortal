@@ -1,0 +1,10 @@
+[[redirects]]
+  from = "/*"
+  to = "/gsite"
+  status = 200
+
+[[redirects]]
+  from = "/:splat"
+  to = "/:splat.html"
+  status = 200
+  force = true
