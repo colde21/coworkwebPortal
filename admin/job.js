@@ -457,11 +457,25 @@ document.getElementById('generateLinkButton').addEventListener('click', async ()
     if (companyName) {
         const link = await generateDisposableLink(companyName);
         if (link) {
-            document.getElementById('disposableLink').textContent = link;
-            document.getElementById('disposableLink').href = link;
+            // Display the link and update the link text
+            document.getElementById('disposableLinkText').textContent = link;
             document.getElementById('disposableLinkContainer').style.display = 'block';
+
+            // Automatically copy the link to the clipboard
+            document.getElementById('copyLinkButton').addEventListener('click', () => {
+                copyToClipboard(link);
+            });
         } else {
             alert("Failed to generate the link. Please try again.");
         }
     }
 });
+
+// Function to copy the link to the clipboard
+function copyToClipboard(link) {
+    navigator.clipboard.writeText(link).then(() => {
+        alert("Link copied to clipboard!");
+    }).catch(err => {
+        console.error("Failed to copy text: ", err);
+    });
+}
