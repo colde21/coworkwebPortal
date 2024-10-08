@@ -424,3 +424,47 @@ table td button:hover {
     filter: blur(5px); /* Adjust the blur intensity as needed */
     pointer-events: none; /* Prevent interactions with blurred content */
 }
+
+/* Styling for the Disposable Link Container */
+#disposableLinkContainer {
+    display: block; /* Set display to block */
+    margin: 20px auto; /* Center horizontally */
+    padding: 15px 20px;
+    border: 2px  #e74c3c; /* Dashed red border */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #fff8f8; /* Light red background */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    text-align: center; /* Center-align text */
+    max-width: 600px; /* Set a maximum width */
+}
+
+/* Styling for the text inside the Disposable Link Container */
+#disposableLinkContainer p {
+    margin: 0;
+    font-size: 16px;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Styling for the Copy Button */
+#copyLinkButton {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+}
+
+/* Change background and text color on hover */
+#copyLinkButton:hover {
+    background-color: #c0392b;
+}
+#disposableLinkText{
+    display: none;
+}
