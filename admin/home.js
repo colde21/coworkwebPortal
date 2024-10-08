@@ -86,13 +86,14 @@ async function loadMostAppliedJobs() {
         mostAppliedJobsList.innerHTML = '';
         sortedJobs.forEach(([job, count]) => {
             const listItem = document.createElement('li');
-            listItem.textContent = `${job} - ${count} applications`;
+            listItem.innerHTML = `<b>${job}</b> (${count}) - ${((count / applications.length) * 100).toFixed(2)}%`;
             mostAppliedJobsList.appendChild(listItem);
         });
     } catch (error) {
         console.error("Error fetching most applied jobs:", error);
     }
 }
+
 
 // Fetch applications and employed data
 async function fetchApplicationsAndEmployed() {
@@ -209,11 +210,11 @@ function aggregateDataByCompany(applications, employed) {
 
 // Shades of red for bars
 const redShades = [
-    'rgba(255, 99, 132, 0.7)', // Soft Red
-    'rgba(255, 77, 77, 0.7)',  // Coral Red
-    'rgba(255, 127, 80, 0.7)', // Light Red
-    'rgba(240, 128, 128, 0.7)', // Salmon
-    'rgba(220, 20, 60, 0.7)',  // Crimson
+    'rgba(255, 99, 132, 0.7)',
+    'rgba(255, 77, 77, 0.7)',
+    'rgba(255, 127, 80, 0.7)',
+    'rgba(240, 128, 128, 0.7)',
+    'rgba(220, 20, 60, 0.7)',
 ];
 
 // Create Applications by Company Chart
@@ -222,7 +223,7 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
     const companies = Object.keys(applicationsByCompany);
     const applications = Object.values(applicationsByCompany);
 
-    const chart = new Chart(ctxApplications, {
+    new Chart(ctxApplications, {
         type: 'bar',
         data: {
             labels: companies,
@@ -235,6 +236,7 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
             }]
         },
         options: {
+            indexAxis: 'y', // Make bars horizontal
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -243,12 +245,7 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
                     text: 'Applications per Company'
                 },
                 legend: {
-                    display: true,
-                    position: 'right',  // Move the legend inside the chart
-                    labels: {
-                        boxWidth: 20,
-                        padding: 15
-                    }
+                    display: false // Hide legends for cleaner UI
                 },
                 datalabels: {
                     anchor: 'center',
@@ -260,25 +257,24 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
                     formatter: (value, context) => {
                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                         const percentage = ((value / total) * 100).toFixed(2) + '%';
-                        return `${value} applications\n(${percentage})`;
+                        return `${value} (${percentage})`;
                     }
                 }
             },
             scales: {
-                y: { beginAtZero: true }
+                x: { beginAtZero: true } // Start the bars from 0
             }
         },
         plugins: [ChartDataLabels]
     });
 }
 
-// Create Employed by Position Chart
+// Create Employed by Position Chart with Adjustments
 function createEmployedByPositionChart(employedByPosition) {
     const ctxEmployedByPosition = document.getElementById('employedByPositionChart').getContext('2d');
     const positions = Object.keys(employedByPosition);
     const companies = [...new Set(Object.values(employedByPosition).flatMap(position => Object.keys(position)))];
 
-    // Calculate total number of employees for all positions
     const totalEmployees = positions.reduce((sum, position) => {
         return sum + Object.values(employedByPosition[position]).reduce((posSum, val) => posSum + val, 0);
     }, 0);
@@ -290,9 +286,7 @@ function createEmployedByPositionChart(employedByPosition) {
             data,
             backgroundColor: redShades[index % redShades.length],
             borderColor: redShades[index % redShades.length].replace('0.7', '1'),
-            borderWidth: 1,
-            barPercentage: 0.8,
-            categoryPercentage: 0.8
+            borderWidth: 1
         };
     });
 
@@ -303,6 +297,7 @@ function createEmployedByPositionChart(employedByPosition) {
             datasets
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -311,33 +306,38 @@ function createEmployedByPositionChart(employedByPosition) {
                     text: 'Positions per Company'
                 },
                 legend: {
-                    display: true,
-                    position: 'right',  // Move the legend inside the chart
-                    labels: {
-                        boxWidth: 20,
-                        padding: 15
-                    }
+                    display: false // Hide the legend to declutter
                 },
                 datalabels: {
-                    anchor: 'center',
-                    align: 'center',
-                    color: 'white',
+                    anchor: 'end',
+                    align: 'end',
+                    color: 'black',
                     font: {
-                        weight: 'bold'
+                        weight: 'bold',
+                        size: 10
                     },
                     formatter: (value) => {
                         const percentage = ((value / totalEmployees) * 100).toFixed(2) + '%';
-                        return value > 0 ? `${value} employed\n(${percentage})` : '';
+                        return value > 0 ? `${value} (${percentage})` : '';
                     }
                 }
             },
             scales: {
                 x: {
-                    stacked: true
+                    beginAtZero: true,
+                    max: Math.max(...positions.map(position => 
+                        companies.reduce((sum, company) => sum + (employedByPosition[position][company] || 0), 0)
+                    )) + 1,
+                    grid: {
+                        display: false
+                    }
                 },
                 y: {
-                    beginAtZero: true,
-                    stacked: true
+                    ticks: {
+                        font: {
+                            size: 10 // Smaller font size for better readability
+                        }
+                    }
                 }
             }
         },
@@ -352,7 +352,7 @@ function createEmployedByCompanyChart(employedByCompany) {
     const companies = Object.keys(employedByCompany);
     const employedCounts = Object.values(employedByCompany);
 
-    const chart = new Chart(ctxEmployedByCompany, {
+    new Chart(ctxEmployedByCompany, {
         type: 'bar',
         data: {
             labels: companies,
@@ -365,6 +365,7 @@ function createEmployedByCompanyChart(employedByCompany) {
             }]
         },
         options: {
+            indexAxis: 'y', // Make bars horizontal
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -373,12 +374,7 @@ function createEmployedByCompanyChart(employedByCompany) {
                     text: 'Employed per Company'
                 },
                 legend: {
-                    display: true,
-                    position: 'right',  // Move the legend inside the chart
-                    labels: {
-                        boxWidth: 20,
-                        padding: 15
-                    }
+                    display: false // Hide legends for cleaner UI
                 },
                 datalabels: {
                     anchor: 'center',
@@ -390,19 +386,19 @@ function createEmployedByCompanyChart(employedByCompany) {
                     formatter: (value, context) => {
                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                         const percentage = ((value / total) * 100).toFixed(2) + '%';
-                        return `${value} employed\n(${percentage})`;
+                        return `${value} (${percentage})`;
                     }
                 }
             },
             scales: {
-                y: { beginAtZero: true }
+                x: { beginAtZero: true } // Start the bars from 0
             }
         },
         plugins: [ChartDataLabels]
     });
 }
 
-// Create Text Summary (Updated with Bold for Job Titles)
+// Create Text Summary
 function createTextSummary(summaryElementId, labels, data, percentages) {
     const summaryElement = document.getElementById(summaryElementId);
     if (!summaryElement) {
@@ -414,13 +410,12 @@ function createTextSummary(summaryElementId, labels, data, percentages) {
     let summaryHTML = '<h3>Summary:</h3><ul>';
     labels.forEach((label, index) => {
         const total = typeof data[index] === 'object' ? Object.values(data[index]).reduce((sum, count) => sum + count, 0) : data[index];
-        summaryHTML += `<li><b>${label}</b> (${percentages[index]}) - ${total}</li>`;
+        summaryHTML += `<li><b>${label}</b> (${total}) - ${percentages[index]}</li>`;
     });
     summaryHTML += '</ul>';
 
     summaryElement.innerHTML = summaryHTML;
 }
-
 
 // Create Charts
 function createCharts(applications, employed) {

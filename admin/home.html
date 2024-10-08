@@ -6,18 +6,17 @@
     <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
     <link rel="stylesheet" href="home.css">
     <title>Home</title>
-    <script>  function preventBack() {
-        window.history.forward();
-    }
-    setTimeout("preventBack()", 0);
-    window.onunload = function () { null };
+    <script>
+        function preventBack() {
+            window.history.forward();
+        }
+        setTimeout("preventBack()", 0);
+        window.onunload = function () { null };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
-    <script type="module" src="home.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-
-
+    <script type="module" src="home.js" defer></script>
 </head>
 <body>
     <div class="nav">
@@ -49,25 +48,19 @@
         </div>
     </div>
 
-    <!-- Charts Section -->
     <div class="charts-wrapper">
-        <!-- Applications by Company Chart -->
         <div class="chart-summary-wrapper">
             <div class="chart-container">
                 <canvas id="applicationsByCompanyChart"></canvas>
             </div>
             <div id="applicationsByCompanySummary" class="summary-container"></div>
         </div>
-
-        <!-- Employed by Position Chart -->
         <div class="chart-summary-wrapper">
             <div class="chart-container">
                 <canvas id="employedByPositionChart"></canvas>
             </div>
             <div id="employedByPositionSummary" class="summary-container"></div>
         </div>
-
-        <!-- Employed by Company Chart -->
         <div class="chart-summary-wrapper">
             <div class="chart-container">
                 <canvas id="employedByCompanyChart"></canvas>
@@ -76,7 +69,6 @@
         </div>
     </div>
 
-    <!-- Most Applied Jobs Section -->
     <div class="most-applied-jobs">
         <h3>Most Applied Jobs</h3>
         <ul id="mostAppliedJobsList"></ul>

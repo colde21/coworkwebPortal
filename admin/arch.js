@@ -1,7 +1,8 @@
 import { fetchArchivedJobs, logAudit, deleteArchivedJob } from './database.js';
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
+import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, getDoc, doc, addDoc, collection, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -17,20 +18,153 @@ const firebaseConfig = {
 // Initialize Firebase if not already initialized
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const firestore = getFirestore(app);  // Initialize Firestore
+const firestore = getFirestore(app);
+
+const itemsPerPage = 5;
+let currentPage = 1;
+let filteredJobs = [];
 
 function requireLogin() {
     onAuthStateChanged(auth, (user) => {
         if (!user) {
-            // If the user is not logged in, redirect to the login page
             window.location.href = '/login.html';
         } else {
-            // Optionally log that the user has accessed the page
-            console.log("Page Accessed.")
+            console.log("Page Accessed.");
         }
     });
 }
-// display unarchive function and delete //
+
+async function performSignOut() {
+    const loadingScreen = document.getElementById('loading-screen');
+    const errorMessageContainer = document.getElementById('error-message');
+
+    if (loadingScreen) loadingScreen.style.display = 'flex';
+
+    try {
+        const user = auth.currentUser;
+        if (!user) throw new Error("No authenticated user found.");
+
+        const userEmail = user.email;
+        await logAudit(userEmail, "Sign out", { status: "Success" });
+        await firebaseSignOut(auth); // This line should now correctly reference the imported signOut function
+        window.location.href = "/login.html";
+    } catch (error) {
+        const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
+        await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+        if (errorMessageContainer) {
+            errorMessageContainer.textContent = error.message || 'Sign out failed. Please try again.';
+        }
+    } finally {
+        if (loadingScreen) loadingScreen.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    requireLogin();
+    fetchAndDisplayArchivedJobs();
+
+    const searchBar = document.getElementById('searchBar');
+    searchBar.addEventListener('input', handleSearch);
+
+    const signOutBtn = document.getElementById('signOutBtn');
+    signOutBtn.addEventListener('click', performSignOut);
+});
+
+async function fetchAndDisplayArchivedJobs() {
+    try {
+        const jobs = await fetchArchivedJobs();
+        filteredJobs = jobs;
+        updateArchiveTable();
+    } catch (error) {
+        console.error("Failed to fetch archived jobs:", error);
+    }
+}
+
+function updateArchiveTable() {
+    const archiveList = document.getElementById('archiveList');
+    archiveList.innerHTML = '';
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const jobsToDisplay = filteredJobs.slice(start, end);
+
+    jobsToDisplay.forEach(job => {
+        const listItem = document.createElement('li');
+        listItem.className = 'archived-job';
+
+        const title = document.createElement('div');
+        title.className = 'jobTitle';
+        title.textContent = `Position: ${job.position}`;
+
+        const company = document.createElement('div');
+        company.className = 'company';
+        company.textContent = `Company: ${job.company}`;
+
+        const location = document.createElement('div');
+        location.className = 'location';
+        location.textContent = `Location: ${job.location}`;
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'button-container';
+
+        const unarchiveButton = document.createElement('button');
+        unarchiveButton.textContent = 'Unarchive';
+        unarchiveButton.className = 'unarchive-button';
+        unarchiveButton.addEventListener('click', () => unarchiveJob(job.id));
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'delete-button';
+        deleteButton.addEventListener('click', () => deleteJob(job.id, listItem));
+
+        buttonContainer.appendChild(unarchiveButton);
+        buttonContainer.appendChild(deleteButton);
+
+        listItem.appendChild(title);
+        listItem.appendChild(company);
+        listItem.appendChild(location);
+        listItem.appendChild(buttonContainer);
+
+        archiveList.appendChild(listItem);
+    });
+
+    updatePaginationControls();
+}
+
+function handleSearch() {
+    const query = document.getElementById('searchBar').value.toLowerCase();
+    fetchArchivedJobs().then(jobs => {
+        filteredJobs = jobs.filter(job => 
+            job.position.toLowerCase().includes(query) ||
+            job.company.toLowerCase().includes(query) ||
+            job.location.toLowerCase().includes(query)
+        );
+        currentPage = 1;
+        updateArchiveTable();
+    });
+}
+
+function updatePaginationControls() {
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = '';
+
+    const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.classList.add('pagination-button');
+        if (i === currentPage) {
+            button.classList.add('active');
+        }
+        button.addEventListener('click', () => {
+            currentPage = i;
+            updateArchiveTable();
+        });
+        paginationControls.appendChild(button);
+    }
+}
+
 function showConfirmationDialog(message, onConfirm) {
     const confirmationDialog = document.getElementById('confirmationDialog');
     const confirmationMessage = document.getElementById('confirmationMessage');
@@ -38,23 +172,21 @@ function showConfirmationDialog(message, onConfirm) {
     const cancelButton = document.getElementById('cancelActionBtn');
 
     confirmationMessage.textContent = message;
-    confirmationDialog.style.display = 'flex'; // Show the dialog
+    confirmationDialog.style.display = 'flex';
 
-    // Remove any previously attached event listeners to avoid conflicts
     confirmButton.replaceWith(confirmButton.cloneNode(true));
     cancelButton.replaceWith(cancelButton.cloneNode(true));
 
-    // Attach the event listeners for confirmation and cancellation
     document.getElementById('confirmActionBtn').onclick = () => {
-        confirmationDialog.style.display = 'none'; // Hide the dialog
+        confirmationDialog.style.display = 'none';
         onConfirm();
     };
     
     document.getElementById('cancelActionBtn').onclick = () => {
-        confirmationDialog.style.display = 'none'; // Just hide the dialog on cancel
+        confirmationDialog.style.display = 'none';
     };
 }
-//Display Edit Vacancy//
+
 function showVacancyInputDialog(message, defaultValue, onConfirm) {
     const vacancyDialog = document.getElementById('vacancyDialog');
     const vacancyMessage = document.getElementById('vacancyDialogMessage');
@@ -63,134 +195,54 @@ function showVacancyInputDialog(message, defaultValue, onConfirm) {
     const cancelButton = document.getElementById('cancelVacancyBtn');
 
     vacancyMessage.textContent = message;
-    vacancyInput.value = defaultValue; // Set the default value in the input
-    vacancyDialog.style.display = 'flex'; // Show the dialog
+    vacancyInput.value = defaultValue;
+    vacancyDialog.style.display = 'flex';
 
-    // Remove any previously attached event listeners to avoid conflicts
     confirmButton.replaceWith(confirmButton.cloneNode(true));
     cancelButton.replaceWith(cancelButton.cloneNode(true));
 
-    // Attach the event listeners for confirming and canceling
     document.getElementById('confirmVacancyBtn').onclick = () => {
         const newValue = vacancyInput.value;
-        if (newValue !== null && !isNaN(newValue) && newValue >= 0) {
-            vacancyDialog.style.display = 'none'; // Hide the dialog
-            onConfirm(newValue); // Call the confirmation callback with the new value
+        if (!isNaN(newValue) && newValue >= 0) {
+            vacancyDialog.style.display = 'none';
+            onConfirm(newValue);
         } else {
             alert('Please enter a valid vacancy number.');
         }
     };
 
     document.getElementById('cancelVacancyBtn').onclick = () => {
-        vacancyDialog.style.display = 'none'; // Just hide the dialog on cancel
+        vacancyDialog.style.display = 'none';
     };
 }
 
-// Check for old archived jobs and delete them if they are older than 5 years
-async function deleteOldArchivedJobs() {
-    const archivedJobs = await fetchArchivedJobs(); // Fetch all archived jobs
-    const fiveYearsInMillis = 5 * 365 * 24 * 60 * 60 * 1000; // 5 years in milliseconds
-    const now = Date.now(); // Get current time
-
-    archivedJobs.forEach(async job => {
-        if (job.archivedAt) {
-            const archivedTime = job.archivedAt.toMillis(); // Convert Firestore timestamp to milliseconds
-            if (now - archivedTime > fiveYearsInMillis) {
-                // Job is older than 5 years, delete it
-                await deleteArchivedJob(job.id);
-                console.log(`Deleted archived job with ID: ${job.id} because it was older than 5 years.`);
-            }
-        }
-    });
-}
-
-// Event listener for when the document content is loaded
-document.addEventListener('DOMContentLoaded', async () => {
-    requireLogin(); 
-    await deleteOldArchivedJobs(); // Check and delete old archived jobs
-    fetchArchivedJobs().then(jobs => {
-        updateArchiveTable(jobs); // Your function that displays the archived jobs
-    }).catch(err => console.error("Failed to fetch archived jobs:", err));
-});
-
-function updateArchiveTable(jobs) {
-    const container = document.querySelector('.container');
-    const list = document.createElement('ul');
-    
-    jobs.forEach(job => {
-        const listItem = document.createElement('li');
-        listItem.className = 'archived-job';
-        
-        const title = document.createElement('div');
-        title.className = 'jobTitle';
-        title.textContent = job.position;
-        
-        const company = document.createElement('div');
-        company.className = 'company';
-        company.textContent = job.company;
-        
-        const location = document.createElement('div');
-        location.className = 'location';
-        location.textContent = job.location;
-
-        // Unarchive button
-        const unarchiveButton = document.createElement('button');
-        unarchiveButton.textContent = 'Unarchive';
-        unarchiveButton.addEventListener('click', () => unarchiveJob(job.id));
-
-        // Delete button
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        deleteButton.addEventListener('click', () => deleteJob(job.id, listItem));
-
-        listItem.appendChild(title);
-        listItem.appendChild(company);
-        listItem.appendChild(location);
-        listItem.appendChild(unarchiveButton);
-        listItem.appendChild(deleteButton);
-
-        list.appendChild(listItem);
-    });
-
-    container.appendChild(list);
-}
-
-// Function to unarchive a job with vacancy editing
 async function unarchiveJob(jobId) {
     const jobDocRef = doc(firestore, `archive/${jobId}`);
     const jobData = await getDoc(jobDocRef);
 
     if (jobData.exists()) {
-        // Use custom vacancy input dialog instead of prompt
         showConfirmationDialog("Do you want to unarchive this job?", async () => {
             const currentVacancy = jobData.data().vacancy || 0;
             showVacancyInputDialog(
                 `Edit the vacancy number for "${jobData.data().position}" at "${jobData.data().company}":`,
                 currentVacancy,
                 async (newVacancy) => {
-                    // Second confirmation before unarchiving
                     showConfirmationDialog("Are you sure you want to unarchive this job with the updated vacancy?", async () => {
                         try {
                             const user = auth.currentUser;
                             const userEmail = user ? user.email : "Unknown user";
                             
-                            // Update the job data with the new vacancy number
                             const updatedJobData = {
                                 ...jobData.data(),
                                 vacancy: parseInt(newVacancy, 10),
-                                unarchivedAt: Timestamp.now() // Add unarchived timestamp
+                                unarchivedAt: Timestamp.now()
                             };
 
-                            // Add the updated job back to the jobs collection
                             await addDoc(collection(firestore, 'jobs'), updatedJobData);
-
-                            // Remove the job from the archive collection
                             await deleteArchivedJob(jobId);
-
-                            // Log the unarchive action
                             await logAudit(userEmail, "Job Unarchived", { jobId, newVacancy });
 
-                            window.location.reload(); // Reload to update the archive list
+                            window.location.reload();
                         } catch (error) {
                             console.error(`Failed to unarchive job ${jobId}:`, error);
                         }
@@ -203,14 +255,25 @@ async function unarchiveJob(jobId) {
     }
 }
 
-// Function to delete a job permanently
 async function deleteJob(jobId, listItem) {
     showConfirmationDialog("Are you sure you want to delete this job permanently?", async () => {
         try {
+            const user = auth.currentUser;
+            const userEmail = user ? user.email : "Unknown user";
+
+            // Delete the job from the archive collection
             await deleteArchivedJob(jobId);
-            listItem.remove(); // Remove the list item from the DOM
+            
+            // Log the audit with the info "Job Deleted"
+            await logAudit(userEmail, "Job Deleted", { jobId });
+
+            // Remove the job from the DOM after deletion
+            listItem.remove();
         } catch (error) {
             console.error(`Failed to delete job ${jobId}:`, error);
         }
     });
 }
+
+
+
