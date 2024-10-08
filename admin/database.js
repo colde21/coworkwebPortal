@@ -152,7 +152,7 @@ export async function generateDisposableLink(companyName) {
             createdAt: Timestamp.now(),
             validUntil: Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)) // Link valid for 24 hours
         });
-        return `client_viewer/applicant.html?linkId=${docRef.id}`;
+        return `https://cowork-portal.netlify.app/client_viewer/applicant.html?linkId=${docRef.id}`;
     } catch (error) {
         console.error("Error generating disposable link:", error);
     }
