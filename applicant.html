@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applicants</title>
+    <link rel="stylesheet" href="view_app.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Applicants List</h1>
+        <div class="search-container">
+            <input type="text" id="searchBar" placeholder="Search by applicant name, position, or company...">
+        </div>
+        <div id="disposableLinkContainer" style="display:none">
+            <p>Generated Link: <a id="disposableLinks" href="#" target="_blank">Click Here</a></p>
+        </div>
+        <!-- Added a paragraph element to display the total number of applicants -->
+        <p id="totalApplicants" style="font-weight: bold;">Total Applicants: 0</p> <!-- New element to show count -->
+
+        <table id="applicantTable">
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>Company</th>
+                </tr>
+            </thead>
+            <tbody id="applicantTableBody">
+                <!-- Applicant data rows will go here -->
+            </tbody>
+        </table>
+    </div>
+    <script type="module" src="applicant.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -27,18 +27,18 @@ export async function submitJobData(formData) {
         console.error("Error adding job:", error);
     }
 }
-
-// Function to fetch all job data
+// Function to fetch all job data (excluding archived jobs)
 export async function fetchAllJobs() {
-    const jobsCol = collection(firestore, 'jobs');
-    const snapshot = await getDocs(jobsCol);
-    const jobs = [];
-    snapshot.forEach(doc => {
-        jobs.push({ id: doc.id, ...doc.data() });
-    });
-    return jobs;  // Returns an array of job objects
+    try {
+        const jobsCol = collection(firestore, 'jobs');
+        const snapshot = await getDocs(jobsCol);
+        const jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return jobs;
+    } catch (error) {
+        console.error("Failed to fetch jobs:", error);
+        throw error;
+    }
 }
-
 // Function to delete a job by ID
 export async function deleteJobById(jobId, userEmail) {
     try {
@@ -81,6 +81,31 @@ export async function exportAuditLog() {
         return logs.join('\n');
     } catch (error) {
         console.error("Error exporting audit log:", error);
+        throw error;
+    }
+}
+// Function to generate a disposable link
+export async function generateDisposableLink(companyName) {
+    try {
+        const docRef = await addDoc(collection(firestore, 'disposableLinks'), {
+            company: companyName,
+            createdAt: Timestamp.now(),
+            validUntil: Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)) // Link valid for 24 hours
+        });
+        return `applicant.html?linkId=${docRef.id}`;
+    } catch (error) {
+        console.error("Error generating disposable link:", error);
+    }
+}
+// Function to fetch all applications
+export async function fetchAllApplications() {
+    try {
+        const applicationsCol = collection(firestore, 'applied');
+        const snapshot = await getDocs(applicationsCol);
+        const applications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return applications;
+    } catch (error) {
+        console.error("Failed to fetch applications:", error);
         throw error;
     }
 }

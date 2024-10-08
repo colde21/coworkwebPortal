@@ -1,5 +1,5 @@
-import { initializeApp} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -20,12 +20,11 @@ const firestore = getFirestore(app);
 export async function submitJobData(formData) {
     try {
         const jobsCol = collection(firestore, 'jobs');
-        // Add the job data along with the timestamp
         const docRef = await addDoc(jobsCol, {
-            ...formData, 
-            createdAt: formData.createdAt // Ensure the timestamp is sent
+            ...formData,
+            createdAt: formData.createdAt
         });
-        return docRef.id; 
+        return docRef.id;
     } catch (error) {
         console.error("Error adding job:", error);
         throw error;
@@ -37,14 +36,8 @@ export async function fetchAllJobs() {
     try {
         const jobsCol = collection(firestore, 'jobs');
         const snapshot = await getDocs(jobsCol);
-        const jobs = [];
-        snapshot.forEach(doc => {
-            const jobData = doc.data();
-             // Exclude archived jobs
-                jobs.push({ id: doc.id, ...jobData });
-           
-        });
-        return jobs;  // Returns an array of non-archived job objects
+        const jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return jobs;
     } catch (error) {
         console.error("Failed to fetch jobs:", error);
         throw error;
@@ -56,20 +49,15 @@ export async function fetchArchivedJobs() {
     try {
         const archivedJobsCol = collection(firestore, 'archive');
         const snapshot = await getDocs(archivedJobsCol);
-        const archivedJobs = [];
-        snapshot.forEach(doc => {
-            archivedJobs.push({ id: doc.id, ...doc.data() });
-        });
-        return archivedJobs;  // Returns an array of archived job objects
+        const archivedJobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return archivedJobs;
     } catch (error) {
         console.error("Failed to fetch archived jobs:", error);
         throw error;
     }
 }
 
-
 // Function to delete an archived job
-
 export async function deleteArchivedJob(jobId) {
     try {
         const jobDoc = doc(firestore, `archive/${jobId}`);
@@ -89,46 +77,34 @@ export async function logAudit(user, action, details) {
             user,
             action,
             details,
-            timestamp: Timestamp.now()  // Use Firestore Timestamp
+            timestamp: Timestamp.now()
         };
         await addDoc(auditsCol, auditEntry);
     } catch (error) {
         console.error("Error logging audit:", error);
     }
 }
-// Function to fetch all audit logs
+
+// Function to export audit logs
 export async function exportAuditLog() {
     try {
-        console.log("Starting export of audit logs...");
         const auditCol = collection(firestore, 'auditLogs');
         const snapshot = await getDocs(auditCol);
-
-        if (snapshot.empty) {
-            console.warn("No audit logs found in the 'auditLogs' collection.");
-            return "No audit logs found.";
-        }
-
-        const logs = [];
-        snapshot.forEach(doc => {
+        const logs = snapshot.docs.map(doc => {
             const data = doc.data();
             const timestamp = data.timestamp.toDate();
-            logs.push({ user: data.user, action: data.action, timestamp});
+            return { user: data.user, action: data.action, timestamp };
         });
 
-        console.log(`Fetched ${logs.length} audit log entries.`);
-
-        // Sort logs by timestamp, most recent first
         logs.sort((a, b) => b.timestamp - a.timestamp);
 
         const logStrings = logs.map(log => `${log.user},${log.action},${log.timestamp.toISOString()}`);
-        console.log("Audit logs successfully exported.");
         return logStrings.join('\n');
     } catch (error) {
         console.error("Error exporting audit log:", error);
         throw error;
     }
 }
-
 
 // Function to update job status or other properties
 export async function updateJobStatus(jobId, updates) {
@@ -147,27 +123,20 @@ export async function fetchAllApplications() {
     try {
         const applicationsCol = collection(firestore, 'applied');
         const snapshot = await getDocs(applicationsCol);
-        const applications = [];
-        snapshot.forEach(doc => {
-            applications.push({ id: doc.id, ...doc.data() });
-        });
-        return applications;  // Returns an array of application objects
+        const applications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return applications;
     } catch (error) {
         console.error("Failed to fetch applications:", error);
         throw error;
     }
 }
 
-
-// Function to add an employee to the employed collection
+// Function to hire an applicant
 export async function hireApplicant(applicationId, applicantData) {
     try {
         const employedCol = collection(firestore, 'employed');
         await addDoc(employedCol, applicantData);
-
-        // Delete the application after hiring
         await deleteDoc(doc(firestore, `applied/${applicationId}`));
-
         console.log(`Applicant with ID: ${applicationId} has been hired and moved to the employed collection.`);
     } catch (error) {
         console.error(`Failed to hire applicant ${applicationId}:`, error);
@@ -175,31 +144,32 @@ export async function hireApplicant(applicationId, applicantData) {
     }
 }
 
-// Exporting the archiveJobIfNeeded function
+// Function to generate a disposable link
+export async function generateDisposableLink(companyName) {
+    try {
+        const docRef = await addDoc(collection(firestore, 'disposableLinks'), {
+            company: companyName,
+            createdAt: Timestamp.now(),
+            validUntil: Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)) // Link valid for 24 hours
+        });
+        return `../applicant.html?linkId=${docRef.id}`;
+    } catch (error) {
+        console.error("Error generating disposable link:", error);
+    }
+}
+
+// Function to archive a job if needed
 export async function archiveJobIfNeeded(jobId, company, position, userEmail) {
     try {
         const jobDocRef = doc(firestore, 'jobs', jobId);
         const jobDocSnap = await getDoc(jobDocRef);
         if (jobDocSnap.exists()) {
             const jobData = jobDocSnap.data();
-
-            // Archive the job
             await addDoc(collection(firestore, 'archive'), jobData);
             await deleteDoc(jobDocRef);
-            console.log(`Archived job with ID: ${jobId}`);
-
             await logAudit(userEmail, "Job Archived", { jobId });
-
-            // Show a confirmation alert with company name and position
-            alert(`Job "${position}" at "${company}" was automatically archived because the vacancy is 0.`);
         }
     } catch (error) {
         console.error(`Failed to archive job with ID: ${jobId}`, error);
-        alert(`Failed to archive job with ID: ${jobId}.`);
     }
 }
-
-
-
-
-

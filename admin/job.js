@@ -1,4 +1,4 @@
-import { fetchAllJobs, logAudit, exportAuditLog } from './database.js';
+import { fetchAllJobs, logAudit, exportAuditLog, generateDisposableLink } from './database.js';
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, getDoc, addDoc, doc, collection, deleteDoc, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
@@ -352,7 +352,7 @@ document.getElementById('saveJobButton').addEventListener('click', async functio
 
         // Hide the edit form
         document.getElementById('editJobForm').style.display = 'none';
-
+        document.querySelector('.job-container').classList.remove('blur');
         // Refresh the job table to reflect the updates
         fetchAllJobs().then(jobs => {
             window.allJobs = jobs;
@@ -407,10 +407,11 @@ async function archiveJobIfNeeded(jobId, company, position) {
 // "Go Back" button functionality
 document.getElementById('goBackButton').addEventListener('click', function () {
     window.location.href = "job.html"; // This will navigate the user to the previous page
+    document.getElementById('editJobForm').style.display = 'none'; // Hide the edit form
+    document.querySelector('.job-container').classList.remove('blur'); // Remove the blur effect
 });
 
 // Function to load job data into the form for editing
-// Function to load job data into the form for editing and add blur effect
 async function editJob(jobId) {
     try {
         const jobDocRef = doc(firestore, 'jobs', jobId);
@@ -451,4 +452,16 @@ document.getElementById('goBackButton').addEventListener('click', function () {
     document.querySelector('.job-container').classList.remove('blur'); // Remove the blur effect
 });
 
-
+document.getElementById('generateLinkButton').addEventListener('click', async () => {
+    const companyName = prompt("Enter the company name for which you want to generate the link:");
+    if (companyName) {
+        const link = await generateDisposableLink(companyName);
+        if (link) {
+            document.getElementById('disposableLink').textContent = link;
+            document.getElementById('disposableLink').href = link;
+            document.getElementById('disposableLinkContainer').style.display = 'block';
+        } else {
+            alert("Failed to generate the link. Please try again.");
+        }
+    }
+});
