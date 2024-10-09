@@ -25,64 +25,94 @@ body {
     margin-left: 20px;
     margin-right: auto;
 }
-/* Form styles */
+
+/* Form Container */
 #jobForm {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px; /* Gap between form groups */
-    width: 75%;
-    padding: 15px;
-    margin-top: 80px; /* Ensure it doesn't overlap with the nav bar */
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    gap: 20px; /* Increased gap for better spacing */
+    width: 100%;
+    max-width: 900px;
+    padding: 30px;
+    margin-top: 100px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Individual Form Groups */
 .form-group {
     display: flex;
-    flex-direction: column;
+    align-items: center;
 }
 
-.full-width {
-    grid-column: span 2;
-}
-
-#jobForm label {
-    margin-bottom: 5px;
+.form-group label {
+    flex: 0 0 150px; /* Align labels to a fixed width */
+    margin-right: 15px;
     font-weight: bold;
 }
 
+/* Checkbox Styling */
+input[type="checkbox"] {
+    width: 10px;
+    height: 18px;
+    margin-left: -30%; /* Place checkbox right beside the input */
+    cursor: pointer;
+}
+
+/* Input Fields */
 #jobForm input, 
 #jobForm textarea, 
 #jobForm select {
     padding: 10px;
-    border: 2px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     width: 100%;
-    box-sizing: border-box; /* Ensure padding doesn't exceed width */
-    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+#skills, #qualifications {
+    width: calc(30% - 40px); /* Adjust width for checkboxes beside inputs */
+}
+
+#skills:disabled, #qualifications:disabled {
+    background-color: #f4f4f4; /* Slightly greyed out when disabled */
+}
+
+/* Full-Width Form Groups */
+.full-width {
+    grid-column: span 2;
+}
+
+.button-container {
+    grid-column: span 2;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
 }
 
 #jobForm input[type="submit"],
 #jobForm input[type="button"] {
     color: white;
-    background-color: red;
+    background-color: #e74c3c;
     padding: 15px;
-    width: 48%; /* Reduced width to allow spacing */
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 10px;
+    width: 48%;
 }
 
 #jobForm input[type="submit"]:hover,
 #jobForm input[type="button"]:hover {
     background-color: darkred;
 }
-
-.button-container {
-    grid-column: span 2;
-    display: flex;
-    justify-content: space-between; /* Distribute space between buttons */
+/* Styles for the Expected Salary field */
+#expectedSalary {
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 20px;
 }

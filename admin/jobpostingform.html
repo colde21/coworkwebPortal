@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <title>Job Posting Form</title>
-    <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
     <link rel="stylesheet" href="jobpostingform.css">
     <script src="jobpostingform.js" type="module"></script>
 </head>
@@ -46,28 +45,47 @@
             <input type="number" id="vacancy" name="vacancy" placeholder="Enter number of vacancies" required>
         </div>
 
-        <!-- Row 4 -->
+        <!-- Row 4 (Skills and Qualifications) -->
         <div class="form-group">
-            <label for="skills">Qualifications:</label>
-            <input type="text" id="qualifications" name="qualifications" placeholder="Enter required qualifications" required>
+            <label for="skills">Skills:</label>    <input type="checkbox" id="enableSkills">
+            <input type="text" id="skills" name="skills" placeholder="Enter required skills" disabled>
+         
         </div>
+        
         <div class="form-group">
+            <label for="qualifications">Qualifications:</label>  <input type="checkbox" id="enableQualifications">
+            <input type="text" id="qualifications" name="qualifications" placeholder="Enter required qualifications" disabled>
+          
+        </div>
+
+        <!-- Row 5 -->
+        <div class="form-group full-width">
             <label for="contact">Contact Email:</label>
             <input type="email" id="contact" name="contact" placeholder="Enter contact email" required>
         </div>
 
-        <!-- Row 5 -->
+        <!-- Row 6 -->
         <div class="form-group full-width">
             <label for="facilities">Facilities:</label>
             <textarea id="facilities" name="facilities" placeholder="Enter work environment"></textarea>
         </div>
 
-        <!-- Row 6 -->
+        <!-- Row 7 -->
         <div class="form-group full-width">
             <label for="description">Description:</label>
             <textarea id="description" name="description" placeholder="Enter job description"></textarea>
         </div>
+<!-- Row 8 -->
+<div class="form-group full-width">
+    <label for="description">Description:</label>
+    <textarea id="description" name="description" placeholder="Enter job description"></textarea>
+</div>
 
+<!-- Row 9: Expected Salary -->
+<div class="form-group full-width">
+    <label for="expectedSalary">Expected Salary:</label>
+    <input type="number" id="expectedSalary" name="expectedSalary" placeholder="Enter expected salary" min="0" required>
+</div>
         <!-- Buttons -->
         <div class="button-container">
             <input type="button" value="Go Back">

@@ -238,7 +238,7 @@ table td button:hover {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80%; /* Adjust to match form width */
+    width: 90%; /* Adjust to match form width */
     max-width: 900px;
     background-color: white;
     padding: 30px;
@@ -390,6 +390,9 @@ table td button:hover {
 .confirmation-dialog-buttons button:hover {
     background-color: darkred;
 }
+
+
+
 /* Loading Screen */
 .loading-screen {
     display: none;

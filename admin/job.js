@@ -23,6 +23,20 @@ const firestore = getFirestore(app);
 const itemsPerPage = 10;
 let currentPage = 1;
 let filteredJobs = [];
+// DOM Elements for enabling/disabling skills and qualifications
+const enableQualificationsCheckbox = document.getElementById('enableQualifications');
+const qualificationsInput = document.getElementById('qualifications');
+const enableSkillsCheckbox = document.getElementById('enableSkills');
+const skillsInput = document.getElementById('skills');
+
+// Add event listeners to handle enable/disable functionality for skills and qualifications fields
+enableQualificationsCheckbox.addEventListener('change', function () {
+    qualificationsInput.disabled = !this.checked;
+});
+
+enableSkillsCheckbox.addEventListener('change', function () {
+    skillsInput.disabled = !this.checked;
+});
 //Prevent user Jump Page 
 function requireLogin() {
     onAuthStateChanged(auth, (user) => {
@@ -93,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchBar = document.getElementById('searchBar');
     searchBar.addEventListener('input', handleSearch);
+    
 
     /*document.getElementById('sortAsc').addEventListener('click', () => handleSort('asc'));
     document.getElementById('sortDesc').addEventListener('click', () => handleSort('desc'));*/
@@ -316,6 +331,9 @@ document.getElementById('saveJobButton').addEventListener('click', async functio
         qualifications: document.getElementById('qualifications').value,
         facilities: document.getElementById('facilities').value,
         description: document.getElementById('description').value,
+        skill: document.getElementById('skills').value,
+        qualifications: document.getElementById('qualifications').value,
+        expsalary: document.getElementById('expectedSalary').value,
     };
 
     // Validate age restriction (between 18 and 60)
@@ -338,6 +356,9 @@ document.getElementById('saveJobButton').addEventListener('click', async functio
             await archiveJobIfNeeded(jobId, updatedData.company, updatedData.position);
             return; // Exit after archiving the job
         }
+    }  if (!enableQualificationsCheckbox.checked && !enableSkillsCheckbox.checked) {
+        alert('Please enable either Qualifications or Skills.');
+        return;
     }
 
     try {
@@ -364,7 +385,9 @@ document.getElementById('saveJobButton').addEventListener('click', async functio
         alert('Failed to update the job. Please try again.');
     }
 });
-
+const formData = new FormData(this);
+const entries = Object.fromEntries(formData.entries());
+entries.createdAt = Timestamp.now();
 // Function to archive the job if vacancy is 0
 async function archiveJobIfNeeded(jobId, company, position) {
     try {
@@ -403,7 +426,6 @@ async function archiveJobIfNeeded(jobId, company, position) {
     }
 }
 
-
 // "Go Back" button functionality
 document.getElementById('goBackButton').addEventListener('click', function () {
     window.location.href = "job.html"; // This will navigate the user to the previous page
@@ -414,23 +436,40 @@ document.getElementById('goBackButton').addEventListener('click', function () {
 // Function to load job data into the form for editing
 async function editJob(jobId) {
     try {
+        
         const jobDocRef = doc(firestore, 'jobs', jobId);
         const jobDocSnap = await getDoc(jobDocRef);
 
         if (jobDocSnap.exists()) {
             const jobData = jobDocSnap.data();
 
-            // Populate the form with the job data
-            document.getElementById('position').value = jobData.position || '';
-            document.getElementById('company').value = jobData.company || '';
-            document.getElementById('location').value = jobData.location || '';
-            document.getElementById('age').value = jobData.age || '';
-            document.getElementById('type').value = jobData.type || '';
-            document.getElementById('vacancy').value = jobData.vacancy || '';
-            document.getElementById('email').value = jobData.contact || '';
-            document.getElementById('qualifications').value = jobData.qualifications || '';
-            document.getElementById('facilities').value = jobData.facilities || '';
-            document.getElementById('description').value = jobData.description || '';
+            // Check for missing elements before assigning values
+            const positionField = document.getElementById('position');
+            const companyField = document.getElementById('company');
+            const locationField = document.getElementById('location');
+            const ageField = document.getElementById('age');
+            const typeField = document.getElementById('type');
+            const vacancyField = document.getElementById('vacancy');
+            const emailField = document.getElementById('email');
+            const facilitiesField = document.getElementById('facilities');
+            const descriptionField = document.getElementById('description');
+            const skillsField = document.getElementById('skills');
+            const qualificationsField = document.getElementById('qualifications');
+            const expectedSalaryField = document.getElementById('expectedSalary');
+
+            // Assign values if elements exist
+            if (positionField) positionField.value = jobData.position || '';
+            if (companyField) companyField.value = jobData.company || '';
+            if (locationField) locationField.value = jobData.location || '';
+            if (ageField) ageField.value = jobData.age || '';
+            if (typeField) typeField.value = jobData.type || '';
+            if (vacancyField) vacancyField.value = jobData.vacancy || '';
+            if (emailField) emailField.value = jobData.contact || '';
+            if (facilitiesField) facilitiesField.value = jobData.facilities || '';
+            if (descriptionField) descriptionField.value = jobData.description || '';
+            if (skillsField) skillsField.value = jobData.skills || '';
+            if (qualificationsField) qualificationsField.value = jobData.qualifications || '';
+            if (expectedSalaryField) expectedSalaryField.value = jobData.expsalary || '';
 
             // Show the edit form and set the jobId in the dataset
             document.getElementById('editJobForm').dataset.jobId = jobId;
@@ -445,6 +484,7 @@ async function editJob(jobId) {
         console.error('Error fetching job for editing:', error);
     }
 }
+
 
 // Function to hide the edit form and remove blur effect
 document.getElementById('goBackButton').addEventListener('click', function () {

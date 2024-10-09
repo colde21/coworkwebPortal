@@ -104,12 +104,25 @@
                     <label for="email">Contact Email:</label>
                     <input type="email" id="email" name="email" required>
                 </div>
-    
                 <div>
-                    <label for="qualifications">Qualifications:</label>
-                    <input type="text" id="qualifications" name="qualifications">
-                </div>                
-        
+                    <label for="expectedSalary">Expected Salary:</label>
+        <input type="number" id="expectedSalary" name="expectedSalary" placeholder="Enter expected salary" min="0" required>
+    </div>
+<!-- HTML for Skills Section -->
+<div class="form-group-skill-qual">
+    <label for="enableSkills">Skills:</label>
+    <input type="checkbox" id="enableSkills" />
+    <input type="text" id="skills" name="skills" placeholder="Enter required skills" disabled />
+</div>
+
+<!-- HTML for Qualifications Section -->
+<div class="form-group-skill-qual">
+    <label for="enableQualifications">Qualifications:</label>
+    <input type="checkbox" id="enableQualifications" />
+    <input type="text" id="qualifications" name="qualifications" placeholder="Enter required qualifications" disabled />
+</div>
+
+
                 <div class="full-width">
                     <label for="facilities">Facilities:</label>
                     <textarea id="facilities" name="facilities"></textarea>
