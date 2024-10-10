@@ -232,78 +232,122 @@ table td button:hover {
 }
 
 /* Edit Job Form Styles */
+/* Form Container */
 #editJobForm {
-    display: none; /* Hidden by default */
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%; /* Adjust to match form width */
-    max-width: 900px;
-    background-color: white;
-    padding: 30px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed; /* Fixed position to ensure it stays centered */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    padding: 9px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    max-height: 80%; /* Ensures the form doesn't exceed screen height */
+    overflow-y: auto; /* Scroll if content overflows */
+    width: 100%;
 }
-
+/* Blur Effect */
+.blur {
+    filter: blur(5px);
+    pointer-events: none;
+}
 #editJobForm h2 {
-    font-size: 24px;
+    text-align: center;
     margin-bottom: 20px;
     color: #333;
-    text-align: center;
 }
 
+/* Form Structure */
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columns layout */
-    gap: 20px; /* Space between inputs */
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
 }
 
-.form-grid div {
+.form-group {
     display: flex;
     flex-direction: column;
 }
 
-.full-width {
-    grid-column: span 2; /* Make these fields take up the entire row */
+.form-group label {
+    font-weight: bold;
+    color: #333;
 }
 
-#editJobForm input,
-#editJobForm textarea {
+.form-group input,
+.form-group textarea,
+.form-group select {
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    width: 100%;
+    border-radius: 5px;
+    width: 90%;
     box-sizing: border-box;
+    transition: border-color 0.3s;
 }
 
-#editJobForm textarea {
-    resize: vertical;
-    height: 100px;
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #e74c3c;
+    outline: none;
+}
+
+/* Skills and Qualifications Grid */
+.skills-qualifications {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Full Width Inputs */
+.full-width {
+    grid-column: span 2;
 }
 
 .form-buttons {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 20px;
+    grid-column: span 2;
     margin-top: 20px;
 }
 
-.form-buttons button {
-    background-color: #e74c3c;  /* Same red color for consistency */
-    color: white;
-    padding: 12px 20px;
+/* Button Styles */
+button,
+input[type="submit"],
+input[type="button"] {
+    background-color: #e74c3c;
+    color: #fff;
     border: none;
-    border-radius: 30px;
+    border-radius: 5px;
+    padding: 10px 20px;
     cursor: pointer;
-    font-size: 16px;
-    width: 45%;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s;
 }
 
-.form-buttons button:hover {
-    background-color: #b71c1c;
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+    background-color: #c0392b;
+}
+
+button:disabled,
+input[type="submit"]:disabled,
+input[type="button"]:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+}
+
+/* Focus on Edit Form */
+#editJobForm[data-job-id] {
+    display: block; /* Show when job ID is present */
 }
 
 /* Responsive styles */
@@ -390,9 +434,6 @@ table td button:hover {
 .confirmation-dialog-buttons button:hover {
     background-color: darkred;
 }
-
-
-
 /* Loading Screen */
 .loading-screen {
     display: none;
@@ -422,12 +463,6 @@ table td button:hover {
         transform: rotate(360deg);
     }
 }
-/* Blur Effect */
-.blur {
-    filter: blur(5px); /* Adjust the blur intensity as needed */
-    pointer-events: none; /* Prevent interactions with blurred content */
-}
-
 /* Styling for the Disposable Link Container */
 #disposableLinkContainer {
     display: block; /* Set display to block */
@@ -470,4 +505,25 @@ table td button:hover {
 }
 #disposableLinkText{
     display: none;
+}
+/* facilities */
+.full-width textarea {
+    width: 100%;
+    min-height: 100px;
+    resize: vertical; /* Allow vertical resizing */
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.full-width textarea:focus {
+    border-color: #e74c3c;
+    outline: none;
+}
+.radio-group {
+    display: flex;
+    gap: 10px;
 }
