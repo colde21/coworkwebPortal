@@ -12,18 +12,38 @@
     <div class="nav">
         <div class="links"> 
             <button onclick="location.href='home.html'">HOME</button>
-            <button onclick="location.href='job.html'">BACK TO JOB</button>
+            <button onclick="location.href='job.html'">JOB LIST</button>
+            <button onclick="location.href='app.html'">APPLICATION</button>
+            <button onclick="location.href='archive.html'">ARCHIVED</button>
+            <button id="signOutBtn">SIGN OUT</button>
         </div>
-    </div> 
-    <!-- Navigation bar-->  
-
-    <div class="container">
-        <h1>Archived Jobs</h1>
-        <ul id="archiveList">
-            <!-- Archived jobs will be listed here -->
-        </ul>
     </div>
 
+    <!-- Main container -->
+    <div class="container">
+        <h1>Archived Jobs</h1>
+        <input type="text" id="searchBar" placeholder="Search archived jobs..." class="search-bar">
+        <ul id="archiveList">
+            <!-- Archived jobs will be dynamically listed here -->
+        </ul>
+        <div id="paginationControls" class="pagination"></div>
+    </div>
+<!--- Sign out --->
+<div id="signOutConfirmation" class="confirmation-dialog" style="display: none;">
+    <div class="confirmation-dialog-content">
+        <h4>Are you sure you want to sign out?</h4>
+        <div class="confirmation-dialog-buttons">
+            <button id="confirmSignOutBtn">Yes, Sign Out</button>
+            <button id="cancelSignOutBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+ <!--- Sign out --->
+    <div id="loading-screen" class="loading-screen" style="display: none;">
+        <div class="load-circle"></div>
+    </div>    
+
+    <div id="error-message" class="error-message"></div>
 
     <script type="module" src="arch.js"></script>
 </body>

@@ -1,20 +1,22 @@
-/* Archive Page Styles */
-
+/* General styles */
 body {
     background-color: #F2F2F2;
     font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding-top: 70px;
 }
 
+/* Navigation bar */
 .nav {
     background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
     position: fixed;
     width: 100%;
     top: 0;
     left: 0;
-    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
 .links {
@@ -23,86 +25,100 @@ body {
 }
 
 .links button {
-    background: none; /* Remove default button background */
-    border: none; /* Remove default border */
+    background: none;
+    border: none;
     color: #f2f2f2;
     padding: 16px 10px;
-    text-decoration: none;
     font-size: 16px;
-    font-weight: bold;
     margin-right: 10px;
-    cursor: pointer; /* Ensure it's clear this is clickable */
-}
-
-.nav h2 {
-    font-size: 30px;
-    color: #f2f2f2;
-    margin-left: 20px;
-    margin-right: auto;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .links button:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Change background color on hover */
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s ease;
 }
 
-/* Container Styles */
+.links button:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Container styles */
 .container {
     width: 80%;
-    margin: 100px auto;
+    margin: 30px auto;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Align search bar to the left */
 h1 {
     text-align: center;
+    font-size: 24px;
     margin-bottom: 20px;
+    font-weight: bold;
 }
 
+#searchBar {
+    width: 20%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    border: 1px solid #ddd;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    margin-left: 0;
+    display: inline-block;
+}
+
+/* Job listing styles */
 ul {
     list-style-type: none;
     padding: 0;
+    clear: both;
 }
 
 li {
     background-color: #f9f9f9;
-    padding: 20px;
+    padding: 15px;
     margin-bottom: 10px;
     border-radius: 8px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* Allow items to wrap */
+    flex-wrap: wrap;
 }
 
-li:last-child {
-    margin-bottom: 0;
-}
-
-.jobTitle, .company, .location {
-    width: 100%;
-    margin-bottom: 10px;
+.details {
+    flex-grow: 1;
+    margin-right: 20px;
+    line-height: 1.6;
     text-align: left;
+    font-size: 16px;
 }
 
 .jobTitle {
     font-weight: bold;
     font-size: 18px;
+    color: #333;
 }
 
-.company {
-    color: #666;
+.company, .location {
     font-size: 16px;
+    color: #666;
 }
 
-.location {
-    color: #999;
-    font-size: 14px;
+.buttons-container {
+    display: flex;
+    gap: 10px;
 }
 
-/* Button Styles */
+/* Button styles */
 button {
     background-color: #e74c3c;
     color: white;
@@ -112,14 +128,37 @@ button {
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-left: 10px;
-    flex-shrink: 0; /* Prevent buttons from shrinking */
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
     background-color: #c0392b;
 }
+
+.unarchive-button,
+.delete-button {
+    margin: 0 5px;
+}
+
+.pagination-button {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pagination-button.active {
+    background-color: #e74c3c;
+}
+
+.pagination-button:hover {
+    background-color: #555;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     li {
@@ -127,9 +166,8 @@ button:hover {
         align-items: flex-start;
     }
 
-    .jobTitle, .company, .location {
+    .details {
         width: 100%;
-        text-align: left;
         margin-bottom: 10px;
     }
 
@@ -140,14 +178,14 @@ button:hover {
     }
 }
 
-/* Confirmation Dialog Styles */
+/* Confirmation dialog */
 .confirmation-dialog {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Transparent dark background */
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -182,14 +220,58 @@ button:hover {
     background-color: darkred;
 }
 
-/* Vacancy Dialog Styles */
+/* Loading Screen */
+.loading-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    z-index: 2000;
+    align-items: center;
+}
+
+.load-circle{
+    width: 100px;
+    height: 40px;
+    --g: radial-gradient(farthest-side,#0000 calc(95% - 3px),#fff calc(100% - 3px) 98%,#0000 101%) no-repeat;
+    background: var(--g), var(--g), var(--g);
+    background-size: 30px 30px;
+    animation: la9 1s infinite alternate;
+}
+  @keyframes la9 {
+    0% {
+      background-position: 0 50%, 50% 50%, 100% 50%;
+    }
+    20% {
+      background-position: 0 0, 50% 50%, 100% 50%;
+    }
+    40% {
+      background-position: 0 100%, 50% 0, 100% 50%;
+    }
+    60% {
+      background-position: 0 50%, 50% 100%, 100% 0;
+    }
+    80% {
+      background-position: 0 50%, 50% 50%, 100% 100%;
+    }
+    100% {
+      background-position: 0 50%, 50% 50%, 100% 50%;
+    }
+  }
+  /*loading screen */
+
+/* Vacancy dialog */
 .dialog-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Dark transparent background */
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -202,12 +284,17 @@ button:hover {
     border-radius: 8px;
     text-align: center;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    width: 400px; /* Set a width for the dialog */
+}
+
+.dialog-content p {
+    margin-bottom: 20px; /* Add margin below the paragraph */
 }
 
 .dialog-buttons {
     margin-top: 20px;
     display: flex;
-    display: block;
+    justify-content: space-around; /* Evenly space the buttons */
 }
 
 .dialog-buttons button {
@@ -217,45 +304,26 @@ button:hover {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
 }
 
 .dialog-buttons button:hover {
-    background-color: darkred;
+    background-color: #c0392b;
+}
+
+.dialog-buttons button:first-child {
+    background-color: #e74c3c;
+}
+
+.dialog-buttons button:first-child:hover {
+    background-color: #c0392b;
 }
 
 #vacancyInput {
-    width: 45%;
+    width: 80%;
     padding: 10px;
     margin-top: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-}
-/* Loading Screen */
-.loading-screen {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    justify-content: center;
-    align-items: center;
-}
-
-.spinner {
-    border: 12px solid #f3f3f3;
-    border-top: 12px solid #bd1a1a;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
-}
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
 }

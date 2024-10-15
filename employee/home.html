@@ -20,69 +20,75 @@
 
 </head>
 <body>
-    <div class="nav">
-        <div class="links">
-            <button onclick="location.href='home.html'">HOME</button>
-            <button onclick="location.href='job.html'">JOB LIST</button>
-            <button onclick="location.href='app.html'">APPLICATION</button>
-            <button onclick="location.href='archive.html'">ARCHIVED</button>
-            <button id="signOutBtn">SIGN OUT</button>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="card job">
-            <h3>JOB</h3>
-            <p id="jobCount">Total: 0</p>
-        </div>
-        <div class="card app">
-            <h3>APPLICATION</h3>
-            <p id="applicationCount">Total: 0</p>
-        </div>
-        <div class="card emp">
-            <h3>EMPLOYED</h3>
-            <p id="employedCount">Total: 0</p>
-        </div>
-        <div class="card vac">
-            <h3>VACANCIES</h3>
-            <p id="vacanciesCount">Total: 0</p>
-        </div>
-    </div>
-
-    <!-- Charts Section -->
-    <div class="charts-wrapper">
-        <!-- Applications by Company Chart -->
-        <div class="chart-summary-wrapper">
-            <div class="chart-container">
-                <canvas id="applicationsByCompanyChart"></canvas>
+    <body>
+        <div class="nav">
+            <div class="links">
+                <button onclick="location.href='home.html'">HOME</button>
+                <button onclick="location.href='job.html'">JOB LIST</button>
+                <button onclick="location.href='app.html'">APPLICATION</button>
+                <button onclick="location.href='archive.html'">ARCHIVED</button>
+                <button id="signOutBtn">SIGN OUT</button>
             </div>
-            <div id="applicationsByCompanySummary" class="summary-container"></div>
         </div>
-
-        <!-- Employed by Position Chart -->
-        <div class="chart-summary-wrapper">
-            <div class="chart-container">
-                <canvas id="employedByPositionChart"></canvas>
+    
+        <div class="container">
+            <div class="card job">
+                <h3>JOB</h3>
+                <p id="jobCount">Total: 0</p>
             </div>
-            <div id="employedByPositionSummary" class="summary-container"></div>
-        </div>
-
-        <!-- Employed by Company Chart -->
-        <div class="chart-summary-wrapper">
-            <div class="chart-container">
-                <canvas id="employedByCompanyChart"></canvas>
+            <div class="card app">
+                <h3>APPLICATION</h3>
+                <p id="applicationCount">Total: 0</p>
             </div>
-            <div id="employedByCompanySummary" class="summary-container"></div>
+            <div class="card emp">
+                <h3>EMPLOYED</h3>
+                <p id="employedCount">Total: 0</p>
+            </div>
+            <div class="card vac">
+                <h3>VACANCIES</h3>
+                <p id="vacanciesCount">Total: 0</p>
+            </div>
         </div>
-    </div>
-
-    <!-- Most Applied Jobs Section -->
-    <div class="most-applied-jobs">
-        <h3>Most Applied Jobs</h3>
-        <ul id="mostAppliedJobsList"></ul>
-    </div>
-    <div id="loading-screen" class="loading-screen">
-        <div class="spinner"></div>
-    </div>
+    
+        <div class="charts-wrapper">
+            <div class="chart-summary-wrapper">
+                <div class="chart-container">
+                    <canvas id="applicationsByCompanyChart"></canvas>
+                </div>
+                <div id="applicationsByCompanySummary" class="summary-container"></div>
+            </div>
+            <div class="chart-summary-wrapper">
+                <div class="chart-container">
+                    <canvas id="employedByPositionChart"></canvas>
+                </div>
+                <div id="employedByPositionSummary" class="summary-container"></div>
+            </div>
+            <div class="chart-summary-wrapper">
+                <div class="chart-container">
+                    <canvas id="employedByCompanyChart"></canvas>
+                </div>
+                <div id="employedByCompanySummary" class="summary-container"></div>
+            </div>
+        </div>
+    
+        <div class="most-applied-jobs">
+            <h3>Most Applied Jobs</h3>
+            <ul id="mostAppliedJobsList"></ul>
+        </div>
+        <div id="loading-screen" class="loading-screen">
+            <div class="load-circle"></div>
+        </div>
+    
+         <!--- Sign out --->
+         <div id="signOutConfirmation" class="confirmation-dialog" style="display: none;">
+            <div class="confirmation-dialog-content">
+                <h4>Are you sure you want to sign out?</h4>
+                <div class="confirmation-dialog-buttons">
+                    <button id="confirmSignOutBtn">Yes, Sign Out</button>
+                    <button id="cancelSignOutBtn">Cancel</button>
+                </div>
+            </div>
+        </div>
+         <!--- Sign out --->
 </body>
 </html>

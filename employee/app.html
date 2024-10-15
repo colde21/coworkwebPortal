@@ -33,9 +33,20 @@
         <!-- List items will be dynamically added here using JavaScript -->
     </ul>
   </div>
-  <div id="loading-screen" class="loading-screen">
-    <div class="spinner"></div>
-</div>
+    <!--- Sign out --->
+    <div id="signOutConfirmation" class="confirmation-dialog" style="display: none;">
+      <div class="confirmation-dialog-content">
+          <h4>Are you sure you want to sign out?</h4>
+          <div class="confirmation-dialog-buttons">
+              <button id="confirmSignOutBtn">Yes, Sign Out</button>
+              <button id="cancelSignOutBtn">Cancel</button>
+          </div>
+      </div>
+  </div>
+   <!--- Sign out --->
+   <div id="loading-screen" class="loading-screen">
+      <div class="load-circle"></div>
+  </div>
   <script type="module" src="app.js"> </script>
   
 </body>

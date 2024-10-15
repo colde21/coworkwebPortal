@@ -36,47 +36,48 @@ let allApplications = [];  // To store all applications globally
 let refreshInterval; // To store the interval ID
 
 async function performSignOut() {
-    const loadingScreen = document.getElementById('loading-screen'); // Reference to the loading screen element
-    const errorMessageContainer = document.getElementById('error-message'); // Reference to show errors
+    const signOutConfirmation = document.getElementById('signOutConfirmation');
+    const confirmSignOutBtn = document.getElementById('confirmSignOutBtn');
+    const cancelSignOutBtn = document.getElementById('cancelSignOutBtn');
+    const loadingScreen = document.getElementById('loading-screen');
 
-    if (loadingScreen) loadingScreen.style.display = 'flex'; // Show the loading screen
+    // Show the confirmation dialog
+    signOutConfirmation.style.display = 'flex';
 
-    try {
-        const user = auth.currentUser; // Get the currently authenticated user
+    // If the user confirms, proceed with sign-out
+    confirmSignOutBtn.addEventListener('click', async function() {
+        signOutConfirmation.style.display = 'none'; // Hide the confirmation dialog
+        if (loadingScreen) loadingScreen.style.display = 'flex'; // Show loading screen
 
-        if (!user) {
-            throw new Error("No authenticated user found."); // Handle the case when there's no logged-in user
+        try {
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error("No authenticated user found.");
+            }
+
+            const userEmail = user.email;
+            await logAudit(userEmail, "Sign out", { status: "Success" });
+            await firebaseSignOut(auth);
+            window.location.href = "/login.html";
+        } catch (error) {
+            console.error("Error during sign-out:", error);
+            const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
+            await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+            alert(error.message || 'Sign out failed. Please try again.');
+        } finally {
+            if (loadingScreen) loadingScreen.style.display = 'none';
         }
+    });
 
-        const userEmail = user.email;
-        console.log('User Email:', userEmail); // Useful for debugging
-
-        // Log audit for successful sign-out
-        await logAudit(userEmail, "Sign out", { status: "Success" });
-        console.log("Audit logged for sign-out.");
-
-        // Perform Firebase sign-out
-        await firebaseSignOut(auth);
-        console.log("User successfully signed out.");
-
-        // Redirect to the login page or show a sign-out success message
-        window.location.href = "/login.html";
-    } catch (error) {
-        console.error("Error during sign-out:", error);
-
-        // Log audit for failed sign-out
-        const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
-        await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
-
-        // Show the error message in the error message container
-        if (errorMessageContainer) {
-            errorMessageContainer.textContent = error.message || 'Sign out failed. Please try again.';
-        }
-    } finally {
-        if (loadingScreen) loadingScreen.style.display = 'none'; // Hide the loading screen
-    }
+    // If the user cancels, hide the confirmation dialog
+    cancelSignOutBtn.addEventListener('click', function() {
+        signOutConfirmation.style.display = 'none';
+    });
 }
 
+// Add event listener to the Sign Out button
+document.getElementById('signOutBtn').addEventListener('click', performSignOut);
 
 // Ensure elements exist before attaching event listeners
 document.addEventListener('DOMContentLoaded', () => {
