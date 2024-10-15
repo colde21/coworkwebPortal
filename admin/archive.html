@@ -8,19 +8,18 @@
     <title>Archived Jobs</title>
 </head>
 <body>
-<!-- Navigation bar--> 
-<div class="nav">
-    <div class="links"> 
-        <button onclick="location.href='home.html'">HOME</button>
-        <button onclick="location.href='job.html'">JOB LIST</button>
-        <button onclick="location.href='app.html'">APPLICATION</button>
-        <button onclick="location.href='archive.html'">ARCHIVED</button>
-        <button id="signOutBtn">SIGN OUT</button>
+    <!-- Navigation bar--> 
+    <div class="nav">
+        <div class="links"> 
+            <button onclick="location.href='home.html'">HOME</button>
+            <button onclick="location.href='job.html'">JOB LIST</button>
+            <button onclick="location.href='app.html'">APPLICATION</button>
+            <button onclick="location.href='archive.html'">ARCHIVED</button>
+            <button id="signOutBtn">SIGN OUT</button>
+        </div>
     </div>
-</div>
-<!-- Navigation bar-->
 
-    <!-- Unarchive dialog and delete -->
+    <!-- Unarchive and delete dialog -->
     <div id="confirmationDialog" class="confirmation-dialog" style="display: none;">
         <div class="confirmation-dialog-content">
             <p id="confirmationMessage">Are you sure?</p>
@@ -31,7 +30,7 @@
         </div>
     </div>
     
-    <!-- Confirmation Vacancy -->
+    <!-- Vacancy Input Dialog -->
     <div id="vacancyDialog" class="dialog-overlay" style="display: none;">
         <div class="dialog-content">
             <p id="vacancyDialogMessage">Edit the vacancy number:</p>
@@ -43,11 +42,12 @@
         </div>
     </div>
 
+    <!-- Main container -->
     <div class="container">
         <h1>Archived Jobs</h1>
         <input type="text" id="searchBar" placeholder="Search archived jobs..." class="search-bar">
         <ul id="archiveList">
-            <!-- Archived jobs will be listed here -->
+            <!-- Archived jobs will be dynamically listed here -->
         </ul>
         <div id="paginationControls" class="pagination"></div>
     </div>

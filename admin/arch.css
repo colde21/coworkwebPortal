@@ -28,7 +28,7 @@ body {
     background: none;
     border: none;
     color: #f2f2f2;
-    padding: 16px 10px; /* Adjust padding for better spacing */
+    padding: 16px 10px;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -44,7 +44,6 @@ body {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-
 /* Container styles */
 .container {
     width: 80%;
@@ -55,7 +54,7 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Title and search bar */
+/* Align search bar to the left */
 h1 {
     text-align: center;
     font-size: 24px;
@@ -71,12 +70,16 @@ h1 {
     border: 1px solid #ddd;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
     font-size: 14px;
+    margin-left: 0;
+    display: inline-block;
+    float: left;
 }
 
 /* Job listing styles */
 ul {
     list-style-type: none;
     padding: 0;
+    clear: both;
 }
 
 li {
@@ -95,16 +98,21 @@ li {
     font-weight: bold;
     font-size: 18px;
     color: #333;
+    flex: 2;
 }
 
 .company {
     font-size: 16px;
     color: #666;
+    flex: 1;
+    text-align: center;
 }
 
 .location {
     font-size: 14px;
     color: #999;
+    flex: 1;
+    text-align: right;
 }
 
 /* Button styles */
@@ -214,54 +222,6 @@ button:hover {
     background-color: darkred;
 }
 
-/* Vacancy dialog */
-.dialog-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.dialog-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-.dialog-buttons {
-    margin-top: 20px;
-    display: block;
-}
-
-.dialog-buttons button {
-    background-color: #e74c3c;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.dialog-buttons button:hover {
-    background-color: darkred;
-}
-
-#vacancyInput {
-    width: 45%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
 /* Loading Screen */
 .loading-screen {
     position: fixed;
@@ -293,4 +253,3 @@ button:hover {
         transform: rotate(360deg);
     }
 }
-
