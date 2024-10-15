@@ -5,7 +5,6 @@ import { Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-fi
 const auth = getAuth();
 document.addEventListener('DOMContentLoaded', () => {
     
-
     function requireLogin() {
         onAuthStateChanged(auth, (user) => {
             if (!user) {
@@ -15,9 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     requireLogin();
 
+   
+
     // Form Submission
     document.getElementById('jobForm').addEventListener('submit', async function(event) {
         event.preventDefault();
+        const loadingScreen = document.getElementById('loading-screen');
+        
+        // Show the loading screen
+        loadingScreen.style.display = 'flex';
 
         const formData = new FormData(this);
         const entries = Object.fromEntries(formData.entries());
@@ -30,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const age = parseInt(entries.age, 10);
         if (isNaN(age) || age < 18 || age > 60) {
             alert('Please enter a valid age between 18 and 60.');
+            loadingScreen.style.display = 'none'; // Hide the loading screen if age is invalid
             return;
         }
 
@@ -51,6 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 timestamp: new Date().toISOString()
             });
             alert("Failed to post job.");
+        } finally {
+            // Hide the loading screen after form submission is complete
+            loadingScreen.style.display = 'none';
         }
     });
 
