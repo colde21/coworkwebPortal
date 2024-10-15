@@ -1,0 +1,109 @@
+// Import necessary Firebase functions
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+import { logAudit } from './database.js';
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
+    authDomain: "cowork-195c0.firebaseapp.com",
+    databaseURL: "https://cowork-195c0-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "cowork-195c0",
+    storageBucket: "cowork-195c0.appspot.com",
+    messagingSenderId: "151400704939",
+    appId: "1:151400704939:web:934d6d15c66390055440ee",
+    measurementId: "G-8DL6T09CP4"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+document.getElementById('submit').addEventListener("click", async function (event) {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorMessageContainer = document.getElementById('error-message');
+    const loadingScreen = document.getElementById('loading-screen');
+
+    loadingScreen.style.display = 'flex'; // Show the loading screen
+
+    try {
+        // Sign in the user
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        const uid = user.uid;
+        const roleSnapshot = await get(ref(database, `user/${uid}/role`));
+        
+        if (roleSnapshot.exists()) {
+            const role = roleSnapshot.val();
+            console.log('Role:', role); // Useful for debugging
+
+            // Log audit for successful login
+            await logAudit(email, "Sign in", { status: "Success" });
+
+            // Retrieve the ID Token from the authenticated user
+            const idToken = await user.getIdToken();
+            console.log('Generated ID Token:', idToken);
+
+            // Send the ID Token to the backend to create a session cookie
+            const response = await fetch('/verify-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                
+                body: JSON.stringify({ idToken }) // Send the idToken to the backend
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create session');
+            }
+
+            // Block back button navigation after login
+            window.onload = function() {
+                history.pushState(null, null, window.location.href);
+                window.onpopstate = function() {
+                    history.pushState(null, null, window.location.href);
+                    alert('You cannot go back to the previous page after logging in.');
+                    window.location.href = "../login.html"; // Redirect to the login page or any other page
+                };
+            };
+
+            // Redirect based on the role
+            if (role === "admin") {
+                window.location.href = "../admin/home.html";
+            } else if (role === "employee") {
+                window.location.href = "../employee/home.html"; // Make sure the path is correct
+            } else {
+                throw new Error('Role not recognized or not assigned');
+            }
+        } else {
+            throw new Error('Role not found');
+        }
+    } catch (error) {
+        // Log audit for failed login
+        await logAudit(email, "Sign in", { status: "Failed", error: error.message });
+        console.error('Login error:', error);
+        errorMessageContainer.textContent = error.message || 'Login failed';
+    } finally {
+        loadingScreen.style.display = 'none'; // Hide the loading screen
+    }
+});
+
+// Show/hide password toggle functionality
+document.getElementById('togglePassword').addEventListener('click', function () {
+    const passwordInput = document.getElementById('password');
+    const toggleButton = document.getElementById('togglePassword');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleButton.textContent = 'Hide';
+    } else {
+        passwordInput.type = 'password';
+        toggleButton.textContent = 'Show';
+    }
+});

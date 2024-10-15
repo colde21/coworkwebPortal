@@ -1,0 +1,11 @@
+# Node.js dependencies
+node_modules/
+
+# Firebase service account
+cowork-195c0-firebase-adminsdk-ud4rx-bb4e3ebdbd.json
+
+# Log files
+*.log
+
+# Environment variables
+.env
