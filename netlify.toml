@@ -8,6 +8,3 @@
   to = "/:splat.html"
   status = 200
   force = true
-  
-  [build]
-  publish = "public"

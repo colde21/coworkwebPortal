@@ -185,138 +185,9 @@ function updatePaginationControls() {
 }
 
 //Archived Selected Jobs
-async function archiveSelectedJobs() {
-    const checkedBoxes = document.querySelectorAll('#jobTable tbody input[type="checkbox"]:checked');
-    if (checkedBoxes.length === 0) {
-        alert("No jobs selected for archiving.");
-        return;
-    }
-
-    // Show the confirmation dialog
-    const confirmationDialog = document.getElementById('confirmationDialog');
-    confirmationDialog.style.display = 'flex'; // Show dialog
-
-    // Handle confirmation logic
-    document.getElementById('confirmArchiveBtn').onclick = async () => {
-        confirmationDialog.style.display = 'none'; // Hide dialog
-        const user = auth.currentUser;
-        const userEmail = user ? user.email : "Unknown user";
-
-        for (const box of checkedBoxes) {
-            const jobId = box.closest('tr').dataset.id;
-            try {
-                const jobDocRef = doc(firestore, 'jobs', jobId);
-                const jobDocSnap = await getDoc(jobDocRef);
-                if (jobDocSnap.exists()) {
-                    const jobData = jobDocSnap.data();
-                    const { company, position } = jobData;
-
-                    // Archive the job with a timestamp
-                    const archiveData = {
-                        ...jobData,
-                        archivedAt: Timestamp.now() // Set the archive timestamp
-                    };
-
-                    // Add the job to the 'archive' collection
-                    await addDoc(collection(firestore, 'archive'), archiveData);
-                    await deleteDoc(jobDocRef); // Remove the job from the jobs collection
-
-                    // Log the action in the audit trail
-                    await logAudit(userEmail, "Job Archived", { jobId });
-
-                    box.closest('tr').remove(); // Remove the row from the table
-                }
-            } catch (error) {
-                console.error(`Failed to archive job with ID: ${jobId}`, error);
-                alert(`Failed to archive job with ID: ${jobId}.`);
-            }
-        }
-
-        // Reload the page after all jobs are processed
-        window.location.reload();
-    };
-
-    // Handle cancellation
-    document.getElementById('cancelArchiveBtn').onclick = () => {
-        confirmationDialog.style.display = 'none'; // Hide dialog
-    };
-}
 
 //EditJob
 // Event listener for the "Save Changes" button
-document.getElementById('saveJobButton').addEventListener('click', async function (event) {
-    event.preventDefault(); // Prevent page reload
-
-    // Get job ID (you must store jobId somewhere)
-    const jobId = document.getElementById('editJobForm').dataset.jobId;
-
-    if (!jobId) {
-        alert('No job ID found. Please refresh and try again.');
-        return;
-    }
-
-    const jobDocRef = doc(firestore, 'jobs', jobId);
-
-    // Collect data from the form
-    const updatedData = {
-        position: document.getElementById('position').value,
-        company: document.getElementById('company').value,
-        location: document.getElementById('location').value,
-        age: document.getElementById('age').value,
-        type: document.getElementById('type').value,
-        vacancy: document.getElementById('vacancy').value,
-        contact: document.getElementById('email').value,
-        qualifications: document.getElementById('qualifications').value,
-        facilities: document.getElementById('facilities').value,
-        description: document.getElementById('description').value,
-    };
-
-    // Validate age restriction (between 18 and 60)
-    const age = parseInt(updatedData.age, 10);
-    if (isNaN(age) || age < 18 || age > 60) {
-        alert('Please enter a valid age between 18 and 60.');
-        return;
-    }
-
-    // Validate vacancy, if 0, ask the user for confirmation to archive the job
-    const vacancy = parseInt(updatedData.vacancy, 10);
-    if (isNaN(vacancy) || vacancy < 0) {
-        alert('Please enter a valid number for vacancy.');
-        return;
-    }
-
-    if (vacancy === 0) {
-        const confirmArchive = confirm('Vacancy is set to 0. Do you want to archive this job?');
-        if (confirmArchive) {
-            await archiveJobIfNeeded(jobId, updatedData.company, updatedData.position);
-            return; // Exit after archiving the job
-        }
-    }
-
-    try {
-        // Update the job in Firestore
-        await updateDoc(jobDocRef, updatedData);
-
-        // Log the audit trail
-        await logAudit(auth.currentUser.email, 'Job Edited', { jobId, updatedData });
-
-        // Show a success message
-        alert('Job updated successfully!');
-
-        // Hide the edit form
-        document.getElementById('editJobForm').style.display = 'none';
-
-        // Refresh the job table to reflect the updates
-        fetchAllJobs().then(jobs => {
-            window.allJobs = jobs;
-            filteredJobs = jobs;
-            updateJobTable();
-        });
-    } catch (error) {
-        console.error('Error updating job:', error);
-        alert('Failed to update the job. Please try again.');
-    }
-});
 
 // Function to archive the job if vacancy is 0
 async function archiveJobIfNeeded(jobId, company, position) {
@@ -357,10 +228,6 @@ async function archiveJobIfNeeded(jobId, company, position) {
 }
 
 
-// "Go Back" button functionality
-document.getElementById('goBackButton').addEventListener('click', function () {
-    window.location.href = "job.html"; // This will navigate the user to the previous page
-});
 
 // Function to load job data into the form for editing
 async function editJob(jobId) {

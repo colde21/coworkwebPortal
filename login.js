@@ -1,6 +1,6 @@
 // Import necessary Firebase functions
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 import { logAudit } from './database.js';
 
@@ -32,12 +32,9 @@ document.getElementById('submit').addEventListener("click", async function (even
     loadingScreen.style.display = 'flex'; // Show the loading screen
 
     try {
-        // Sign in the user
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        const uid = user.uid;
+        const uid = userCredential.user.uid;
         const roleSnapshot = await get(ref(database, `user/${uid}/role`));
-        
         if (roleSnapshot.exists()) {
             const role = roleSnapshot.val();
             console.log('Role:', role); // Useful for debugging
@@ -45,28 +42,12 @@ document.getElementById('submit').addEventListener("click", async function (even
             // Log audit for successful login
             await logAudit(email, "Sign in", { status: "Success" });
 
-            // Retrieve the ID Token from the authenticated user
-            const idToken = await user.getIdToken();
-            console.log('Generated ID Token:', idToken);
-
-            // Send the ID Token to the backend to create a session cookie
-            const response = await fetch('https://cowork-portal.netlify.app/verify-session', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                
-                body: JSON.stringify({ idToken }) // Send the idToken to the backend
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create session');
-            }
-
             // Block back button navigation after login
             window.onload = function() {
+                // Add a new entry to the browser history (to override the back button)
                 history.pushState(null, null, window.location.href);
                 window.onpopstate = function() {
+                    // When the user presses the back button, prevent the action and redirect them to the login page
                     history.pushState(null, null, window.location.href);
                     alert('You cannot go back to the previous page after logging in.');
                     window.location.href = "../login.html"; // Redirect to the login page or any other page
@@ -79,16 +60,16 @@ document.getElementById('submit').addEventListener("click", async function (even
             } else if (role === "employee") {
                 window.location.href = "../employee/home.html"; // Make sure the path is correct
             } else {
-                throw new Error('Role not recognized or not assigned');
+                throw new Error('Role not recognized or not assigned'); // Handle unexpected roles
             }
         } else {
-            throw new Error('Role not found');
+            throw new Error('Role not found'); // Role must be set in the database
         }
     } catch (error) {
         // Log audit for failed login
         await logAudit(email, "Sign in", { status: "Failed", error: error.message });
         console.error('Login error:', error);
-        errorMessageContainer.textContent = error.message || 'Login failed';
+        errorMessageContainer.textContent = error.message || 'Login failed'; // Displaying more descriptive error message
     } finally {
         loadingScreen.style.display = 'none'; // Hide the loading screen
     }
