@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 });
 
 // Verify the session
-app.post('https://cowork-portal.netlify.app/verify-session', async (req, res) => {
+app.post('/verify-session', async (req, res) => {
     const { idToken } = req.body;
 
     try {

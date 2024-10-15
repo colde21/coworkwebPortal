@@ -50,7 +50,7 @@ document.getElementById('submit').addEventListener("click", async function (even
             console.log('Generated ID Token:', idToken);
 
             // Send the ID Token to the backend to create a session cookie
-            const response = await fetch('/verify-session', {
+            const response = await fetch('https://cowork-portal.netlify.app/verify-session', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
