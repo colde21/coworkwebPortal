@@ -17,7 +17,8 @@ admin.initializeApp({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(cors()); // Enable CORS if needed
+app.use(cors({ origin: 'https://cowork-portal.netlify.app', credentials: true }));
+
 
 app.get('/', (req, res) => {
   res.redirect('/login.html');
