@@ -1,7 +1,7 @@
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { fetchAllApplications, hireApplicant, archiveJobIfNeeded, logAudit } from './database.js';
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { fetchAllApplications, fetchHiredApplicants, fetchRejectedApplicants, fetchInterviewApplicants, hireApplicant, rejectApplicant, moveToInterview, logAudit } from './database.js'; 
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -19,10 +19,11 @@ const auth = getAuth(app);
 const firestore = getFirestore(app);
 
 // Pagination Variables
-let allApplications = [];  // To store all applications globally
-let filteredApplications = []; // To store filtered applications
-let currentPage = 1;  // Current page in pagination
-const applicationsPerPage = 5;  // Limit applications per page
+let allApplications = [];
+let filteredApplications = [];
+let currentPage = 1;
+const applicationsPerPage = 5;
+let selectedFilter = 'applied'; // Default filter as 'Applications'
 
 function requireLogin() {
     onAuthStateChanged(auth, (user) => {
@@ -76,20 +77,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const refreshBtn = document.getElementById('refreshBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', handleRefresh);  // Added the refresh button functionality
+    const filterDropdown = document.getElementById('statusFilter');
+    if (filterDropdown) {
+        filterDropdown.addEventListener('change', handleFilterChange);
     }
 
-    fetchApplicationsAndUpdateUI();  // Initial load
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', handleRefresh);
+    }
+
+    fetchApplicationsAndUpdateUI(); // Load initially as 'Applications'
 });
 
-function fetchApplicationsAndUpdateUI() {
-    fetchAllApplications().then(applications => {
-        allApplications = applications;
-        filteredApplications = applications; // Initialize filteredApplications with all applications
+async function fetchApplicationsAndUpdateUI() {
+    try {
+        if (selectedFilter === 'applied') {
+            const applications = await fetchAllApplications();
+            allApplications = applications;
+        } else if (selectedFilter === 'hired') {
+            const hired = await fetchHiredApplicants();
+            allApplications = hired;
+        } else if (selectedFilter === 'rejected') {
+            const rejected = await fetchRejectedApplicants();
+            allApplications = rejected;
+        } else if (selectedFilter === 'interview') {
+            const interview = await fetchInterviewApplicants();
+            allApplications = interview;
+        }
+        filteredApplications = allApplications;
         updateApplicationList(filteredApplications);
-    }).catch(err => console.error("Failed to fetch applications:", err));
+    } catch (error) {
+        console.error("Failed to fetch applications:", error);
+    }
 }
 
 function updateApplicationList(applications) {
@@ -98,7 +118,6 @@ function updateApplicationList(applications) {
 
     applicationList.innerHTML = ''; 
 
-    // Get the applications for the current page
     const startIndex = (currentPage - 1) * applicationsPerPage;
     const endIndex = startIndex + applicationsPerPage;
     const paginatedApplications = applications.slice(startIndex, endIndex);
@@ -115,28 +134,54 @@ function updateApplicationList(applications) {
             <strong>Contact number:</strong> ${application.userPhone}
         `;
 
-        const contactButton = document.createElement('button');
-        contactButton.textContent = 'Contact';
-        contactButton.addEventListener('click', () => {
-            const subject = `Application Status for ${application.position} at ${application.company}`;
-            const body = `Dear ${application.userName},\n\nCongratulations! You have been approved by ${application.company} for the position of ${application.position}.\n\nBest regards,\nCoWork Group of Companies`;
-            const mailtoLink = `mailto:${application.userEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.location.href = mailtoLink;
-        });
+        if (selectedFilter === 'applied') {
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'buttons-container';
 
-        const hireButton = document.createElement('button');
-        hireButton.textContent = 'Hire';
-        hireButton.addEventListener('click', async () => {
-            await hireApplicantAndDecrementVacancy(application.id, application);
-        });
+            const contactButton = document.createElement('button');
+            contactButton.textContent = 'Contact';
+            contactButton.addEventListener('click', () => {
+                const subject = `Application Status for ${application.position} at ${application.company}`;
+                const body = `Dear ${application.userName},\n\nYou have applied for ${application.position} at ${application.company}.`;
+                const mailtoLink = `mailto:${application.userEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                window.location.href = mailtoLink;
+            });
 
-        listItem.appendChild(detailsDiv);
-        listItem.appendChild(contactButton);
-        listItem.appendChild(hireButton);
+            const hireButton = document.createElement('button');
+            hireButton.textContent = 'Hire';
+            hireButton.addEventListener('click', async () => {
+                await hireApplicant(application.id, application);
+                fetchApplicationsAndUpdateUI();
+            });
+
+            const rejectButton = document.createElement('button');
+            rejectButton.textContent = 'Reject';
+            rejectButton.addEventListener('click', async () => {
+                await rejectApplicant(application.id, application);
+                fetchApplicationsAndUpdateUI();
+            });
+
+            const interviewButton = document.createElement('button');
+            interviewButton.textContent = 'For Interview';
+            interviewButton.addEventListener('click', async () => {
+                await moveToInterview(application.id, application);
+                fetchApplicationsAndUpdateUI();
+            });
+
+            buttonsContainer.appendChild(contactButton);
+            buttonsContainer.appendChild(hireButton);
+            buttonsContainer.appendChild(rejectButton);
+            buttonsContainer.appendChild(interviewButton);
+
+            listItem.appendChild(detailsDiv);
+            listItem.appendChild(buttonsContainer);
+        } else {
+            listItem.appendChild(detailsDiv); // No buttons for 'hired', 'rejected', and 'interview'
+        }
+
         applicationList.appendChild(listItem);
     });
 
-    // Update pagination controls
     updatePaginationControls(applications);
 }
 
@@ -148,7 +193,6 @@ function updatePaginationControls(applications) {
 
     const totalPages = Math.ceil(applications.length / applicationsPerPage);
 
-    // Create "Previous" button
     const prevButton = document.createElement('button');
     prevButton.textContent = '<';
     prevButton.disabled = currentPage === 1;
@@ -160,13 +204,11 @@ function updatePaginationControls(applications) {
     });
     paginationControls.appendChild(prevButton);
 
-    // Create page numbers display
     const pageNumbers = document.createElement('span');
     pageNumbers.textContent = `${currentPage}-${totalPages}`;
     pageNumbers.classList.add('page-numbers');
     paginationControls.appendChild(pageNumbers);
 
-    // Create "Next" button
     const nextButton = document.createElement('button');
     nextButton.textContent = '>';
     nextButton.disabled = currentPage === totalPages;
@@ -179,89 +221,27 @@ function updatePaginationControls(applications) {
     paginationControls.appendChild(nextButton);
 }
 
-async function hireApplicantAndDecrementVacancy(applicationId, application) {
-    try {
-        const user = auth.currentUser;
-        const userEmail = user ? user.email : "Unknown user";
-
-        if (!application.jobId) {
-            alert("Job ID not found for the selected application.");
-            return;
-        }
-
-        await hireApplicant(applicationId, application);
-
-        await logAudit(userEmail, "Applicant Hired", {
-            applicationId: applicationId,
-            applicantName: application.userName,
-            position: application.position,
-            company: application.company,
-            status: "Success",
-            timestamp: new Date().toISOString()
-        });
-
-        const jobDocRef = doc(firestore, 'jobs', application.jobId);
-        const jobDocSnap = await getDoc(jobDocRef);
-
-        if (jobDocSnap.exists()) {
-            let vacancy = jobDocSnap.data().vacancy;
-            if (vacancy > 0) {
-                vacancy--;
-                await updateDoc(jobDocRef, { vacancy });
-
-                if (vacancy === 0) {
-                    await archiveJobIfNeeded(application.jobId, application.company, application.position, userEmail);
-                    window.location.href = "archive.html";
-                    fetchApplicationsAndUpdateUI();
-                    return;
-                }
-
-                fetchApplicationsAndUpdateUI();
-                alert(`${application.userName} has been hired and vacancy updated.`);
-            } else {
-                alert("The job has no more vacancies.");
-            }
-        } else {
-            alert("Job not found.");
-        }
-    } catch (error) {
-        console.error("Error hiring applicant and updating vacancy:", error);
-
-        await logAudit(userEmail, "Applicant Hire Failed", {
-            applicationId: applicationId,
-            applicantName: application.userName,
-            position: application.position,
-            company: application.company,
-            status: "Failed",
-            error: error.message,
-            timestamp: new Date().toISOString()
-        });
-    }
-}
-
 function handleSearch() {
-    const searchBar = document.getElementById('searchBar');
-    if (!searchBar) return;
-
-    const query = searchBar.value.toLowerCase();
-
-    if (query === '') {
-        filteredApplications = allApplications;
-    } else {
-        filteredApplications = allApplications.filter(application => {
-            return (
-                (application.userName && application.userName.toLowerCase().includes(query)) ||
-                (application.position && application.position.toLowerCase().includes(query)) ||
-                (application.company && application.company.toLowerCase().includes(query)) ||
-                (application.userEmail && application.userEmail.toLowerCase().includes(query)) 
-            );
-        });
-    }
-    currentPage = 1; // Reset to first page after search
+    const query = document.getElementById('searchBar').value.toLowerCase();
+    filteredApplications = filterApplications(allApplications).filter(application => 
+        application.userName.toLowerCase().includes(query) ||
+        application.position.toLowerCase().includes(query) ||
+        application.company.toLowerCase().includes(query) ||
+        application.userEmail.toLowerCase().includes(query)
+    );
     updateApplicationList(filteredApplications);
 }
 
 function handleRefresh() {
-    currentPage = 1; // Reset the page to 1
-    fetchApplicationsAndUpdateUI(); // Reload the application list
+    filteredApplications = filterApplications(allApplications);
+    updateApplicationList(filteredApplications);
+}
+
+function handleFilterChange(event) {
+    selectedFilter = event.target.value;
+    fetchApplicationsAndUpdateUI();
+}
+
+function filterApplications(applications) {
+    return applications; // No status-based filtering, fetching by filter already handles it.
 }
