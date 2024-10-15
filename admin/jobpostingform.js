@@ -3,8 +3,15 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const auth = getAuth();
+
 document.addEventListener('DOMContentLoaded', () => {
-    
+    const loadingScreen = document.getElementById('loading-screen');
+    const confirmationDialog = document.getElementById('confirmationDialog');
+    const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+    const cancelSubmitBtn = document.getElementById('cancelSubmitBtn');
+    const successMessage = document.getElementById('successMessage');
+    const closeSuccessBtn = document.getElementById('closeSuccessBtn');
+
     function requireLogin() {
         onAuthStateChanged(auth, (user) => {
             if (!user) {
@@ -14,17 +21,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     requireLogin();
 
-   
-
-    // Form Submission
-    document.getElementById('jobForm').addEventListener('submit', async function(event) {
+    // Show confirmation dialog when form is submitted
+    document.getElementById('jobForm').addEventListener('submit', function(event) {
         event.preventDefault();
-        const loadingScreen = document.getElementById('loading-screen');
-        
-        // Show the loading screen
-        loadingScreen.style.display = 'flex';
+        confirmationDialog.style.display = 'flex'; // Show confirmation dialog
+    });
 
-        const formData = new FormData(this);
+    // Cancel submission and hide confirmation dialog
+    cancelSubmitBtn.addEventListener('click', () => {
+        confirmationDialog.style.display = 'none'; // Hide confirmation dialog
+    });
+
+    // Confirm submission and handle form submission
+    confirmSubmitBtn.addEventListener('click', async function() {
+        confirmationDialog.style.display = 'none'; // Hide confirmation dialog
+        loadingScreen.style.display = 'flex'; // Show loading screen
+
+        const formData = new FormData(document.getElementById('jobForm'));
         const entries = Object.fromEntries(formData.entries());
         entries.createdAt = Timestamp.now();
 
@@ -48,8 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 timestamp: new Date().toISOString()
             });
             
-            alert("Job posted successfully!");
-            window.location.href = '../admin/job.html';
+            successMessage.style.display = 'flex'; // Show success message
         } catch (error) {
             await logAudit(userEmail, "Job Posting Failed", {
                 status: "Failed",
@@ -58,11 +70,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             alert("Failed to post job.");
         } finally {
-            // Hide the loading screen after form submission is complete
-            loadingScreen.style.display = 'none';
+            loadingScreen.style.display = 'none'; // Hide the loading screen after form submission is complete
         }
     });
 
+    // Close success message
+    closeSuccessBtn.addEventListener('click', () => {
+        successMessage.style.display = 'none'; // Hide success message
+        window.location.href = '../admin/job.html'; // Redirect to job list page
+    });
+
+    // Go back button functionality
     const goBackButton = document.querySelector('input[type="button"]');
     goBackButton.addEventListener('click', () => {
         window.location.href = "../admin/job.html";

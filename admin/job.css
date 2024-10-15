@@ -435,6 +435,7 @@ input[type="button"]:disabled {
     background-color: darkred;
 }
 /* Loading Screen */
+/* loading */
 .loading-screen {
     display: none;
     position: fixed;
@@ -446,23 +447,36 @@ input[type="button"]:disabled {
     justify-content: center;
     align-items: center;
 }
-
-.spinner {
-    border: 12px solid #f3f3f3;
-    border-top: 12px solid #bd1a1a;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
+.load-circle{
+    width: 100px;
+    height: 40px;
+    --g: radial-gradient(farthest-side,#0000 calc(95% - 3px),#fff calc(100% - 3px) 98%,#0000 101%) no-repeat;
+    background: var(--g), var(--g), var(--g);
+    background-size: 30px 30px;
+    animation: la9 1s infinite alternate;
 }
-@keyframes spin {
+  @keyframes la9 {
     0% {
-        transform: rotate(0deg);
+      background-position: 0 50%, 50% 50%, 100% 50%;
+    }
+    20% {
+      background-position: 0 0, 50% 50%, 100% 50%;
+    }
+    40% {
+      background-position: 0 100%, 50% 0, 100% 50%;
+    }
+    60% {
+      background-position: 0 50%, 50% 100%, 100% 0;
+    }
+    80% {
+      background-position: 0 50%, 50% 50%, 100% 100%;
     }
     100% {
-        transform: rotate(360deg);
+      background-position: 0 50%, 50% 50%, 100% 50%;
     }
-}
+  }
+  /*loading screen */
+  
 /* Styling for the Disposable Link Container */
 #disposableLinkContainer {
     display: block; /* Set display to block */
@@ -526,4 +540,47 @@ input[type="button"]:disabled {
 .radio-group {
     display: flex;
     gap: 10px;
+}
+
+
+/* Sign-out confirmation dialog styles */
+.confirmation-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.confirmation-dialog-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-dialog-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.confirmation-dialog-buttons button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.confirmation-dialog-buttons button:hover {
+    background-color: darkred;
 }

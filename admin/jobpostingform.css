@@ -8,7 +8,7 @@ body {
 .nav {
     background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
     width: 100%;
-    padding: 15px 0;
+    padding: 1px 0;
     text-align: center;
     color: #f2f2f2;
     position: fixed;
@@ -18,7 +18,7 @@ body {
 .form-container {
     display: flex;
     justify-content: center;
-    margin-top: 10%;
+    margin-top: 5%;
 }
 
 form {
@@ -35,7 +35,7 @@ form {
 .form-left, .form-right {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
     flex: 1;
 }
 
@@ -131,3 +131,142 @@ button{
     }
   }
   /*loading screen */
+
+  /* Confirmation Dialog */
+.confirmation-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-dialog-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-dialog-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.confirmation-dialog-buttons button {
+  background-color: #e74c3c;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirmation-dialog-buttons button:hover {
+  background-color: darkred;
+}
+
+/* Success Message */
+.success-message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.success-message-content {
+  background-color: white;
+  width: 300px; /* Adjust the width to your preference */
+  height: auto; /* Let height adjust based on content */
+  padding: 30px; /* Add sufficient padding around the content */
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensure space between checkmark, text, and button */
+  align-items: center;
+  box-sizing: border-box;
+}
+
+#closeSuccessBtn {
+  background-color: #e74c3c;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+#closeSuccessBtn:hover {
+  background-color: #c0392b;
+}
+.success-animation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px; /* Add space between checkmark and text */
+}
+
+.checkmark {
+  width: 70px; /* Adjust the size of the checkmark */
+  height: 70px;
+  border-radius: 8px; /* Keep the checkmark box slightly rounded */
+  margin: 0 auto 20px auto; /* Add spacing between the checkmark and text */
+  display: block;
+  stroke-width: 2;
+  stroke: #e74c3c;
+  stroke-miterlimit: 10;
+  box-shadow: inset 0px 0px 0px #e74c3c;
+  animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+}
+
+.checkmark__circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 2;
+  stroke-miterlimit: 10;
+  stroke: #e74c3c;;
+  fill: #fff;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark__check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+  100% {
+      stroke-dashoffset: 0;
+  }
+}
+
+@keyframes scale {
+  0%, 100% {
+      transform: none;
+  }
+
+  50% {
+      transform: scale3d(1.1, 1.1, 1);
+  }
+}
+.success-message-content h4{
+  font-size: 20px; /* Adjust the margin between the checkmark and the message */
+}
