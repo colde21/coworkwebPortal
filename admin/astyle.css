@@ -99,7 +99,7 @@ li button {
 }
 
 li button:hover {
-    background-color: #0077b6;
+    background-color: #c0392b;
 }
 
 /* Pagination styling */
@@ -143,8 +143,8 @@ li button:hover {
 }
 
 .pagination button.active {
-    background-color: #0077b6;
+    background-color: #c0392b;
     color: white;
-    border-color: #0077b6;
+    border-color: #c0392b;
 }
 

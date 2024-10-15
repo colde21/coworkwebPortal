@@ -119,7 +119,7 @@ function updateApplicationList(applications) {
         contactButton.textContent = 'Contact';
         contactButton.addEventListener('click', () => {
             const subject = `Application Status for ${application.position} at ${application.company}`;
-            const body = `Dear ${application.userName},\n\nCongratulations! You have been approved by ${application.company} for the position of ${application.position}.\n\nBest regards,\nYour Company Name`;
+            const body = `Dear ${application.userName},\n\nCongratulations! You have been approved by ${application.company} for the position of ${application.position}.\n\nBest regards,\nCoWork Group of Companies`;
             const mailtoLink = `mailto:${application.userEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             window.location.href = mailtoLink;
         });
