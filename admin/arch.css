@@ -47,7 +47,7 @@ body {
 /* Container styles */
 .container {
     width: 80%;
-    margin: 100px auto;
+    margin: 30px auto;
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -72,7 +72,6 @@ h1 {
     font-size: 14px;
     margin-left: 0;
     display: inline-block;
-    float: left;
 }
 
 /* Job listing styles */
