@@ -138,34 +138,35 @@ function updateApplicationList(applications) {
             const buttonsContainer = document.createElement('div');
             buttonsContainer.className = 'buttons-container';
 
-            const contactButton = document.createElement('button');
-            contactButton.textContent = 'Contact';
-            contactButton.addEventListener('click', () => {
+            const contactButton = createButton('Contact', () => {
                 const subject = `Application Status for ${application.position} at ${application.company}`;
                 const body = `Dear ${application.userName},\n\nYou have applied for ${application.position} at ${application.company}.`;
                 const mailtoLink = `mailto:${application.userEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 window.location.href = mailtoLink;
             });
 
-            const hireButton = document.createElement('button');
-            hireButton.textContent = 'Hire';
-            hireButton.addEventListener('click', async () => {
-                await hireApplicant(application.id, application);
-                fetchApplicationsAndUpdateUI();
+            const hireButton = createButton('Hire', async () => {
+                const confirm = await showCustomModal('Are you sure you want to hire this applicant?');
+                if (confirm) {
+                    await hireApplicant(application.id, application);
+                    fetchApplicationsAndUpdateUI();
+                }
             });
 
-            const rejectButton = document.createElement('button');
-            rejectButton.textContent = 'Reject';
-            rejectButton.addEventListener('click', async () => {
-                await rejectApplicant(application.id, application);
-                fetchApplicationsAndUpdateUI();
+            const rejectButton = createButton('Reject', async () => {
+                const confirm = await showCustomModal('Are you sure you want to reject this applicant?');
+                if (confirm) {
+                    await rejectApplicant(application.id, application);
+                    fetchApplicationsAndUpdateUI();
+                }
             });
 
-            const interviewButton = document.createElement('button');
-            interviewButton.textContent = 'For Interview';
-            interviewButton.addEventListener('click', async () => {
-                await moveToInterview(application.id, application);
-                fetchApplicationsAndUpdateUI();
+            const interviewButton = createButton('For Interview', async () => {
+                const confirm = await showCustomModal('Are you sure you want to move this applicant to interview?');
+                if (confirm) {
+                    await moveToInterview(application.id, application);
+                    fetchApplicationsAndUpdateUI();
+                }
             });
 
             buttonsContainer.appendChild(contactButton);
@@ -244,4 +245,39 @@ function handleFilterChange(event) {
 
 function filterApplications(applications) {
     return applications; // No status-based filtering, fetching by filter already handles it.
+}
+
+// Utility to create a button with a label and a click event
+function createButton(label, onClick) {
+    const button = document.createElement('button');
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    return button;
+}
+
+// Utility function to show custom modal for confirmation
+function showCustomModal(message) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <p>${message}</p>
+                <button id="confirmBtn" class="confirm-btn">Confirm</button>
+                <button id="cancelBtn" class="cancel-btn">Cancel</button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+            resolve(true);
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+            resolve(false);
+        });
+    });
 }
