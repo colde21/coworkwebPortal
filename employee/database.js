@@ -147,21 +147,44 @@ export async function fetchAllApplications() {
 }
 
 
-// Function to add an employee to the employed collection
-export async function hireApplicant(applicationId, applicantData) {
+// Function to fetch hired applicants
+export async function fetchHiredApplicants() {
     try {
-        const employedCol = collection(firestore, 'employed');
-        await addDoc(employedCol, applicantData);
-
-        // Delete the application after hiring
-        await deleteDoc(doc(firestore, `applied/${applicationId}`));
-
-        console.log(`Applicant with ID: ${applicationId} has been hired and moved to the employed collection.`);
+        const hiredCol = collection(firestore, 'employed');
+        const snapshot = await getDocs(hiredCol);
+        const hired = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return hired;
     } catch (error) {
-        console.error(`Failed to hire applicant ${applicationId}:`, error);
+        console.error("Failed to fetch hired applicants:", error);
         throw error;
     }
 }
+
+// Function to fetch rejected applicants
+export async function fetchRejectedApplicants() {
+    try {
+        const rejectedCol = collection(firestore, 'rejected');
+        const snapshot = await getDocs(rejectedCol);
+        const rejected = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return rejected;
+    } catch (error) {
+        console.error("Failed to fetch rejected applicants:", error);
+        throw error;
+    }
+}
+// Function to fetch interview applicants
+export async function fetchInterviewApplicants() {
+    try {
+        const interviewCol = collection(firestore, 'interview');
+        const snapshot = await getDocs(interviewCol);
+        const interview = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return interview;
+    } catch (error) {
+        console.error("Failed to fetch interview applicants:", error);
+        throw error;
+    }
+}
+
 
 // Exporting the archiveJobIfNeeded function
 export async function archiveJobIfNeeded(jobId, company, position, userEmail) {
