@@ -93,25 +93,28 @@ li {
     flex-wrap: wrap;
 }
 
+.details {
+    flex-grow: 1;
+    margin-right: 20px;
+    line-height: 1.6;
+    text-align: left;
+    font-size: 16px;
+}
+
 .jobTitle {
     font-weight: bold;
     font-size: 18px;
     color: #333;
-    flex: 2;
 }
 
-.company {
+.company, .location {
     font-size: 16px;
     color: #666;
-    flex: 1;
-    text-align: center;
 }
 
-.location {
-    font-size: 14px;
-    color: #999;
-    flex: 1;
-    text-align: right;
+.buttons-container {
+    display: flex;
+    gap: 10px;
 }
 
 /* Button styles */
@@ -119,14 +122,12 @@ button {
     background-color: #e74c3c;
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 10px 20px;
     font-size: 14px;
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-left: 10px;
-    flex-shrink: 0;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -164,11 +165,8 @@ button:hover {
         align-items: flex-start;
     }
 
-    .jobTitle,
-    .company,
-    .location {
+    .details {
         width: 100%;
-        text-align: left;
         margin-bottom: 10px;
     }
 
@@ -316,4 +314,3 @@ button:hover {
     border: 1px solid #ddd;
     border-radius: 4px;
 }
-    
