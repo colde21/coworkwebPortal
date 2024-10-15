@@ -24,6 +24,12 @@
   <div class="container">
     <div class="header-container">
         <input type="text" id="searchBar" placeholder="Search...">
+        <select id="statusFilter" class="filter-dropdown">
+            <option value="applied">Applications</option>
+            <option value="hired">Hired</option>
+            <option value="rejected">Rejected</option>
+            <option value="interview">For Interview</option> <!-- Added For Interview option -->
+        </select>
         &nbsp;
         <button id="refreshBtn" class="refresh-btn">🔄</button>
     </div>
@@ -41,8 +47,9 @@
 
   <div id="loading-screen" class="loading-screen">
     <div class="spinner"></div>
-</div>
-  <script type="module" src="app.js"> </script>
+  </div>
+  
+  <script type="module" src="app.js"></script>
   
 </body>
 </html>

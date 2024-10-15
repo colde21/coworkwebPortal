@@ -54,6 +54,7 @@ body {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
+    gap: 10px; /* Added spacing between elements */
 }
 
 #searchBar {
@@ -64,12 +65,40 @@ body {
     box-sizing: border-box;
 }
 
+.filter-dropdown {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.refresh-btn {
+    padding: 10px;
+    border: none;
+    background-color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.refresh-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.refresh-btn:hover {
+    background-color: #f1f1f1;
+}
+
 ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
+/* Style for list items */
 li {
     background-color: #f9f9f9;
     padding: 15px;
@@ -77,16 +106,21 @@ li {
     border-radius: 8px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    align-items: center;  /* Align items vertically */
+    flex-wrap: wrap; /* Allow items to wrap in smaller screens */
 }
 
+/* Style for details section */
 .details {
     flex-grow: 1;
     margin-right: 20px;
     line-height: 1.6;
     text-align: left;
+    font-size: 16px;
 }
 
+/* Style for buttons */
 li button {
     background-color: #E74C3C;
     color: white;
@@ -96,10 +130,32 @@ li button {
     cursor: pointer;
     transition: background-color 0.3s ease;
     margin-left: 5px;
+    font-size: 14px;
 }
 
+/* Align buttons horizontally */
+li .buttons-container {
+    display: flex;
+    gap: 10px;
+}
+
+/* Button hover effect */
 li button:hover {
     background-color: #c0392b;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+    li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .buttons-container {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: flex-start;
+    }
 }
 
 /* Pagination styling */
@@ -147,4 +203,3 @@ li button:hover {
     color: white;
     border-color: #c0392b;
 }
-

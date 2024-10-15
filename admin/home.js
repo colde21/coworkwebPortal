@@ -59,46 +59,40 @@ async function performSignOut() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const signOutBtn = document.getElementById('signOutBtn');
-    const confirmationDialog = document.getElementById('signOutConfirmation');
-    const confirmSignOutBtn = document.getElementById('confirmSignOutBtn');
-    const cancelSignOutBtn = document.getElementById('cancelSignOutBtn');
-    const loadingScreen = document.getElementById('loading-screen');
-
     if (signOutBtn) {
-        signOutBtn.addEventListener('click', () => {
-            confirmationDialog.style.display = 'flex'; // Show confirmation dialog
-        });
+        signOutBtn.addEventListener('click', performSignOut);
     }
-
-    cancelSignOutBtn.addEventListener('click', () => {
-        confirmationDialog.style.display = 'none'; // Hide the confirmation dialog
-    });
-
-    confirmSignOutBtn.addEventListener('click', async () => {
-        confirmationDialog.style.display = 'none'; // Hide the confirmation dialog
-        loadingScreen.style.display = 'flex'; // Show loading screen
-
-        try {
-            const user = auth.currentUser;
-            if (!user) throw new Error("No authenticated user found.");
-
-            const userEmail = user.email;
-            await logAudit(userEmail, "Sign out", { status: "Success" });
-            await firebaseSignOut(auth);
-            window.location.href = "/login.html";
-        } catch (error) {
-            const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
-            await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
-            alert("Error: Unable to sign out.");
-        } finally {
-            loadingScreen.style.display = 'none'; // Hide loading screen after sign-out is complete
-        }
-    });
-
     requireLogin();
     updateDashboardData();
     loadMostAppliedJobs();
 });
+
+// Load "Most Applied Jobs"
+async function loadMostAppliedJobs() {
+    const mostAppliedJobsList = document.getElementById('mostAppliedJobsList');
+    const applicationCol = collection(firestore, 'applied');
+    
+    try {
+        const applicationsSnapshot = await getDocs(applicationCol);
+        const applications = applicationsSnapshot.docs.map(doc => doc.data());
+        const positionsByCount = {};
+
+        applications.forEach(app => {
+            const position = app.position || 'Unknown Position';
+            positionsByCount[position] = (positionsByCount[position] || 0) + 1;
+        });
+
+        const sortedJobs = Object.entries(positionsByCount).sort(([, a], [, b]) => b - a).slice(0, 5);
+        mostAppliedJobsList.innerHTML = '';
+        sortedJobs.forEach(([job, count]) => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `<b>${job}</b> (${count}) - ${((count / applications.length) * 100).toFixed(2)}%`;
+            mostAppliedJobsList.appendChild(listItem);
+        });
+    } catch (error) {
+        console.error("Error fetching most applied jobs:", error);
+    }
+}
 
 
 // Fetch applications and employed data
