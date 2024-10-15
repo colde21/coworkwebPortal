@@ -178,8 +178,33 @@
                 </div>
             </form>
         </div>
-        
-    
+       
+     
+        <!-- Edit Job Confirmation Dialog -->
+<div id="editJobConfirmation" class="confirmation-dialog" style="display: none;">
+    <div class="confirmation-dialog-content">
+        <h4>Are you sure you want to save changes to this job?</h4>
+        <div class="confirmation-dialog-buttons">
+            <button id="confirmEditJobBtn">Yes, Save</button>
+            <button id="cancelEditJobBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Message -->
+<div id="successMessage" class="success-message" style="display: none;">
+    <div class="success-message-content">
+        <div class="success-animation">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+        </div>
+        <h4>Job Updated Successfully!</h4>
+        <button id="closeSuccessBtn">Close</button>
+    </div>
+</div>
+
     <div id="paginationControls" class="pagination"></div>
     <div id="loading-screen" class="loading-screen">
         <div class="load-circle"></div>

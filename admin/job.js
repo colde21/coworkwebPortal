@@ -276,64 +276,84 @@ async function editJob(jobId) {
     }
 }
 // Save job changes
-document.getElementById('saveJobButton').addEventListener('click', async function (event) {
+document.getElementById('saveJobButton').addEventListener('click', function(event) {
     event.preventDefault();
 
-    const jobId = document.getElementById('editJobForm').dataset.jobId;
-    if (!jobId) {
-        alert('No job ID found. Please refresh and try again.');
-        return;
-    }
+    // Show the confirmation dialog before saving the job
+    const editJobConfirmation = document.getElementById('editJobConfirmation');
+    editJobConfirmation.style.display = 'flex';
 
-    // Get the selected job type radio button value
-    const selectedJobType = document.querySelector('input[name="jobType"]:checked')?.value || '';
+    // If the user confirms the changes
+    document.getElementById('confirmEditJobBtn').addEventListener('click', async function() {
+        editJobConfirmation.style.display = 'none'; // Hide the confirmation dialog
 
-    const updatedData = {
-        position: document.getElementById('position')?.value || '',
-        company: document.getElementById('company')?.value || '',
-        location: document.getElementById('location')?.value || '',
-        age: document.getElementById('age')?.value || '',
-        type: document.getElementById('type')?.value || '',
-        vacancy: document.getElementById('vacancy')?.value || '',
-        contact: document.getElementById('email')?.value || '',
-        skills1: document.getElementById('skills1')?.value || '',
-        skills2: document.getElementById('skills2')?.value || '',
-        skills3: document.getElementById('skills3')?.value || '',
-        skills4: document.getElementById('skills4')?.value || '',
-        skills5: document.getElementById('skills5')?.value || '',
-        qualification1: document.getElementById('qualification1')?.value || '',
-        qualification2: document.getElementById('qualification2')?.value || '',
-        qualification3: document.getElementById('qualification3')?.value || '',
-        qualification4: document.getElementById('qualification4')?.value || '',
-        qualification5: document.getElementById('qualification5')?.value || '',
-        facilities: document.getElementById('facilities')?.value || '',
-        description: document.getElementById('description')?.value || '',
-        expsalary: document.getElementById('expectedSalary')?.value || '',
-        experience1: document.getElementById('experience1')?.value || '',
-        experience2: document.getElementById('experience2')?.value || '',
-        experience3: document.getElementById('experience3')?.value || '',
-        jobType: selectedJobType, // Add the selected job type
-    };
+        const jobId = document.getElementById('editJobForm').dataset.jobId;
+        if (!jobId) {
+            alert('No job ID found. Please refresh and try again.');
+            return;
+        }
 
-    try {
-        const jobDocRef = doc(firestore, 'jobs', jobId);
-        await updateDoc(jobDocRef, updatedData);
-        await logAudit(auth.currentUser.email, 'Job Edited', { jobId, updatedData });
-        alert('Job updated successfully!');
-        document.getElementById('editJobForm').style.display = 'none';
-        document.querySelector('.job-container').classList.remove('blur');
-        fetchAllJobs().then(jobs => {
-            window.allJobs = jobs;
-            filteredJobs = jobs;
-            updateJobTable();
-        });
-    } catch (error) {
-        console.error('Error updating job:', error);
-        alert('Failed to update the job. Please try again.');
-    }
+        // Get the selected job type radio button value
+        const selectedJobType = document.querySelector('input[name="jobType"]:checked')?.value || '';
+
+        const updatedData = {
+            position: document.getElementById('position')?.value || '',
+            company: document.getElementById('company')?.value || '',
+            location: document.getElementById('location')?.value || '',
+            age: document.getElementById('age')?.value || '',
+            type: document.getElementById('type')?.value || '',
+            vacancy: document.getElementById('vacancy')?.value || '',
+            contact: document.getElementById('email')?.value || '',
+            skills1: document.getElementById('skills1')?.value || '',
+            skills2: document.getElementById('skills2')?.value || '',
+            skills3: document.getElementById('skills3')?.value || '',
+            skills4: document.getElementById('skills4')?.value || '',
+            skills5: document.getElementById('skills5')?.value || '',
+            qualification1: document.getElementById('qualification1')?.value || '',
+            qualification2: document.getElementById('qualification2')?.value || '',
+            qualification3: document.getElementById('qualification3')?.value || '',
+            qualification4: document.getElementById('qualification4')?.value || '',
+            qualification5: document.getElementById('qualification5')?.value || '',
+            facilities: document.getElementById('facilities')?.value || '',
+            description: document.getElementById('description')?.value || '',
+            expsalary: document.getElementById('expectedSalary')?.value || '',
+            experience1: document.getElementById('experience1')?.value || '',
+            experience2: document.getElementById('experience2')?.value || '',
+            experience3: document.getElementById('experience3')?.value || '',
+            jobType: selectedJobType, // Add the selected job type
+        };
+
+        try {
+            const jobDocRef = doc(firestore, 'jobs', jobId);
+            await updateDoc(jobDocRef, updatedData);
+            await logAudit(auth.currentUser.email, 'Job Edited', { jobId, updatedData });
+
+            // Show success message
+            const successMessage = document.getElementById('successMessage');
+            successMessage.style.display = 'flex';
+
+            // Close the success message and reset form
+            document.getElementById('closeSuccessBtn').addEventListener('click', () => {
+                successMessage.style.display = 'none';
+                document.getElementById('editJobForm').style.display = 'none';
+                document.querySelector('.job-container').classList.remove('blur');
+                fetchAllJobs().then(jobs => {
+                    window.allJobs = jobs;
+                    filteredJobs = jobs;
+                    updateJobTable();
+                });
+            });
+        } catch (error) {
+            console.error('Error updating job:', error);
+            alert('Failed to update the job. Please try again.');
+        }
+    });
+
+    // If the user cancels the changes
+    document.getElementById('cancelEditJobBtn').addEventListener('click', function() {
+        document.getElementById('editJobConfirmation').style.display = 'none';
+    });
 });
-
-
 // "Go Back" button functionality
 document.getElementById('goBackButton').addEventListener('click', function () {
     document.getElementById('editJobForm').style.display = 'none';
