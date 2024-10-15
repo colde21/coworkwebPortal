@@ -33,30 +33,45 @@ function requireLogin() {
 
 // Sign out functionality
 async function performSignOut() {
+    const signOutConfirmation = document.getElementById('signOutConfirmation');
+    const confirmSignOutBtn = document.getElementById('confirmSignOutBtn');
+    const cancelSignOutBtn = document.getElementById('cancelSignOutBtn');
     const loadingScreen = document.getElementById('loading-screen');
-    const errorMessageContainer = document.getElementById('error-message');
 
-    if (loadingScreen) loadingScreen.style.display = 'flex';
+    // Show the confirmation dialog
+    signOutConfirmation.style.display = 'flex';
 
-    try {
-        const user = auth.currentUser;
-        if (!user) throw new Error("No authenticated user found.");
+    // If the user confirms, proceed with sign-out
+    confirmSignOutBtn.addEventListener('click', async function() {
+        signOutConfirmation.style.display = 'none'; // Hide the confirmation dialog
+        if (loadingScreen) loadingScreen.style.display = 'flex'; // Show loading screen
 
-        const userEmail = user.email;
-        await logAudit(userEmail, "Sign out", { status: "Success" });
-        await firebaseSignOut(auth);
-        window.location.href = "/login.html";
-    } catch (error) {
-        const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
-        await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
-        if (errorMessageContainer) {
-            errorMessageContainer.textContent = error.message || 'Sign out failed. Please try again.';
+        try {
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error("No authenticated user found.");
+            }
+
+            const userEmail = user.email;
+            await logAudit(userEmail, "Sign out", { status: "Success" });
+            await firebaseSignOut(auth);
+            window.location.href = "/login.html";
+        } catch (error) {
+            console.error("Error during sign-out:", error);
+            const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
+            await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+            alert(error.message || 'Sign out failed. Please try again.');
+        } finally {
+            if (loadingScreen) loadingScreen.style.display = 'none';
         }
-    } finally {
-        if (loadingScreen) loadingScreen.style.display = 'none';
-    }
-}
+    });
 
+    // If the user cancels, hide the confirmation dialog
+    cancelSignOutBtn.addEventListener('click', function() {
+        signOutConfirmation.style.display = 'none';
+    });
+}
 document.addEventListener('DOMContentLoaded', () => {
     const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
