@@ -223,20 +223,28 @@ function aggregateDataByCompany(applications, employed) {
     return { applicationsByCompany, employedByCompany, employedByPosition };
 }
 
-// Shades of red for bars
-const redShades = [
-    'rgba(255, 99, 132, 0.7)',
-    'rgba(255, 77, 77, 0.7)',
-    'rgba(255, 127, 80, 0.7)',
-    'rgba(240, 128, 128, 0.7)',
-    'rgba(220, 20, 60, 0.7)',
+const coolShades = [
+    'rgba(85, 172, 238, 0.7)',   // Light Blue
+    'rgba(93, 156, 236, 0.7)',   // Medium Blue
+    'rgba(72, 133, 237, 0.7)',   // Classic Blue
+    'rgba(153, 102, 255, 0.7)',  // Soft Purple
+    'rgba(102, 204, 255, 0.7)',  // Sky Blue
+    'rgba(122, 197, 205, 0.7)',  // Soft Teal
 ];
 
-// Create Applications by Company Chart
+
 function createApplicationsByCompanyChart(applicationsByCompany) {
     const ctxApplications = document.getElementById('applicationsByCompanyChart').getContext('2d');
     const companies = Object.keys(applicationsByCompany);
     const applications = Object.values(applicationsByCompany);
+
+    // Create gradients for each bar using cooler colors
+    const gradients = companies.map((_, index) => {
+        const gradient = ctxApplications.createLinearGradient(0, 0, ctxApplications.canvas.width, 0); // Horizontal gradient
+        gradient.addColorStop(0, 'rgba(85, 172, 238, 0.1)'); // Lighter start
+        gradient.addColorStop(1, coolShades[index % coolShades.length]); // Full color end
+        return gradient;
+    });
 
     new Chart(ctxApplications, {
         type: 'bar',
@@ -245,8 +253,8 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
             datasets: [{
                 label: 'Applications by Company',
                 data: applications,
-                backgroundColor: redShades,
-                borderColor: redShades.map(shade => shade.replace('0.7', '1')),
+                backgroundColor: gradients, // Use the gradients for background color
+                borderColor: coolShades.map(shade => shade.replace('0.7', '1')),
                 borderWidth: 1
             }]
         },
@@ -284,6 +292,8 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
     });
 }
 
+
+
 // Create Employed by Position Chart with Adjustments
 function createEmployedByPositionChart(employedByPosition) {
     const ctxEmployedByPosition = document.getElementById('employedByPositionChart').getContext('2d');
@@ -299,8 +309,8 @@ function createEmployedByPositionChart(employedByPosition) {
         return {
             label: company,
             data,
-            backgroundColor: redShades[index % redShades.length],
-            borderColor: redShades[index % redShades.length].replace('0.7', '1'),
+            backgroundColor: coolShades[index % coolShades.length],
+            borderColor: coolShades[index % coolShades.length].replace('0.7', '1'),
             borderWidth: 1
         };
     });
@@ -361,11 +371,18 @@ function createEmployedByPositionChart(employedByPosition) {
 }
 
 
-// Create Employed by Company Chart
 function createEmployedByCompanyChart(employedByCompany) {
     const ctxEmployedByCompany = document.getElementById('employedByCompanyChart').getContext('2d');
     const companies = Object.keys(employedByCompany);
     const employedCounts = Object.values(employedByCompany);
+
+    // Create gradients for each bar using cooler colors
+    const gradients = companies.map((_, index) => {
+        const gradient = ctxEmployedByCompany.createLinearGradient(0, 0, ctxEmployedByCompany.canvas.width, 0);
+        gradient.addColorStop(0, 'rgba(85, 172, 238, 0.1)'); // Lighter start
+        gradient.addColorStop(1, coolShades[index % coolShades.length]); // Full color end
+        return gradient;
+    });
 
     new Chart(ctxEmployedByCompany, {
         type: 'bar',
@@ -374,8 +391,8 @@ function createEmployedByCompanyChart(employedByCompany) {
             datasets: [{
                 label: 'Employed by Company',
                 data: employedCounts,
-                backgroundColor: redShades,
-                borderColor: redShades.map(shade => shade.replace('0.7', '1')),
+                backgroundColor: gradients, // Use the gradients for background color
+                borderColor: coolShades.map(shade => shade.replace('0.7', '1')),
                 borderWidth: 1
             }]
         },
@@ -412,6 +429,8 @@ function createEmployedByCompanyChart(employedByCompany) {
         plugins: [ChartDataLabels]
     });
 }
+
+
 
 // Create Text Summary
 function createTextSummary(summaryElementId, labels, data, percentages) {
