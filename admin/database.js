@@ -131,15 +131,54 @@ export async function fetchAllApplications() {
     }
 }
 
-// Function to hire an applicant
+// Function to hire an applicant from interview
 export async function hireApplicant(applicationId, applicantData) {
     try {
         const employedCol = collection(firestore, 'employed');
         await addDoc(employedCol, applicantData);
-        await deleteDoc(doc(firestore, `applied/${applicationId}`));
+        await deleteDoc(doc(firestore, `interview/${applicationId}`));
         console.log(`Applicant with ID: ${applicationId} has been hired and moved to the employed collection.`);
     } catch (error) {
         console.error(`Failed to hire applicant ${applicationId}:`, error);
+        throw error;
+    }
+}
+
+// Function to reject an applicant from interview
+export async function rejectApplicant(applicationId, applicantData) {
+    try {
+        const rejectedCol = collection(firestore, 'rejected');
+        await addDoc(rejectedCol, applicantData);
+        await deleteDoc(doc(firestore, `interview/${applicationId}`));
+        console.log(`Applicant with ID: ${applicationId} has been rejected and moved to the rejected collection.`);
+    } catch (error) {
+        console.error(`Failed to reject applicant ${applicationId}:`, error);
+        throw error;
+    }
+}
+
+// Function to move an applicant to interview collection
+export async function moveToInterview(applicationId, applicantData) {
+    try {
+        const interviewCol = collection(firestore, 'interview');
+        await addDoc(interviewCol, applicantData);
+        await deleteDoc(doc(firestore, `applied/${applicationId}`));
+        console.log(`Applicant with ID: ${applicationId} has been moved to the interview collection.`);
+    } catch (error) {
+        console.error(`Failed to move applicant ${applicationId} to interview:`, error);
+        throw error;
+    }
+}
+
+// Function to fetch interview applicants
+export async function fetchInterviewApplicants() {
+    try {
+        const interviewCol = collection(firestore, 'interview');
+        const snapshot = await getDocs(interviewCol);
+        const interview = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return interview;
+    } catch (error) {
+        console.error("Failed to fetch interview applicants:", error);
         throw error;
     }
 }
@@ -201,41 +240,3 @@ export async function fetchRejectedApplicants() {
 }
 
 // Function to reject an applicant
-export async function rejectApplicant(applicationId, applicantData) {
-    try {
-        const rejectedCol = collection(firestore, 'rejected');
-        await addDoc(rejectedCol, applicantData);
-        await deleteDoc(doc(firestore, `applied/${applicationId}`));
-        console.log(`Applicant with ID: ${applicationId} has been rejected and moved to the rejected collection.`);
-    } catch (error) {
-        console.error(`Failed to reject applicant ${applicationId}:`, error);
-        throw error;
-    }
-}
-
-// Function to move an applicant to interview collection
-export async function moveToInterview(applicationId, applicantData) {
-    try {
-        const interviewCol = collection(firestore, 'interview');
-        await addDoc(interviewCol, applicantData);
-        await deleteDoc(doc(firestore, `applied/${applicationId}`));
-        console.log(`Applicant with ID: ${applicationId} has been moved to the interview collection.`);
-    } catch (error) {
-        console.error(`Failed to move applicant ${applicationId} to interview:`, error);
-        throw error;
-    }
-}
-
-// Function to fetch interview applicants
-export async function fetchInterviewApplicants() {
-    try {
-        const interviewCol = collection(firestore, 'interview');
-        const snapshot = await getDocs(interviewCol);
-        const interview = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        return interview;
-    } catch (error) {
-        console.error("Failed to fetch interview applicants:", error);
-        throw error;
-    }
-}
-

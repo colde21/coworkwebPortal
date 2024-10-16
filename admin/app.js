@@ -1,6 +1,6 @@
-import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
+import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { fetchAllApplications, fetchHiredApplicants, fetchRejectedApplicants, fetchInterviewApplicants, hireApplicant, rejectApplicant, moveToInterview, logAudit } from './database.js'; 
+import { fetchAllApplications, fetchHiredApplicants, fetchRejectedApplicants, fetchInterviewApplicants, hireApplicant, rejectApplicant, moveToInterview, logAudit } from './database.js';
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -41,27 +41,20 @@ async function performSignOut() {
     const cancelSignOutBtn = document.getElementById('cancelSignOutBtn');
     const loadingScreen = document.getElementById('loading-screen');
 
-    // Show the confirmation dialog
     signOutConfirmation.style.display = 'flex';
-
-    // If the user confirms, proceed with sign-out
     confirmSignOutBtn.addEventListener('click', async function() {
-        signOutConfirmation.style.display = 'none'; // Hide the confirmation dialog
-        if (loadingScreen) loadingScreen.style.display = 'flex'; // Show loading screen
+        signOutConfirmation.style.display = 'none';
+        if (loadingScreen) loadingScreen.style.display = 'flex';
 
         try {
             const user = auth.currentUser;
-
-            if (!user) {
-                throw new Error("No authenticated user found.");
-            }
+            if (!user) throw new Error("No authenticated user found.");
 
             const userEmail = user.email;
             await logAudit(userEmail, "Sign out", { status: "Success" });
             await firebaseSignOut(auth);
             window.location.href = "/login.html";
         } catch (error) {
-            console.error("Error during sign-out:", error);
             const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
             await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
             alert(error.message || 'Sign out failed. Please try again.');
@@ -70,7 +63,6 @@ async function performSignOut() {
         }
     });
 
-    // If the user cancels, hide the confirmation dialog
     cancelSignOutBtn.addEventListener('click', function() {
         signOutConfirmation.style.display = 'none';
     });
@@ -79,29 +71,21 @@ async function performSignOut() {
 document.addEventListener('DOMContentLoaded', () => {
     requireLogin();
     const signOutBtn = document.getElementById('signOutBtn');
-    if (signOutBtn) {
-        signOutBtn.addEventListener('click', performSignOut);
-    }
+    if (signOutBtn) signOutBtn.addEventListener('click', performSignOut);
     
     const searchBar = document.getElementById('searchBar');
     if (searchBar) {
         searchBar.addEventListener('input', handleSearch);
         searchBar.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                handleSearch();
-            }
+            if (event.key === 'Enter') handleSearch();
         });
     }
 
     const filterDropdown = document.getElementById('statusFilter');
-    if (filterDropdown) {
-        filterDropdown.addEventListener('change', handleFilterChange);
-    }
+    if (filterDropdown) filterDropdown.addEventListener('change', handleFilterChange);
 
     const refreshBtn = document.getElementById('refreshBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', handleRefresh);
-    }
+    if (refreshBtn) refreshBtn.addEventListener('click', handleRefresh);
 
     fetchApplicationsAndUpdateUI(); // Load initially as 'Applications'
 });
@@ -150,21 +134,39 @@ function updateApplicationList(applications) {
             <strong>Contact number:</strong> ${application.userPhone}
         `;
 
-        if (selectedFilter === 'applied') {
-            const buttonsContainer = document.createElement('div');
-            buttonsContainer.className = 'buttons-container';
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'buttons-container';
 
-            const contactButton = createButton('Contact', () => {
-                const subject = `Application Status for ${application.position} at ${application.company}`;
-                const body = `Dear ${application.userName},\n\nYou have applied for ${application.position} at ${application.company}.`;
-                const mailtoLink = `mailto:${application.userEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                window.location.href = mailtoLink;
+        const contactButton = createButton('Contact', () => {
+            const subject = `Application Status for ${application.position} at ${application.company}`;
+            const body = `Dear ${application.userName},\n\nYou have applied for ${application.position} at ${application.company}.`;
+            const mailtoLink = `mailto:${application.userEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
+        });
+
+        if (selectedFilter === 'applied') {
+            const interviewButton = createButton('For Interview', async () => {
+                const interviewDetails = await showInterviewModal(application);
+                if (interviewDetails) {
+                    const fullInterviewData = {
+                        ...application,
+                        ...interviewDetails
+                    };
+                    await moveToInterview(application.id, fullInterviewData);
+                    alert('Applicant has been moved to the "For Interview" filter.');
+                    fetchApplicationsAndUpdateUI();
+                }
             });
 
+            buttonsContainer.appendChild(contactButton);
+            buttonsContainer.appendChild(interviewButton);
+        } 
+        else if (selectedFilter === 'interview') {
             const hireButton = createButton('Hire', async () => {
                 const confirm = await showCustomModal('Are you sure you want to hire this applicant?');
                 if (confirm) {
                     await hireApplicant(application.id, application);
+                    alert('Applicant has been hired.');
                     fetchApplicationsAndUpdateUI();
                 }
             });
@@ -173,14 +175,7 @@ function updateApplicationList(applications) {
                 const confirm = await showCustomModal('Are you sure you want to reject this applicant?');
                 if (confirm) {
                     await rejectApplicant(application.id, application);
-                    fetchApplicationsAndUpdateUI();
-                }
-            });
-
-            const interviewButton = createButton('For Interview', async () => {
-                const confirm = await showCustomModal('Are you sure you want to move this applicant to interview?');
-                if (confirm) {
-                    await moveToInterview(application.id, application);
+                    alert('Applicant has been rejected.');
                     fetchApplicationsAndUpdateUI();
                 }
             });
@@ -188,14 +183,10 @@ function updateApplicationList(applications) {
             buttonsContainer.appendChild(contactButton);
             buttonsContainer.appendChild(hireButton);
             buttonsContainer.appendChild(rejectButton);
-            buttonsContainer.appendChild(interviewButton);
-
-            listItem.appendChild(detailsDiv);
-            listItem.appendChild(buttonsContainer);
-        } else {
-            listItem.appendChild(detailsDiv); // No buttons for 'hired', 'rejected', and 'interview'
         }
 
+        listItem.appendChild(detailsDiv);
+        listItem.appendChild(buttonsContainer);
         applicationList.appendChild(listItem);
     });
 
@@ -245,13 +236,10 @@ function handleSearch() {
         (application.position && application.position.toLowerCase().includes(query)) ||
         (application.company && application.company.toLowerCase().includes(query)) ||
         (application.userEmail && application.userEmail.toLowerCase().includes(query)) ||
-        (application.userPhone && String(application.userPhone).includes(query)) // Convert userPhone to string
+        (application.userPhone && String(application.userPhone).includes(query)) 
     );
     updateApplicationList(filteredApplications);
 }
-
-
-
 
 function handleRefresh() {
     filteredApplications = filterApplications(allApplications);
@@ -260,16 +248,14 @@ function handleRefresh() {
 
 function handleFilterChange(event) {
     selectedFilter = event.target.value;
-    currentPage = 1; // Reset to the first page whenever the filter is changed
+    currentPage = 1;
     fetchApplicationsAndUpdateUI();
 }
 
-
 function filterApplications(applications) {
-    return applications; // No status-based filtering, fetching by filter already handles it.
+    return applications;
 }
 
-// Utility to create a button with a label and a click event
 function createButton(label, onClick) {
     const button = document.createElement('button');
     button.textContent = label;
@@ -277,7 +263,6 @@ function createButton(label, onClick) {
     return button;
 }
 
-// Utility function to show custom modal for confirmation
 function showCustomModal(message) {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
@@ -300,6 +285,59 @@ function showCustomModal(message) {
         document.getElementById('cancelBtn').addEventListener('click', () => {
             document.body.removeChild(modal);
             resolve(false);
+        });
+    });
+}
+
+function showInterviewModal(application) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Schedule Interview for ${application.userName}</h3>
+                <label for="interviewDate">Date:</label>
+                <input type="date" id="interviewDate" required><br><br>
+                <label for="interviewTime">Time:</label>
+                <input type="time" id="interviewTime" required><br><br>
+                <label for="interviewLocation">Location:</label>
+                <input type="text" id="interviewLocation" placeholder="Enter location" required><br><br>
+                <label for="interviewRequirements">Requirements:</label>
+                <textarea id="interviewRequirements" rows="3" placeholder="List interview requirements" required></textarea><br><br>
+                <label for="contactPerson">Contact Person:</label>
+                <input type="text" id="contactPerson" placeholder="Enter contact person" required><br><br>
+                <button id="confirmInterviewBtn" class="confirm-btn">Confirm</button>
+                <button id="cancelInterviewBtn" class="cancel-btn">Cancel</button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById('confirmInterviewBtn').addEventListener('click', () => {
+            const interviewDate = document.getElementById('interviewDate').value;
+            const interviewTime = document.getElementById('interviewTime').value;
+            const interviewLocation = document.getElementById('interviewLocation').value;
+            const interviewRequirements = document.getElementById('interviewRequirements').value;
+            const contactPerson = document.getElementById('contactPerson').value;
+
+            if (interviewDate && interviewTime && interviewLocation && interviewRequirements && contactPerson) {
+                const interviewDetails = {
+                    date: interviewDate,
+                    time: interviewTime,
+                    location: interviewLocation,
+                    requirements: interviewRequirements,
+                    contactPerson: contactPerson
+                };
+                document.body.removeChild(modal);
+                resolve(interviewDetails);
+            } else {
+                alert("Please fill out all the interview details.");
+            }
+        });
+
+        document.getElementById('cancelInterviewBtn').addEventListener('click', () => {
+            document.body.removeChild(modal);
+            resolve(null);
         });
     });
 }
