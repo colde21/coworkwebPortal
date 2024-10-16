@@ -392,7 +392,7 @@ function updatePaginationControls() {
     paginationControls.appendChild(nextButton);
 }
 document.getElementById('generateLinkButton').addEventListener('click', async () => {
-    const companyName = prompt("Enter the company name for which you want to generate the link:").trim().toLowerCase();
+    const companyName = prompt("Enter the company name for which you want to generate the link:");
     if (companyName) {
         const link = await generateDisposableLink(companyName);
         if (link) {
