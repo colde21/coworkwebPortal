@@ -157,25 +157,6 @@ li:hover {
     color: #999;
 }
 
-li button {
-    background-color: #ff0000;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-left: auto;
-}
-
-li button:hover {
-    background-color: #cc0000;
-}
-
-li button:focus {
-    outline: none;
-}
-
 @media (max-width: 768px) {
     .header-container {
         flex-direction: column;
@@ -193,12 +174,6 @@ li button:focus {
 
     .details {
         margin-bottom: 10px;
-    }
-
-    li button {
-        width: 100%;
-        text-align: center;
-        margin-left: 0;
     }
 
     #searchBar {
@@ -228,25 +203,6 @@ li button:focus {
     text-align: center;
 }
 
-.confirmation-dialog-buttons {
-    display: flex;
-    display: block;
-    margin-top: 20px;
-}
-
-.confirmation-dialog-buttons button {
-    background-color: #e74c3c;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.confirmation-dialog-buttons button:hover {
-    background-color: darkred;
-}
 /* Loading Screen */
 .loading-screen {
     display: none;
@@ -259,7 +215,8 @@ li button:focus {
     justify-content: center;
     align-items: center;
 }
-.load-circle{
+
+.load-circle {
     width: 100px;
     height: 40px;
     --g: radial-gradient(farthest-side,#0000 calc(95% - 3px),#fff calc(100% - 3px) 98%,#0000 101%) no-repeat;
@@ -267,28 +224,30 @@ li button:focus {
     background-size: 30px 30px;
     animation: la9 1s infinite alternate;
 }
-  @keyframes la9 {
+
+@keyframes la9 {
     0% {
-      background-position: 0 50%, 50% 50%, 100% 50%;
+        background-position: 0 50%, 50% 50%, 100% 50%;
     }
     20% {
-      background-position: 0 0, 50% 50%, 100% 50%;
+        background-position: 0 0, 50% 50%, 100% 50%;
     }
     40% {
-      background-position: 0 100%, 50% 0, 100% 50%;
+        background-position: 0 100%, 50% 0, 100% 50%;
     }
     60% {
-      background-position: 0 50%, 50% 100%, 100% 0;
+        background-position: 0 50%, 50% 100%, 100% 0;
     }
     80% {
-      background-position: 0 50%, 50% 50%, 100% 100%;
+        background-position: 0 50%, 50% 50%, 100% 100%;
     }
     100% {
-      background-position: 0 50%, 50% 50%, 100% 50%;
+        background-position: 0 50%, 50% 50%, 100% 50%;
     }
-  }
-  /*loading screen */
-  .profile-image {
+}
+
+/* Profile Image */
+.profile-image {
     margin-right: 15px;
 }
 
@@ -298,3 +257,42 @@ li button:focus {
     border-radius: 50%;
 }
 
+/* Modal styling */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it appears on top */
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 50%;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dialog-body {
+    padding: 10px;
+}
+
+.profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
