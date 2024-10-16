@@ -69,6 +69,31 @@ body {
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+    font-size: 14px; /* Ensure text size is smaller to fit better */
+    overflow-wrap: break-word; /* Handle long company names */
+}
+
+.summary-container h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.summary-container ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.summary-container li {
+    margin-bottom: 10px;
+    font-size: 14px; /* Adjust font size */
+    word-wrap: break-word; /* Wrap long words or text */
+    line-height: 1.5; /* Add line height for better readability */
+}
+
+.summary-container b {
+    font-size: 14px;
 }
 
 canvas {
@@ -151,7 +176,7 @@ canvas {
     background-size: 30px 30px;
     animation: la9 1s infinite alternate;
 }
-  @keyframes la9 {
+@keyframes la9 {
     0% {
       background-position: 0 50%, 50% 50%, 100% 50%;
     }
@@ -170,12 +195,11 @@ canvas {
     100% {
       background-position: 0 50%, 50% 50%, 100% 50%;
     }
-  }
-  /*loading screen */
+}
+/*loading screen */
 
-  
-  /* confirmation-dialog */
-  .confirmation-dialog {
+/* confirmation-dialog */
+.confirmation-dialog {
     position: fixed;
     top: 0;
     left: 0;
