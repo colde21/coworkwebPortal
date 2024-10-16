@@ -2,6 +2,7 @@ import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https:/
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { fetchAllApplications, fetchHiredApplicants, fetchRejectedApplicants, fetchInterviewApplicants, logAudit } from './database.js'; 
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -17,7 +18,7 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
-
+const storage = getStorage(app);  // Initialize Firebase Storage
 // Pagination Variables
 let allApplications = [];
 let filteredApplications = [];
@@ -140,6 +141,7 @@ function updateApplicationList(applications) {
     paginatedApplications.forEach((application) => {
         const listItem = document.createElement('li');
 
+        // Create a container for the user details
         const detailsDiv = document.createElement('div');
         detailsDiv.className = 'details';
         detailsDiv.innerHTML = `
@@ -149,13 +151,36 @@ function updateApplicationList(applications) {
             <strong>Contact number:</strong> ${application.userPhone}
         `;
 
-        // Append the details (without any action buttons)
-        listItem.appendChild(detailsDiv);
+        // Profile Image fetching
+        const profileImageDiv = document.createElement('div');
+        profileImageDiv.className = 'profile-image';
+
+        getDownloadURL(storageRef(storage, `profile_images/${application.userId}.jpg`))
+            .then((url) => {
+                const profileImage = document.createElement('img');
+                profileImage.src = url;
+                profileImage.alt = `${application.userName}'s profile image`;
+                profileImage.className = 'profile-pic'; // Add class for styling
+                profileImageDiv.appendChild(profileImage);
+            })
+            .catch((error) => {
+                console.error("Error fetching profile image:", error);
+                const placeholderImage = document.createElement('div');
+                placeholderImage.textContent = 'P'; // Placeholder for missing image
+                placeholderImage.className = 'placeholder-image';
+                profileImageDiv.appendChild(placeholderImage);
+            });
+
+        // Append the profile image and details to the list item (without buttons)
+        listItem.appendChild(profileImageDiv);  // Add profile image to the list item
+        listItem.appendChild(detailsDiv);      // Add user details to the list item
+
         applicationList.appendChild(listItem);
     });
 
     updatePaginationControls(applications);
 }
+
 
 
 function updatePaginationControls(applications) {

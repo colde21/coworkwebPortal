@@ -2,6 +2,8 @@ import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https:/
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { fetchAllApplications, fetchHiredApplicants, fetchRejectedApplicants, fetchInterviewApplicants, hireApplicant, rejectApplicant, moveToInterview, logAudit } from './database.js';
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
+import { collection, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -17,6 +19,7 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
+const storage = getStorage(app);
 
 // Pagination Variables
 let allApplications = [];
@@ -24,6 +27,9 @@ let filteredApplications = [];
 let currentPage = 1;
 const applicationsPerPage = 5;
 let selectedFilter = 'applied'; // Default filter as 'Applications'
+
+const possibleFormats = ['png', 'jpg', 'jpeg'];
+let imageFound = false;
 
 function requireLogin() {
     onAuthStateChanged(auth, (user) => {
@@ -125,6 +131,7 @@ function updateApplicationList(applications) {
     paginatedApplications.forEach((application) => {
         const listItem = document.createElement('li');
 
+        // Create a container for the user details
         const detailsDiv = document.createElement('div');
         detailsDiv.className = 'details';
         detailsDiv.innerHTML = `
@@ -133,6 +140,28 @@ function updateApplicationList(applications) {
             <strong>Email:</strong> ${application.userEmail}<br>
             <strong>Contact number:</strong> ${application.userPhone}
         `;
+
+        // Profile Image fetching
+        const profileImageDiv = document.createElement('div');
+        profileImageDiv.className = 'profile-image';
+        
+
+       getDownloadURL(storageRef(storage, `profile_images/${application.userId}.jpg`))
+       
+            .then((url) => {
+                const profileImage = document.createElement('img');
+                profileImage.src = url;
+                profileImage.alt = `${application.userName}'s profile image`;
+                profileImage.className = 'profile-pic'; // Add class for styling
+                profileImageDiv.appendChild(profileImage);
+            })
+            .catch((error) => {
+                console.error("Error fetching profile image:", error);
+                const placeholderImage = document.createElement('div');
+                placeholderImage.textContent = 'P'; // Placeholder for missing image
+                placeholderImage.className = 'placeholder-image';
+                profileImageDiv.appendChild(placeholderImage);
+            });
 
         const buttonsContainer = document.createElement('div');
         buttonsContainer.className = 'buttons-container';
@@ -160,8 +189,8 @@ function updateApplicationList(applications) {
 
             buttonsContainer.appendChild(contactButton);
             buttonsContainer.appendChild(interviewButton);
-        } 
-        else if (selectedFilter === 'interview') {
+
+        } else if (selectedFilter === 'interview') {
             const hireButton = createButton('Hire', async () => {
                 const confirm = await showCustomModal('Are you sure you want to hire this applicant?');
                 if (confirm) {
@@ -171,22 +200,51 @@ function updateApplicationList(applications) {
                 }
             });
 
-            const rejectButton = createButton('Reject', async () => {
-                const confirm = await showCustomModal('Are you sure you want to reject this applicant?');
-                if (confirm) {
-                    await rejectApplicant(application.id, application);
-                    alert('Applicant has been rejected.');
-                    fetchApplicationsAndUpdateUI();
+           const rejectButton = createButton('Reject', async () => {
+            const confirm = await showCustomModal('Are you sure you want to reject this applicant?');
+            if (confirm) {
+                try {
+                    // Remove the applicant from the "interview" collection
+                    const interviewDocRef = doc(firestore, 'interview', application.id);
+                    await deleteDoc(interviewDocRef);
+        
+                    // Add the applicant to the "rejected" collection
+                    const rejectedDocRef = doc(firestore, 'rejected', application.id);
+                    await setDoc(rejectedDocRef, {
+                        userId: application.userId,
+                        userName: application.userName,
+                        userEmail: application.userEmail,
+                        userPhone: application.userPhone,
+                        position: application.position,
+                        company: application.company,
+                        rejectedAt: new Date().toISOString() // Capture rejection date and time
+                    });
+        
+                    // Log the rejection audit
+                    await logAudit(application.userEmail, "Rejected", { status: "Success" });
+        
+                    alert('Applicant has been rejected and moved to the "Rejected" filter.');
+        
+                    // After rejection, refetch and refresh the UI
+                    filteredApplications = filteredApplications.filter(app => app.id !== application.id);
+                    updateApplicationList(filteredApplications); // This will remove the applicant from the interview list
+        
+                } catch (error) {
+                    console.error('Error while rejecting applicant:', error);
+                    alert('Failed to reject the applicant. Please try again.');
                 }
-            });
-
+            }
+        });
+        
             buttonsContainer.appendChild(contactButton);
             buttonsContainer.appendChild(hireButton);
             buttonsContainer.appendChild(rejectButton);
         }
 
-        listItem.appendChild(detailsDiv);
-        listItem.appendChild(buttonsContainer);
+        listItem.appendChild(profileImageDiv);  // Add profile image to the list item
+        listItem.appendChild(detailsDiv);      // Add user details to the list item
+        listItem.appendChild(buttonsContainer); // Add buttons to the list item
+
         applicationList.appendChild(listItem);
     });
 
@@ -340,4 +398,26 @@ function showInterviewModal(application) {
             resolve(null);
         });
     });
+}
+
+possibleFormats.forEach(async (format) => {
+    if (!imageFound) {
+        try {
+            const url = await getDownloadURL(storageRef(storage, `profile_images/${application.userId}.${format}`));
+            const profileImage = document.createElement('img');
+            profileImage.src = url;
+            profileImage.alt = `${application.userName}'s profile image`;
+            profileImage.className = 'profile-pic';
+            profileImageDiv.appendChild(profileImage);
+            imageFound = true;
+        } catch (error) {
+            console.log(`File format ${format} not found.`);
+        }
+    }
+});
+
+if (!imageFound) {
+    const placeholderImage = document.createElement('div');
+    placeholderImage.textContent = 'P'; // Placeholder for missing image
+    placeholderImage.className = 'placeholder-image';
 }
