@@ -241,13 +241,17 @@ function updatePaginationControls(applications) {
 function handleSearch() {
     const query = document.getElementById('searchBar').value.toLowerCase();
     filteredApplications = filterApplications(allApplications).filter(application => 
-        application.userName.toLowerCase().includes(query) ||
-        application.position.toLowerCase().includes(query) ||
-        application.company.toLowerCase().includes(query) ||
-        application.userEmail.toLowerCase().includes(query)
+        (application.userName && application.userName.toLowerCase().includes(query)) ||
+        (application.position && application.position.toLowerCase().includes(query)) ||
+        (application.company && application.company.toLowerCase().includes(query)) ||
+        (application.userEmail && application.userEmail.toLowerCase().includes(query)) ||
+        (application.userPhone && String(application.userPhone).includes(query)) // Convert userPhone to string
     );
     updateApplicationList(filteredApplications);
 }
+
+
+
 
 function handleRefresh() {
     filteredApplications = filterApplications(allApplications);
@@ -256,8 +260,10 @@ function handleRefresh() {
 
 function handleFilterChange(event) {
     selectedFilter = event.target.value;
+    currentPage = 1; // Reset to the first page whenever the filter is changed
     fetchApplicationsAndUpdateUI();
 }
+
 
 function filterApplications(applications) {
     return applications; // No status-based filtering, fetching by filter already handles it.

@@ -204,6 +204,7 @@ li button:hover {
     border-color: #c0392b;
 }
 
+/* Modal Overlay */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -275,7 +276,6 @@ li button:hover {
 }
 
 .confirmation-dialog-buttons {
-    display: flex;
     display: block;
     margin-top: 20px;
 }
@@ -293,8 +293,8 @@ li button:hover {
 .confirmation-dialog-buttons button:hover {
     background-color: darkred;
 }
+
 /* Loading Screen */
-/* loading */
 .loading-screen {
     display: none;
     position: fixed;
@@ -306,32 +306,33 @@ li button:hover {
     justify-content: center;
     align-items: center;
 }
-.load-circle{
+
+.load-circle {
     width: 100px;
     height: 40px;
-    --g: radial-gradient(farthest-side,#0000 calc(95% - 3px),#fff calc(100% - 3px) 98%,#0000 101%) no-repeat;
+    --g: radial-gradient(farthest-side, #0000 calc(95% - 3px), #fff calc(100% - 3px) 98%, #0000 101%) no-repeat;
     background: var(--g), var(--g), var(--g);
     background-size: 30px 30px;
     animation: la9 1s infinite alternate;
 }
-  @keyframes la9 {
+
+@keyframes la9 {
     0% {
-      background-position: 0 50%, 50% 50%, 100% 50%;
+        background-position: 0 50%, 50% 50%, 100% 50%;
     }
     20% {
-      background-position: 0 0, 50% 50%, 100% 50%;
+        background-position: 0 0, 50% 50%, 100% 50%;
     }
     40% {
-      background-position: 0 100%, 50% 0, 100% 50%;
+        background-position: 0 100%, 50% 0, 100% 50%;
     }
     60% {
-      background-position: 0 50%, 50% 100%, 100% 0;
+        background-position: 0 50%, 50% 100%, 100% 0;
     }
     80% {
-      background-position: 0 50%, 50% 50%, 100% 100%;
+        background-position: 0 50%, 50% 50%, 100% 100%;
     }
     100% {
-      background-position: 0 50%, 50% 50%, 100% 50%;
+        background-position: 0 50%, 50% 50%, 100% 50%;
     }
-  }
-  /*loading screen */
+}
