@@ -1,5 +1,6 @@
 import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { fetchAllApplications } from "./db.js";  // Correct import
 
 // Firebase configuration
 const firebaseConfig = {
@@ -24,35 +25,43 @@ const linkId = urlParams.get('linkId');
 // Pagination variables
 let currentPage = 1;
 const itemsPerPage = 10;
-let allApplicants = []; // Store all applicants globally
+let allApplicants = [];  // Store all applicants globally
 let originalApplicants = [];
 
 // Validate link and fetch applicants
-async function fetchAllApplications() {
+async function fetchApplicantsByLink() {
     try {
+        console.log("Fetching disposable link with ID:", linkId);  // Debugging log
+
         const linkDocRef = doc(firestore, 'disposableLinks', linkId);
         const linkSnap = await getDoc(linkDocRef);
+
         if (linkSnap.exists()) {
             const linkData = linkSnap.data();
+            console.log("Link Data:", linkData);  // Debugging log
+
             const now = new Date();
 
             if (linkData.validUntil.toDate() >= now) {
+                console.log("Link is still valid.");  // Debugging log
                 const q = query(collection(firestore, 'applied'), where('company', '==', linkData.company));
                 const querySnapshot = await getDocs(q);
 
                 let totalApplicants = 0;
-                allApplicants = []; // Reset applicants array
-                originalApplicants = []; // Reset the original applicants array
+                allApplicants = [];  // Reset applicants array
+                originalApplicants = [];  // Reset the original applicants array
 
                 querySnapshot.forEach(doc => {
                     const applicantData = doc.data();
                     totalApplicants++;
                     allApplicants.push(applicantData);
-                    originalApplicants.push(applicantData); // Store a copy in the original array
+                    originalApplicants.push(applicantData);  // Store a copy in the original array
                 });
 
+                console.log("Total Applicants Found:", totalApplicants);  // Debugging log
+
                 document.getElementById('totalApplicants').textContent = `Total Applicants: ${totalApplicants}`;
-                displayApplicants(); // Show applicants with pagination
+                displayApplicants();  // Show applicants with pagination
                 updateDateTime();
             } else {
                 alert("The link has expired.");
@@ -66,7 +75,6 @@ async function fetchAllApplications() {
     }
 }
 
-
 // Function to display applicants based on the current page and search results
 function displayApplicants() {
     const applicantsTableBody = document.getElementById('applicantTableBody');
@@ -74,7 +82,7 @@ function displayApplicants() {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, allApplicants.length);
-    
+
     // Display the correct slice of applicants for the current page
     const paginatedApplicants = allApplicants.slice(startIndex, endIndex);
     paginatedApplicants.forEach(applicant => {
@@ -105,15 +113,15 @@ document.getElementById('searchBar').addEventListener('input', (event) => {
 
     // If the search query is empty, reset to the original list
     if (query === '') {
-        allApplicants = [...originalApplicants]; // Restore the original applicants
+        allApplicants = [...originalApplicants];  // Restore the original applicants
     } else {
         // Filter applicants by position name
-        allApplicants = originalApplicants.filter(applicant => 
+        allApplicants = originalApplicants.filter(applicant =>
             applicant.position && applicant.position.toLowerCase().includes(query)
         );
     }
 
-    currentPage = 1; // Reset to first page for the filtered results
+    currentPage = 1;  // Reset to first page for the filtered results
     displayApplicants();
 });
 
@@ -135,9 +143,9 @@ document.getElementById('nextButton').addEventListener('click', () => {
 
 // Function to update date and time display
 function updateDateTime() {
-    const currentDateTime = new Date().toLocaleString(); // Get current date and time
+    const currentDateTime = new Date().toLocaleString();  // Get current date and time
     document.getElementById('dateTime').textContent = currentDateTime;
 }
 
 // Fetch and display applicants when the page loads
-fetchAllApplications();
+fetchApplicantsByLink();
