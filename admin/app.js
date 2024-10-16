@@ -1,9 +1,8 @@
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { fetchAllApplications, fetchHiredApplicants, fetchRejectedApplicants, fetchInterviewApplicants, hireApplicant, rejectApplicant, moveToInterview, logAudit } from './database.js';
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
-import { collection, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -21,15 +20,11 @@ const auth = getAuth(app);
 const firestore = getFirestore(app);
 const storage = getStorage(app);
 
-// Pagination Variables
 let allApplications = [];
 let filteredApplications = [];
 let currentPage = 1;
 const applicationsPerPage = 5;
-let selectedFilter = 'applied'; // Default filter as 'Applications'
-
-const possibleFormats = ['png', 'jpg', 'jpeg'];
-let imageFound = false;
+let selectedFilter = 'applied';
 
 function requireLogin() {
     onAuthStateChanged(auth, (user) => {
@@ -74,6 +69,69 @@ async function performSignOut() {
     });
 }
 
+// Updated function to fetch full user details from 'users' collection
+async function fetchUserDetails(userId) {
+    try {
+        const userDoc = doc(firestore, 'users', userId);
+        const userSnapshot = await getDoc(userDoc);
+        return userSnapshot.exists() ? userSnapshot.data() : null;
+    } catch (error) {
+        console.error('Error fetching user details:', error);
+        return null;
+    }
+}
+
+// Updated function with detailed logging to debug the applications object
+function openUserDetailsDialog(userDetails, imageUrl, applications) {
+    // Log userDetails and applications data to see their structure
+    console.log("User Details:", userDetails);
+    console.log("Applications data:", applications);
+
+    // Safeguard check to avoid errors if applications is undefined or doesn't have expected fields
+    const userName = applications?.userName || 'N/A';
+    const userEmail = applications?.userEmail || 'N/A';
+    const userPhone = applications?.userPhone || 'N/A';
+    const position = applications?.position || 'N/A';
+    const company = applications?.company || 'N/A';
+
+    const dialogOverlay = document.createElement('div');
+    dialogOverlay.className = 'modal-overlay';
+
+    const dialogContent = document.createElement('div');
+    dialogContent.className = 'modal-content';
+
+    dialogContent.innerHTML = `
+        <div class="dialog-header">
+            <button class="close-dialog">X</button>
+        </div>
+        <div class="dialog-body">
+            <img src="${imageUrl}" alt="${userDetails.first_name || 'N/A'}'s profile picture" class="profile-pic">
+            <p><strong>Name:</strong> ${userName}</p>
+            <p><strong>Email:</strong> ${userEmail}</p>
+            <p><strong>Phone:</strong> ${userPhone}</p>
+            <p><strong>Position Applied:</strong> ${position}</p>
+            <p><strong>Company:</strong> ${company}</p>
+            <p><strong>Preferred Jobs:</strong> ${userDetails.preferredJobs || 'N/A'}</p>
+            <p><strong>Skills:</strong> ${userDetails.skills || 'N/A'}</p>
+            <p><strong>Reason for Leaving:</strong> ${userDetails.reasonForLeaving || 'N/A'}</p>
+            <p><strong>Salary:</strong> ${userDetails.salary || 'N/A'}</p>
+            <p><strong>Work Phone:</strong> ${userDetails.workPhone || 'N/A'}</p>
+            <p><strong>Work Address:</strong> ${userDetails.workAddress || 'N/A'}</p>
+        </div>
+    `;
+
+    dialogOverlay.appendChild(dialogContent);
+    document.body.appendChild(dialogOverlay);
+
+    dialogOverlay.querySelector('.close-dialog').addEventListener('click', () => {
+        document.body.removeChild(dialogOverlay);
+    });
+}
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     requireLogin();
     const signOutBtn = document.getElementById('signOutBtn');
@@ -93,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) refreshBtn.addEventListener('click', handleRefresh);
 
-    fetchApplicationsAndUpdateUI(); // Load initially as 'Applications'
+    fetchApplicationsAndUpdateUI();
 });
 
 async function fetchApplicationsAndUpdateUI() {
@@ -130,35 +188,32 @@ function updateApplicationList(applications) {
 
     paginatedApplications.forEach((application) => {
         const listItem = document.createElement('li');
+        listItem.classList.add('applicant-container'); 
 
-        // Create a container for the user details
         const detailsDiv = document.createElement('div');
         detailsDiv.className = 'details';
         detailsDiv.innerHTML = `
-            <strong>Applicant:</strong> ${application.userName}<br>
-            <strong>Position:</strong> ${application.position} - ${application.company}<br>
-            <strong>Email:</strong> ${application.userEmail}<br>
-            <strong>Contact number:</strong> ${application.userPhone}
+            <strong>Applicant:</strong> ${application.userName || 'N/A'}<br>
+            <strong>Position:</strong> ${application.position || 'N/A'} - ${application.company || 'N/A'}<br>
+            <strong>Email:</strong> ${application.userEmail || 'N/A'}<br>
+            <strong>Contact number:</strong> ${application.userPhone || 'N/A'}
         `;
 
-        // Profile Image fetching
         const profileImageDiv = document.createElement('div');
         profileImageDiv.className = 'profile-image';
         
-
-       getDownloadURL(storageRef(storage, `profile_images/${application.userId}.jpg`))
-       
+        getDownloadURL(storageRef(storage, `profile_images/${application.userId}.jpg`))
             .then((url) => {
                 const profileImage = document.createElement('img');
                 profileImage.src = url;
-                profileImage.alt = `${application.userName}'s profile image`;
-                profileImage.className = 'profile-pic'; // Add class for styling
+                profileImage.alt = `${application.userName || 'N/A'}'s profile image`;
+                profileImage.className = 'profile-pic';
                 profileImageDiv.appendChild(profileImage);
             })
             .catch((error) => {
                 console.error("Error fetching profile image:", error);
                 const placeholderImage = document.createElement('div');
-                placeholderImage.textContent = 'P'; // Placeholder for missing image
+                placeholderImage.textContent = 'P';
                 placeholderImage.className = 'placeholder-image';
                 profileImageDiv.appendChild(placeholderImage);
             });
@@ -166,15 +221,17 @@ function updateApplicationList(applications) {
         const buttonsContainer = document.createElement('div');
         buttonsContainer.className = 'buttons-container';
 
-        const contactButton = createButton('Contact', () => {
-            const subject = `Application Status for ${application.position} at ${application.company}`;
-            const body = `Dear ${application.userName},\n\nYou have applied for ${application.position} at ${application.company}.`;
-            const mailtoLink = `mailto:${application.userEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const contactButton = createButton('Contact', (event) => {
+            event.stopPropagation(); // Prevent user profile popup
+            const subject = `Application Status for ${application.position || 'N/A'} at ${application.company || 'N/A'}`;
+            const body = `Dear ${application.userName || 'N/A'},\n\nYou have applied for ${application.position || 'N/A'} at ${application.company || 'N/A'}.`;
+            const mailtoLink = `mailto:${application.userEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             window.location.href = mailtoLink;
         });
 
         if (selectedFilter === 'applied') {
-            const interviewButton = createButton('For Interview', async () => {
+            const interviewButton = createButton('For Interview', async (event) => {
+                event.stopPropagation(); // Prevent user profile popup
                 const interviewDetails = await showInterviewModal(application);
                 if (interviewDetails) {
                     const fullInterviewData = {
@@ -189,9 +246,9 @@ function updateApplicationList(applications) {
 
             buttonsContainer.appendChild(contactButton);
             buttonsContainer.appendChild(interviewButton);
-
         } else if (selectedFilter === 'interview') {
-            const hireButton = createButton('Hire', async () => {
+            const hireButton = createButton('Hire', async (event) => {
+                event.stopPropagation(); // Prevent user profile popup
                 const confirm = await showCustomModal('Are you sure you want to hire this applicant?');
                 if (confirm) {
                     await hireApplicant(application.id, application);
@@ -200,50 +257,43 @@ function updateApplicationList(applications) {
                 }
             });
 
-           const rejectButton = createButton('Reject', async () => {
-            const confirm = await showCustomModal('Are you sure you want to reject this applicant?');
-            if (confirm) {
-                try {
-                    // Remove the applicant from the "interview" collection
-                    const interviewDocRef = doc(firestore, 'interview', application.id);
-                    await deleteDoc(interviewDocRef);
-        
-                    // Add the applicant to the "rejected" collection
-                    const rejectedDocRef = doc(firestore, 'rejected', application.id);
-                    await setDoc(rejectedDocRef, {
-                        userId: application.userId,
-                        userName: application.userName,
-                        userEmail: application.userEmail,
-                        userPhone: application.userPhone,
-                        position: application.position,
-                        company: application.company,
-                        rejectedAt: new Date().toISOString() // Capture rejection date and time
-                    });
-        
-                    // Log the rejection audit
-                    await logAudit(application.userEmail, "Rejected", { status: "Success" });
-        
-                    alert('Applicant has been rejected and moved to the "Rejected" filter.');
-        
-                    // After rejection, refetch and refresh the UI
-                    filteredApplications = filteredApplications.filter(app => app.id !== application.id);
-                    updateApplicationList(filteredApplications); // This will remove the applicant from the interview list
-        
-                } catch (error) {
-                    console.error('Error while rejecting applicant:', error);
-                    alert('Failed to reject the applicant. Please try again.');
+            const rejectButton = createButton('Reject', async (event) => {
+                event.stopPropagation(); // Prevent user profile popup
+                const confirm = await showCustomModal('Are you sure you want to reject this applicant?');
+                if (confirm) {
+                    await rejectApplicant(application.id, application);
+                    alert('Applicant has been rejected.');
+                    fetchApplicationsAndUpdateUI();
                 }
-            }
-        });
-        
+            });
+
             buttonsContainer.appendChild(contactButton);
             buttonsContainer.appendChild(hireButton);
             buttonsContainer.appendChild(rejectButton);
         }
 
-        listItem.appendChild(profileImageDiv);  // Add profile image to the list item
-        listItem.appendChild(detailsDiv);      // Add user details to the list item
-        listItem.appendChild(buttonsContainer); // Add buttons to the list item
+        listItem.appendChild(profileImageDiv);  
+        listItem.appendChild(detailsDiv);      
+        listItem.appendChild(buttonsContainer); 
+
+        listItem.addEventListener('click', async () => {
+            const userDetails = await fetchUserDetails(application.userId);
+            if (userDetails) {
+                let imageUrl = 'placeholder_image_url.png';
+                try {
+                    const downloadUrl = await getDownloadURL(storageRef(storage, `profile_images/${application.userId}.jpg`));
+                    imageUrl = downloadUrl;
+                } catch (error) {
+                    console.error("Error fetching profile image, using placeholder:", error);
+                }
+        
+                // Pass the 'application' object properly when opening the dialog
+                openUserDetailsDialog(userDetails, imageUrl, application); // Pass the application data here
+            } else {
+                alert('Failed to fetch user details.');
+            }
+        });
+        
 
         applicationList.appendChild(listItem);
     });
@@ -398,26 +448,4 @@ function showInterviewModal(application) {
             resolve(null);
         });
     });
-}
-
-possibleFormats.forEach(async (format) => {
-    if (!imageFound) {
-        try {
-            const url = await getDownloadURL(storageRef(storage, `profile_images/${application.userId}.${format}`));
-            const profileImage = document.createElement('img');
-            profileImage.src = url;
-            profileImage.alt = `${application.userName}'s profile image`;
-            profileImage.className = 'profile-pic';
-            profileImageDiv.appendChild(profileImage);
-            imageFound = true;
-        } catch (error) {
-            console.log(`File format ${format} not found.`);
-        }
-    }
-});
-
-if (!imageFound) {
-    const placeholderImage = document.createElement('div');
-    placeholderImage.textContent = 'P'; // Placeholder for missing image
-    placeholderImage.className = 'placeholder-image';
 }
