@@ -24,8 +24,8 @@ body {
 }
 
 .links button {
-    background: none; 
-    border: none; 
+    background: none;
+    border: none;
     color: #f2f2f2;
     padding: 16px 10px;
     text-decoration: none;
@@ -336,11 +336,14 @@ li button:hover {
         background-position: 0 50%, 50% 50%, 100% 50%;
     }
 }
+
+/* Applicant Picture Styling */
 .profile-pic {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    object-fit: cover;
+    object-fit: cover; /* Ensures the image maintains aspect ratio and covers the entire element */
+    margin-right: 20px; /* Adds spacing between the image and the details */
 }
 
 .placeholder-image {
@@ -355,3 +358,10 @@ li button:hover {
     font-weight: bold;
     color: white;
 }
+
+li {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adds spacing between image and other elements */
+}
+
