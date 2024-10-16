@@ -1,8 +1,7 @@
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { fetchAllApplications, hireApplicant, archiveJobIfNeeded, logAudit } from './database.js';
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-
+import { fetchAllApplications, fetchHiredApplicants, fetchRejectedApplicants, fetchInterviewApplicants, logAudit } from './database.js'; 
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
@@ -19,75 +18,71 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 
-// prevent jump
+// Pagination Variables
+let allApplications = [];
+let filteredApplications = [];
+let currentPage = 1;
+const applicationsPerPage = 5;
+let selectedFilter = 'applied'; // Default filter as 'Applications'
+
 function requireLogin() {
     onAuthStateChanged(auth, (user) => {
         if (!user) {
-            // If the user is not logged in, redirect to the login page
             window.location.href = '/login.html';
         } else {
-            // Optionally log that the user has accessed the page
-           console.log("Page Accessed.")
+            console.log("Page Accessed.");
         }
     });
 }
 
-let allApplications = [];  // To store all applications globally
-let refreshInterval; // To store the interval ID
-
 async function performSignOut() {
-    const loadingScreen = document.getElementById('loading-screen'); // Reference to the loading screen element
-    const errorMessageContainer = document.getElementById('error-message'); // Reference to show errors
+    const signOutConfirmation = document.getElementById('signOutConfirmation');
+    const confirmSignOutBtn = document.getElementById('confirmSignOutBtn');
+    const cancelSignOutBtn = document.getElementById('cancelSignOutBtn');
+    const loadingScreen = document.getElementById('loading-screen');
 
-    if (loadingScreen) loadingScreen.style.display = 'flex'; // Show the loading screen
+    // Show the confirmation dialog
+    signOutConfirmation.style.display = 'flex';
 
-    try {
-        const user = auth.currentUser; // Get the currently authenticated user
+    // If the user confirms, proceed with sign-out
+    confirmSignOutBtn.addEventListener('click', async function() {
+        signOutConfirmation.style.display = 'none'; // Hide the confirmation dialog
+        if (loadingScreen) loadingScreen.style.display = 'flex'; // Show loading screen
 
-        if (!user) {
-            throw new Error("No authenticated user found."); // Handle the case when there's no logged-in user
+        try {
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error("No authenticated user found.");
+            }
+
+            const userEmail = user.email;
+            await logAudit(userEmail, "Sign out", { status: "Success" });
+            await firebaseSignOut(auth);
+            window.location.href = "/login.html";
+        } catch (error) {
+            console.error("Error during sign-out:", error);
+            const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
+            await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+            alert(error.message || 'Sign out failed. Please try again.');
+        } finally {
+            if (loadingScreen) loadingScreen.style.display = 'none';
         }
+    });
 
-        const userEmail = user.email;
-        console.log('User Email:', userEmail); // Useful for debugging
-
-        // Log audit for successful sign-out
-        await logAudit(userEmail, "Sign out", { status: "Success" });
-        console.log("Audit logged for sign-out.");
-
-        // Perform Firebase sign-out
-        await firebaseSignOut(auth);
-        console.log("User successfully signed out.");
-
-        // Redirect to the login page or show a sign-out success message
-        window.location.href = "/login.html";
-    } catch (error) {
-        console.error("Error during sign-out:", error);
-
-        // Log audit for failed sign-out
-        const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
-        await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
-
-        // Show the error message in the error message container
-        if (errorMessageContainer) {
-            errorMessageContainer.textContent = error.message || 'Sign out failed. Please try again.';
-        }
-    } finally {
-        if (loadingScreen) loadingScreen.style.display = 'none'; // Hide the loading screen
-    }
+    // If the user cancels, hide the confirmation dialog
+    cancelSignOutBtn.addEventListener('click', function() {
+        signOutConfirmation.style.display = 'none';
+    });
 }
 
-
-// Ensure elements exist before attaching event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    requireLogin();  // Ensure login
-
-    const signOutBtn = document.getElementById('signOutBtn'); // don porget
+    requireLogin();
+    const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
         signOutBtn.addEventListener('click', performSignOut);
-    } else {
-    }// this also
-
+    }
+    
     const searchBar = document.getElementById('searchBar');
     if (searchBar) {
         searchBar.addEventListener('input', handleSearch);
@@ -96,28 +91,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleSearch();
             }
         });
-        searchBar.addEventListener('focus', () => clearInterval(refreshInterval));
     }
 
-    refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
-    fetchApplicationsAndUpdateUI();
+    const filterDropdown = document.getElementById('statusFilter');
+    if (filterDropdown) {
+        filterDropdown.addEventListener('change', handleFilterChange);
+    }
+
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', handleRefresh);
+    }
+
+    fetchApplicationsAndUpdateUI(); // Load initially as 'Applications'
 });
 
-
-function fetchApplicationsAndUpdateUI() {
-    fetchAllApplications().then(applications => {
-        allApplications = applications;
-        updateApplicationList(allApplications);
-    }).catch(err => console.error("Failed to fetch applications:", err));
+async function fetchApplicationsAndUpdateUI() {
+    try {
+        if (selectedFilter === 'applied') {
+            const applications = await fetchAllApplications();
+            allApplications = applications;
+        } else if (selectedFilter === 'hired') {
+            const hired = await fetchHiredApplicants();
+            allApplications = hired;
+        } else if (selectedFilter === 'rejected') {
+            const rejected = await fetchRejectedApplicants();
+            allApplications = rejected;
+        } else if (selectedFilter === 'interview') {
+            const interview = await fetchInterviewApplicants();
+            allApplications = interview;
+        }
+        filteredApplications = allApplications;
+        updateApplicationList(filteredApplications);
+    } catch (error) {
+        console.error("Failed to fetch applications:", error);
+    }
 }
-
 function updateApplicationList(applications) {
     const applicationList = document.getElementById('applicationList');
-    if (!applicationList) return; // Exit if the element does not exist
+    if (!applicationList) return;
 
     applicationList.innerHTML = ''; 
 
-    applications.forEach((application) => {
+    const startIndex = (currentPage - 1) * applicationsPerPage;
+    const endIndex = startIndex + applicationsPerPage;
+    const paginatedApplications = applications.slice(startIndex, endIndex);
+
+    paginatedApplications.forEach((application) => {
         const listItem = document.createElement('li');
 
         const detailsDiv = document.createElement('div');
@@ -129,105 +149,80 @@ function updateApplicationList(applications) {
             <strong>Contact number:</strong> ${application.userPhone}
         `;
 
-    
+        // Append the details (without any action buttons)
         listItem.appendChild(detailsDiv);
         applicationList.appendChild(listItem);
     });
-}
 
-async function hireApplicantAndDecrementVacancy(applicationId, application) {
-    try {
-        const user = auth.currentUser;
-        const userEmail = user ? user.email : "Unknown user";
-
-        // Ensure jobId exists in the application
-        if (!application.jobId) {
-            alert("Job ID not found for the selected application.");
-            return;
-        }
-
-        // Hire the applicant
-        await hireApplicant(applicationId, application);
-
-        // Log audit for hiring the applicant
-        await logAudit(userEmail, "Applicant Hired", {
-            applicationId: applicationId,
-            applicantName: application.userName,
-            position: application.position,
-            company: application.company,
-            status: "Success",
-            timestamp: new Date().toISOString()
-        });
-
-        // Fetch the job and decrement the vacancy
-        const jobDocRef = doc(firestore, 'jobs', application.jobId);
-        const jobDocSnap = await getDoc(jobDocRef);
-
-        if (jobDocSnap.exists()) {
-            let vacancy = jobDocSnap.data().vacancy;
-            if (vacancy > 0) {
-                vacancy--;
-
-                // Update the job vacancy
-                await updateDoc(jobDocRef, { vacancy });
-
-                // Archive the job if vacancy is 0
-                if (vacancy === 0) {
-                    await archiveJobIfNeeded(application.jobId, application.company, application.position, userEmail);
-                
-                    // Update the UI after archiving the job
-                    window.location.href = "archive.html";
-                    fetchApplicationsAndUpdateUI();
-                    return;  // Exit the function to prevent further execution
-                }
-
-                // Refresh the job table after updating the vacancy
-                fetchApplicationsAndUpdateUI();
-
-                alert(`${application.userName} has been hired and vacancy updated.`);
-            } else {
-                alert("The job has no more vacancies.");
-            }
-        } else {
-            alert("Job not found.");
-        }
-    } catch (error) {
-        console.error("Error hiring applicant and updating vacancy:", error);
-
-        // Log audit for hiring failure
-        await logAudit(userEmail, "Applicant Hire Failed", {
-            applicationId: applicationId,
-            applicantName: application.userName,
-            position: application.position,
-            company: application.company,
-            status: "Failed",
-            error: error.message,
-            timestamp: new Date().toISOString()
-        });
-    }
+    updatePaginationControls(applications);
 }
 
 
-//handle Search function..
+function updatePaginationControls(applications) {
+    const paginationControls = document.getElementById('paginationControls');
+    if (!paginationControls) return;
+
+    paginationControls.innerHTML = '';
+
+    const totalPages = Math.ceil(applications.length / applicationsPerPage);
+
+    const prevButton = document.createElement('button');
+    prevButton.textContent = '<';
+    prevButton.disabled = currentPage === 1;
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            updateApplicationList(filteredApplications);
+        }
+    });
+    paginationControls.appendChild(prevButton);
+
+    const pageNumbers = document.createElement('span');
+    pageNumbers.textContent = `${currentPage}-${totalPages}`;
+    pageNumbers.classList.add('page-numbers');
+    paginationControls.appendChild(pageNumbers);
+
+    const nextButton = document.createElement('button');
+    nextButton.textContent = '>';
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            updateApplicationList(filteredApplications);
+        }
+    });
+    paginationControls.appendChild(nextButton);
+}
+
 function handleSearch() {
-    const searchBar = document.getElementById('searchBar');
-    if (!searchBar) return;
+    const query = document.getElementById('searchBar').value.toLowerCase();
+    filteredApplications = filterApplications(allApplications).filter(application => 
+        application.userName.toLowerCase().includes(query) ||
+        application.position.toLowerCase().includes(query) ||
+        application.company.toLowerCase().includes(query) ||
+        application.userEmail.toLowerCase().includes(query)
+    );
+    updateApplicationList(filteredApplications);
+}
 
-    const query = searchBar.value.toLowerCase();
+function handleRefresh() {
+    filteredApplications = filterApplications(allApplications);
+    updateApplicationList(filteredApplications);
+}
 
-    if (query === '') {
-        updateApplicationList(allApplications);
-        refreshInterval = setInterval(fetchApplicationsAndUpdateUI, 1000);
-    } else {
-        const filteredApplications = allApplications.filter(application => {
-            return (
-                (application.userName && application.userName.toLowerCase().includes(query)) ||
-                (application.position && application.position.toLowerCase().includes(query)) ||
-                (application.company && application.company.toLowerCase().includes(query)) ||
-                (application.userEmail && application.userEmail.toLowerCase().includes(query)) 
-            );
-        });
-        updateApplicationList(filteredApplications);
-        clearInterval(refreshInterval);
-    }
+function handleFilterChange(event) {
+    selectedFilter = event.target.value;
+    fetchApplicationsAndUpdateUI();
+}
+
+function filterApplications(applications) {
+    return applications; // No status-based filtering, fetching by filter already handles it.
+}
+
+// Utility to create a button with a label and a click event
+function createButton(label, onClick) {
+    const button = document.createElement('button');
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    return button;
 }
