@@ -1,14 +1,14 @@
 body {
-    background-color: #F2F2F2;
+    background: url('https://scontent.fmnl33-3.fna.fbcdn.net/v/t39.30808-6/435949826_822945913186705_6178021484777531627_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeEfYrJGNWPqmZf4tcYUT9UOqOkeDSI9Vuao6R4NIj1W5vp63KF7SXqGUhQw6YhxfKqiUTBekRoTZnx5hXiI_1R6&_nc_ohc=sKGeY2LY1NgQ7kNvgF6gLpK&_nc_zt=23&_nc_ht=scontent.fmnl33-3.fna&_nc_gid=Ai8RpPvEjC6VlVr0eykcQ8s&oh=00_AYAK3py1IP28vGN7J-RyBQnEDBU0U4mBv_ZGrKz0ZxzKqw&oe=6726F6BD') no-repeat center center fixed;
+    background-size: cover;
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
     padding-top: 70px;
     color: #333;
 }
 
-/* Navigation bar */
-.nav {
-    background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
+header.nav {
+    background: rgba(189, 26, 26, 0.85); /* Semi-transparent navbar */
     position: fixed;
     width: 100%;
     top: 0;
@@ -16,11 +16,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    padding: 10px 0;
+    padding: 15px 0;
 }
 
-.nav h1 {
+header.nav h1 {
     color: #FFFFFF;
     font-size: 24px;
     font-weight: bold;
@@ -34,40 +33,38 @@ body {
     margin: 0 auto;
     padding: 20px;
     text-align: center;
-}
-
-.download-section {
-    background: #ffffff;
-    padding: 40px;
+    background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent content background */
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .download-section h2 {
     color: #bd1a1a;
-    font-size: 28px;
+    font-size: 26px;
     margin-bottom: 15px;
+    font-weight: bold;
 }
 
 .download-section p {
-    font-size: 18px;
+    font-size: 16px;
     color: #555;
     margin-bottom: 25px;
+    line-height: 1.6;
 }
 
+/* Button styling */
 .download-btn {
+    display: inline-block;
     background-color: #e74c3c;
     color: #fff;
-    border: none;
-    padding: 15px 30px;
-    font-size: 16px;
+    padding: 12px 25px;
+    font-size: 18px;
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
+    text-decoration: none;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .download-btn:hover {
@@ -77,34 +74,43 @@ body {
 
 .install-instructions {
     text-align: left;
-    margin-top: 20px;
+    margin-top: 30px;
     font-size: 16px;
+    color: #333;
+}
+
+.install-instructions h3 {
+    color: #bd1a1a;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .install-instructions ol {
-    margin-left: 20px;
-    color: #555;
+    padding-left: 20px;
+    list-style-type: decimal;
 }
 
 .install-instructions li {
     margin-bottom: 10px;
 }
 
-/* Responsive styles */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .download-section {
-        padding: 20px;
+    .content {
+        padding: 20px 15px;
+    }
+
+    header.nav h1 {
+        font-size: 20px;
     }
 
     .download-section h2 {
-        font-size: 24px;
+        font-size: 22px;
     }
 
     .download-btn {
         width: 100%;
-    }
-
-    .nav h1 {
-        font-size: 20px;
+        font-size: 16px;
     }
 }

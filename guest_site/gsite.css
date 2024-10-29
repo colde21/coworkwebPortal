@@ -5,9 +5,9 @@ body {
     color: #333;
 }
 
-/* Navigation Bar */
+/* Transparent Navigation Bar */
 .nav {
-    background-color: #bd1a1a;
+    background-color: rgba(189, 26, 26, 0.8); /* Semi-transparent red */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -18,6 +18,7 @@ body {
     z-index: 1000;
 }
 
+/* Navigation logo styling */
 .logo h1 {
     color: #ffffff;
     cursor: pointer;
@@ -25,44 +26,59 @@ body {
     font-size: 24px;
 }
 
-.login-btn {
-    background-color: #ffffff;
-    color: #bd1a1a;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.login-btn:hover {
-    background-color: #f0f0f0;
-}
-
-/* Jumbotron */
-.jumbotron {
-    background: linear-gradient(135deg, #bd1a1a, #e74c3c);
+/* Jumbotron and Image Section */
+.jumbotron, .image-section {
+    position: relative;
     color: #ffffff;
     padding: 100px 20px;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 60vh;
+    height: 50vh; /* Adjusted height for balance */
+    background-size: cover;
+    background-position: center;
 }
 
-.jumbotron-content {
+.jumbotron {
+    background-image: url('https://scontent.fmnl33-2.fna.fbcdn.net/v/t39.30808-6/427142991_737597611808116_4797103468568493563_n.jpg?stp=cp6_dst-jpg&_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeGbEYIo8S7JSWpS6_9zlBc0MO8rkU88efMw7yuRTzx58zC-YrDxFBzvNzlnGCkNRVYfLfxIAhGL_ZKHQ6Z8CIuO&_nc_ohc=C89zH8_HsL4Q7kNvgEHvJKj&_nc_zt=23&_nc_ht=scontent.fmnl33-2.fna&_nc_gid=AmWB9e4C_UU_NnAKUmhIpQE&oh=00_AYAZGLztcE9AKosstV_GV_iIf8YJwI-r8Hz7PEFU9PTLgA&oe=6726E229');
+}
+
+.image-section {
+    background-image: url('https://scontent.fmnl33-2.fna.fbcdn.net/v/t39.30808-6/427142991_737597611808116_4797103468568493563_n.jpg?stp=cp6_dst-jpg&_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeGbEYIo8S7JSWpS6_9zlBc0MO8rkU88efMw7yuRTzx58zC-YrDxFBzvNzlnGCkNRVYfLfxIAhGL_ZKHQ6Z8CIuO&_nc_ohc=C89zH8_HsL4Q7kNvgEHvJKj&_nc_zt=23&_nc_ht=scontent.fmnl33-2.fna&_nc_gid=AmWB9e4C_UU_NnAKUmhIpQE&oh=00_AYAZGLztcE9AKosstV_GV_iIf8YJwI-r8Hz7PEFU9PTLgA&oe=6726E229');
+}
+
+/* Dark overlay for both jumbotron and image-section */
+.jumbotron::before, .image-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Darker overlay for readability */
+    z-index: 1;
+}
+
+/* Centered text within overlay */
+.jumbotron-content, .image-section-content {
+    position: relative;
+    z-index: 2;
     max-width: 800px;
 }
 
-.jumbotron h1 {
+.jumbotron h1, .image-section h2 {
     font-size: 36px;
     margin-bottom: 20px;
+    color: #ffffff;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6); /* Subtle shadow for contrast */
 }
 
 .jumbotron p {
     font-size: 18px;
     margin-bottom: 30px;
+    color: #f2f2f2;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .get-started-btn {
@@ -80,88 +96,122 @@ body {
     background-color: #f0f0f0;
 }
 
-/* About and Features */
+
+/* About and Features Section */
 .about-features {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    margin: 40px 20px;
+    flex-direction: column;
+    align-items: center;
+    background-color: #e9e9e9; /* Subtle background for contrast */
+    padding: 60px 20px;
     gap: 20px;
 }
 
 .about, .features {
     background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    max-width: 500px;
-    flex: 1;
-    margin: 10px;
-}
-
-.about h2, .features h2 {
-    color: #bd1a1a;
-    margin-bottom: 15px;
-}
-
-.about p, .features ul {
-    font-size: 16px;
-    color: #555;
-}
-
-.features ul {
-    list-style: disc;
-    padding-left: 20px;
-}
-
-.features li {
-    margin-bottom: 10px;
-}
-
-.download-section {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
-    max-width: 800px;
-    text-align: center;
-}
-
-.download-section h2 {
-    color: #bd1a1a;
-    font-size: 28px;
-    margin-bottom: 10px;
-}
-
-.download-section p {
-    font-size: 16px;
-    color: #555;
+    padding: 40px; /* Increased padding for a balanced look */
+    border-radius: 12px; /* Slightly more rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Softer shadow for depth */
+    max-width: 80%; /* Adjusted width for larger screens */
+    width: 100%;
+    border-left: 6px solid #bd1a1a; /* Accent border */
+    text-align: left; /* Align text to the left */
     margin-bottom: 20px;
 }
 
-.install-instructions {
-    text-align: left;
-    margin-top: 20px;
+/* Section Heading */
+.about h2, .features h2 {
+    color: #bd1a1a;
+    margin-bottom: 15px;
+    font-size: 24px;
+    font-weight: bold;
 }
 
-.install-instructions ol {
-    margin-left: 20px;
+/* Paragraph and List Styling */
+.about p, .features ul {
+    font-size: 16px;
     color: #555;
+    line-height: 1.8; /* Better line spacing */
+}
+
+.features ul {
+    list-style: none; /* Removing default list style */
+    padding-left: 0;
+}
+
+.features li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Custom bullet styling */
+.features li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #bd1a1a;
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* Background Image Section Styling */
+.image-section {
+    background-image: url('https://scontent.fmnl33-2.fna.fbcdn.net/v/t39.30808-6/427142991_737597611808116_4797103468568493563_n.jpg?stp=cp6_dst-jpg&_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeGbEYIo8S7JSWpS6_9zlBc0MO8rkU88efMw7yuRTzx58zC-YrDxFBzvNzlnGCkNRVYfLfxIAhGL_ZKHQ6Z8CIuO&_nc_ohc=C89zH8_HsL4Q7kNvgEHvJKj&_nc_zt=23&_nc_ht=scontent.fmnl33-2.fna&_nc_gid=AmWB9e4C_UU_NnAKUmhIpQE&oh=00_AYAZGLztcE9AKosstV_GV_iIf8YJwI-r8Hz7PEFU9PTLgA&oe=6726E229');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Parallax effect */
+    height: 60vh; /* Adjust height as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Optional overlay for readability */
+.image-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3); /* Semi-transparent overlay */
+}
+
+.image-section h2 {
+    color: #fff;
+    font-size: 32px;
+    text-align: center;
+    z-index: 1; /* Ensure text is above overlay */
 }
 
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
     .about-features {
-        flex-direction: column;
-        align-items: center;
+        padding: 40px 10px;
     }
 
+    .about, .features {
+        max-width: 95%;
+    }
+}
+
+@media (max-width: 480px) {
     .jumbotron h1 {
         font-size: 28px;
     }
 
-    .get-started-btn {
-        width: 100%;
+    .jumbotron p {
+        font-size: 16px;
+    }
+
+    .about h2, .features h2 {
+        font-size: 22px;
+    }
+
+    .about p, .features ul {
+        font-size: 14px;
     }
 }
