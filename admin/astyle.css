@@ -397,6 +397,6 @@ li {
 }
 
 .chart-container canvas {
-    width: 300px;
-    height: 300px;
+    width: 100% !important;
+    height: 400px !important;
 }
