@@ -83,11 +83,9 @@ async function fetchUserDetails(userId) {
 
 // Updated function with detailed logging to debug the applications object
 function openUserDetailsDialog(userDetails, imageUrl, applications) {
-    // Log userDetails and applications data to see their structure
     console.log("User Details:", userDetails);
     console.log("Applications data:", applications);
 
-    // Safeguard check to avoid errors if applications is undefined or doesn't have expected fields
     const userName = applications?.userName || 'N/A';
     const userEmail = applications?.userEmail || 'N/A';
     const userPhone = applications?.userPhone || 'N/A';
@@ -113,10 +111,6 @@ function openUserDetailsDialog(userDetails, imageUrl, applications) {
             <p><strong>Company:</strong> ${company}</p>
             <p><strong>Preferred Jobs:</strong> ${userDetails.preferredJobs || 'N/A'}</p>
             <p><strong>Skills:</strong> ${userDetails.skills || 'N/A'}</p>
-            <p><strong>Reason for Leaving:</strong> ${userDetails.reasonForLeaving || 'N/A'}</p>
-            <p><strong>Salary:</strong> ${userDetails.salary || 'N/A'}</p>
-            <p><strong>Work Phone:</strong> ${userDetails.workPhone || 'N/A'}</p>
-            <p><strong>Work Address:</strong> ${userDetails.workAddress || 'N/A'}</p>
         </div>
     `;
 
@@ -127,10 +121,6 @@ function openUserDetailsDialog(userDetails, imageUrl, applications) {
         document.body.removeChild(dialogOverlay);
     });
 }
-
-
-
-
 
 document.addEventListener('DOMContentLoaded', () => {
     requireLogin();
@@ -156,43 +146,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchApplicationsAndUpdateUI() {
     try {
-        let applications;
         if (selectedFilter === 'applied') {
-            applications = await fetchAllApplications();
+            const applications = await fetchAllApplications();
+            allApplications = applications;
         } else if (selectedFilter === 'hired') {
-            applications = await fetchHiredApplicants();
+            const hired = await fetchHiredApplicants();
+            allApplications = hired;
         } else if (selectedFilter === 'rejected') {
-            applications = await fetchRejectedApplicants();
+            const rejected = await fetchRejectedApplicants();
+            allApplications = rejected;
         } else if (selectedFilter === 'interview') {
-            applications = await fetchInterviewApplicants();
+            const interview = await fetchInterviewApplicants();
+            allApplications = interview;
         }
-
-        // Extract job_matches data and prepare it for visualization
-        const jobMatchesData = applications.map(app => ({
-            id: app.id,
-            name: app.userName,
-            matches: app.job_matches || {}  // Assume job_matches is an object with job titles and match percentages
-        }));
-
-        allApplications = applications;
-        filteredApplications = applications;
+        filteredApplications = allApplications;
         updateApplicationList(filteredApplications);
-
-        // Call function to render job match chart
-        renderJobMatchChart(jobMatchesData);
-
     } catch (error) {
         console.error("Failed to fetch applications:", error);
     }
 }
 
-
 function updateApplicationList(applications) {
     const applicationList = document.getElementById('applicationList');
-    if (!applicationList) {
-        console.error("Element with ID 'applicationList' not found.");
-        return;
-    }
+    if (!applicationList) return;
 
     applicationList.innerHTML = ''; 
 
@@ -232,40 +208,87 @@ function updateApplicationList(applications) {
                 profileImageDiv.appendChild(placeholderImage);
             });
 
-        // Create job match chart container and canvas
-        const chartContainer = document.createElement('div');
-        chartContainer.className = 'chart-container';
-        const canvas = document.createElement('canvas');
-        canvas.id = `chart-${application.userId}`;
-        chartContainer.appendChild(canvas);
-
-        // Render job match chart on this canvas
-        renderJobMatchChart(canvas, application.job_matches || {});
-
         const buttonsContainer = document.createElement('div');
         buttonsContainer.className = 'buttons-container';
 
         const contactButton = createButton('Contact', (event) => {
-            event.stopPropagation();
+            event.stopPropagation(); 
             const subject = `Application Status for ${application.position || 'N/A'} at ${application.company || 'N/A'}`;
             const body = `Dear ${application.userName || 'N/A'},\n\nYou have applied for ${application.position || 'N/A'} at ${application.company || 'N/A'}.`;
             const mailtoLink = `mailto:${application.userEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             window.location.href = mailtoLink;
         });
 
-        buttonsContainer.appendChild(contactButton);
+        if (selectedFilter === 'applied') {
+            const interviewButton = createButton('For Interview', async (event) => {
+                event.stopPropagation();
+                const interviewDetails = await showInterviewModal(application);
+                if (interviewDetails) {
+                    const fullInterviewData = {
+                        ...application,
+                        ...interviewDetails
+                    };
+                    await moveToInterview(application.id, fullInterviewData);
+                    alert('Applicant has been moved to the "For Interview" filter.');
+                    fetchApplicationsAndUpdateUI();
+                }
+            });
+
+            buttonsContainer.appendChild(contactButton);
+            buttonsContainer.appendChild(interviewButton);
+        } else if (selectedFilter === 'interview') {
+            const hireButton = createButton('Hire', async (event) => {
+                event.stopPropagation();
+                const confirm = await showCustomModal('Are you sure you want to hire this applicant?');
+                if (confirm) {
+                    await hireApplicant(application.id, application);
+                    alert('Applicant has been hired.');
+                    fetchApplicationsAndUpdateUI();
+                }
+            });
+
+            const rejectButton = createButton('Reject', async (event) => {
+                event.stopPropagation();
+                const confirm = await showCustomModal('Are you sure you want to reject this applicant?');
+                if (confirm) {
+                    await rejectApplicant(application.id, application);
+                    alert('Applicant has been rejected.');
+                    fetchApplicationsAndUpdateUI();
+                }
+            });
+
+            buttonsContainer.appendChild(contactButton);
+            buttonsContainer.appendChild(hireButton);
+            buttonsContainer.appendChild(rejectButton);
+        }
 
         listItem.appendChild(profileImageDiv);  
-        listItem.appendChild(detailsDiv);
-        listItem.appendChild(chartContainer);   // Add chart container here
+        listItem.appendChild(detailsDiv);      
         listItem.appendChild(buttonsContainer); 
+
+        listItem.addEventListener('click', async () => {
+            const userDetails = await fetchUserDetails(application.userId);
+            if (userDetails) {
+                let imageUrl = 'placeholder_image_url.png';
+                try {
+                    const downloadUrl = await getDownloadURL(storageRef(storage, `profile_images/${application.userId}.jpg`));
+                    imageUrl = downloadUrl;
+                } catch (error) {
+                    console.error("Error fetching profile image, using placeholder:", error);
+                }
+        
+                openUserDetailsDialog(userDetails, imageUrl, application);
+            } else {
+                alert('Failed to fetch user details.');
+            }
+        });
+        
 
         applicationList.appendChild(listItem);
     });
 
     updatePaginationControls(applications);
 }
-
 
 function updatePaginationControls(applications) {
     const paginationControls = document.getElementById('paginationControls');
@@ -415,52 +438,3 @@ function showInterviewModal(application) {
         });
     });
 }
-// Render job match chart for each applicant
-function renderJobMatchChart(canvas, jobMatches = {}) {
-    if (!canvas) {
-        console.error("Canvas element not found.");
-        return;
-    }
-
-    // Extract job titles and match percentages
-    const labels = [];
-    const data = [];
-    
-    Object.keys(jobMatches).forEach(key => {
-        const jobMatch = jobMatches[key];
-        labels.push(jobMatch.jobId); // Assuming `jobId` is the label you want to display
-        data.push(parseInt(jobMatch.matchPercentage, 10) || 0); // Convert percentage to number
-    });
-
-    new Chart(canvas, {
-        type: "doughnut",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: `Job Match Percentages`,
-                data: data,
-                backgroundColor: [
-                    "#FF6384",
-                    "#36A2EB",
-                    "#FFCE56",
-                    "#4BC0C0",
-                    "#9966FF",
-                    "#FF9F40"
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Job Match Percentages'
-                }
-            }
-        }
-    });
-}
-
