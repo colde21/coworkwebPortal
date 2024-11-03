@@ -35,6 +35,30 @@ function requireLogin() {
     });
 }
 
+//Navigation
+document.getElementById('homeButton').addEventListener('click', function () {
+    location.href = 'home.html';
+});
+
+document.getElementById('jobButton').addEventListener('click', function () {
+    location.href = 'job.html';
+});
+
+document.getElementById('appButton').addEventListener('click', function () {
+    location.href = 'app.html';
+});
+
+document.getElementById('archiveButton').addEventListener('click', function () {
+    location.href = 'archive.html';
+});
+
+// Assuming the sign-out functionality is handled in the same JavaScript file
+document.getElementById('signOutBtn').addEventListener('click', function () {
+    // Add your sign-out logic here
+    console.log('Sign out button clicked');
+});
+//Navigation
+
 // Handle sign-out
 async function performSignOut() {
     const signOutConfirmation = document.getElementById('signOutConfirmation');
