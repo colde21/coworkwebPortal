@@ -124,12 +124,11 @@ li {
 li button {
     background-color: #E74C3C;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    margin-left: 5px;
     font-size: 14px;
 }
 
@@ -137,8 +136,8 @@ li button {
 li .buttons-container {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
-
 /* Button hover effect */
 li button:hover {
     background-color: #c0392b;
@@ -389,14 +388,15 @@ li {
     margin-bottom: 20px;
 }
 .chart-container {
+    width: 60px;
+    height: 60px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+    align-items: center;
     justify-content: center;
-    margin-top: 20px;
+    margin-right: 20px; /* Adjust to add space between chart and details */
 }
 
 .chart-container canvas {
     width: 100% !important;
-    height: 400px !important;
+    height: 100% !important;
 }
