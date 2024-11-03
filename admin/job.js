@@ -102,6 +102,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(err => console.error("Failed to fetch jobs:", err));
 });
 
+// Display job details pop-up
+function viewJobDetails(jobId) {
+    const jobDetailsPopup = document.getElementById('viewJobDetailsPopup');
+    const jobDetailsContent = document.getElementById('jobDetailsContent');
+
+    getDoc(doc(firestore, 'jobs', jobId)).then((jobDoc) => {
+        if (jobDoc.exists()) {
+            const jobData = jobDoc.data();
+            jobDetailsContent.innerHTML = `
+                <p><strong>Position:</strong> ${jobData.position}</p>
+                <p><strong>Company:</strong> ${jobData.company}</p>
+                <p><strong>Location:</strong> ${jobData.location}</p>
+                <p><strong>Vacancy:</strong> ${jobData.vacancy}</p>
+                <p><strong>Type:</strong> ${jobData.type}</p>
+                <p><strong>Email:</strong> ${jobData.contact}</p>
+                <p><strong>Expected Salary:</strong> ${jobData.expectedSalary}</p>
+                <p><strong>Skills:</strong> ${[jobData.skills1, jobData.skills2, jobData.skills3, jobData.skills4, jobData.skills5].filter(Boolean).join(', ')}</p>
+                <p><strong>Qualifications:</strong> ${[jobData.qualification1, jobData.qualification2, jobData.qualification3, jobData.qualification4, jobData.qualification5].filter(Boolean).join(', ')}</p>
+                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ')}</p>
+                <p><strong>Facilities:</strong> ${jobData.facilities}</p>
+                <p><strong>Description:</strong> ${jobData.description}</p>
+            `;
+            jobDetailsPopup.style.display = 'flex';
+        } else {
+            alert("Job details not found.");
+        }
+    }).catch((error) => {
+        console.error("Error fetching job details:", error);
+        alert("Failed to load job details.");
+    });
+}
+
+// Close job details pop-up
+document.getElementById('closeViewJobDetailsPopup').addEventListener('click', () => {
+    document.getElementById('viewJobDetailsPopup').style.display = 'none';
+});
+
+
 // Update the job table
 function updateJobTable() {
     const tableBody = document.getElementById('jobTable').getElementsByTagName('tbody')[0];
@@ -139,6 +177,12 @@ function updateJobTable() {
         editButton.textContent = 'Edit';
         editButton.addEventListener('click', () => editJob(job.id));
         editCell.appendChild(editButton);
+
+        const viewCell = newRow.insertCell();
+        const viewButton = document.createElement('button');
+        viewButton.textContent = 'View';
+        viewButton.addEventListener('click', () => viewJobDetails(job.id));
+        viewCell.appendChild(viewButton);
     });
 
     document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
