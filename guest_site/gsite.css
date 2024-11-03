@@ -41,11 +41,11 @@ body {
 }
 
 .jumbotron {
-    background-image: url('https://scontent.fmnl33-2.fna.fbcdn.net/v/t39.30808-6/427142991_737597611808116_4797103468568493563_n.jpg?stp=cp6_dst-jpg&_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeGbEYIo8S7JSWpS6_9zlBc0MO8rkU88efMw7yuRTzx58zC-YrDxFBzvNzlnGCkNRVYfLfxIAhGL_ZKHQ6Z8CIuO&_nc_ohc=C89zH8_HsL4Q7kNvgEHvJKj&_nc_zt=23&_nc_ht=scontent.fmnl33-2.fna&_nc_gid=AmWB9e4C_UU_NnAKUmhIpQE&oh=00_AYAZGLztcE9AKosstV_GV_iIf8YJwI-r8Hz7PEFU9PTLgA&oe=6726E229');
+    background-image: url(industrial-style-office.jpg);
 }
 
 .image-section {
-    background-image: url('https://scontent.fmnl33-2.fna.fbcdn.net/v/t39.30808-6/427142991_737597611808116_4797103468568493563_n.jpg?stp=cp6_dst-jpg&_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeGbEYIo8S7JSWpS6_9zlBc0MO8rkU88efMw7yuRTzx58zC-YrDxFBzvNzlnGCkNRVYfLfxIAhGL_ZKHQ6Z8CIuO&_nc_ohc=C89zH8_HsL4Q7kNvgEHvJKj&_nc_zt=23&_nc_ht=scontent.fmnl33-2.fna&_nc_gid=AmWB9e4C_UU_NnAKUmhIpQE&oh=00_AYAZGLztcE9AKosstV_GV_iIf8YJwI-r8Hz7PEFU9PTLgA&oe=6726E229');
+    background-image: url(industrial-style-office.jpg);
 }
 
 /* Dark overlay for both jumbotron and image-section */
@@ -158,7 +158,7 @@ body {
 
 /* Background Image Section Styling */
 .image-section {
-    background-image: url('https://scontent.fmnl33-2.fna.fbcdn.net/v/t39.30808-6/427142991_737597611808116_4797103468568493563_n.jpg?stp=cp6_dst-jpg&_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeGbEYIo8S7JSWpS6_9zlBc0MO8rkU88efMw7yuRTzx58zC-YrDxFBzvNzlnGCkNRVYfLfxIAhGL_ZKHQ6Z8CIuO&_nc_ohc=C89zH8_HsL4Q7kNvgEHvJKj&_nc_zt=23&_nc_ht=scontent.fmnl33-2.fna&_nc_gid=AmWB9e4C_UU_NnAKUmhIpQE&oh=00_AYAZGLztcE9AKosstV_GV_iIf8YJwI-r8Hz7PEFU9PTLgA&oe=6726E229');
+    background-image: url(industrial-style-office.jpg);
     background-size: cover;
     background-position: center;
     background-attachment: fixed; /* Parallax effect */
