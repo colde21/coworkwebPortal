@@ -35,7 +35,6 @@
                 <p>Disposable Link: <span id="disposableLinkText" ></span></p>
                 <button id="copyLinkButton">Copy Link</button>
             </div>
-            
         </div>
         <div class="jable">
             <table id="jobTable">
@@ -49,13 +48,24 @@
                         <th>Type</th>
                         <th>Email</th>
                         <th>Edit</th>
+                        <th>View</th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- Dynamic rows will be added here -->
                 </tbody>
             </table>
-            
+        </div>
+    </div>
+
+    <!-- Job Details Pop-up -->
+    <div id="viewJobDetailsPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <span class="close" id="closeViewJobDetailsPopup">&times;</span>
+            <h2>Job Details</h2>
+            <div id="jobDetailsContent">
+                <!-- Job details will be dynamically populated here -->
+            </div>
         </div>
     </div>
     <div id="confirmationDialog" class="confirmation-dialog" style="display: none;">
