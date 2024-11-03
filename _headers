@@ -1,5 +1,5 @@
 /*
- Content-Security-Policy: default-src 'self'; script-src 'self' https://www.gstatic.com https://www.googleapis.com 'sha256-ryy9v91n5Ys6UsmqzxAzUC/Ywl7XDK91vx9g4xHLM/ZI=' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://www.googleapis.com https://firebase.googleapis.com; report-uri https://cowork-portal.netlify.app/.netlify/functions/__csp-violations
+ Content-Security-Policy: default-src 'self'; script-src 'self' https://www.gstatic.com https://www.googleapis.com 'nonce-brostop' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://www.googleapis.com https://firebase.googleapis.com; report-uri https://cowork-portal.netlify.app/.netlify/functions/__csp-violations;
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
