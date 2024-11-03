@@ -102,10 +102,69 @@ document.addEventListener('DOMContentLoaded', () => {
         updateJobTable();
     }).catch(err => console.error("Failed to fetch jobs:", err));
 });
-//Update tables
+
+// Display job details pop-up
+function viewJobDetails(jobId) {
+    const jobDetailsPopup = document.getElementById('viewJobDetailsPopup');
+    const jobDetailsContent = document.getElementById('jobDetailsContent');
+
+    getDoc(doc(firestore, 'jobs', jobId)).then((jobDoc) => {
+        if (jobDoc.exists()) {
+            const jobData = jobDoc.data();
+            jobDetailsContent.innerHTML = `
+                <p><strong>Position:</strong> ${jobData.position}</p><hr>
+                <p><strong>Company:</strong> ${jobData.company}</p><hr>
+                <p><strong>Location:</strong> ${jobData.location}</p><hr>
+                <p><strong>Vacancy:</strong> ${jobData.vacancy}</p><hr>
+                <p><strong>Type:</strong> ${jobData.type}</p><hr>
+                <p><strong>Email:</strong> ${jobData.contact}</p><hr>
+                <p><strong>Expected Salary:</strong> ${jobData.expectedSalary}</p><hr>
+                <p><strong>Skills:</strong> ${[jobData.skills1, jobData.skills2, jobData.skills3, jobData.skills4, jobData.skills5].filter(Boolean).join(', ')}</p><hr>
+                <p><strong>Qualifications:</strong> ${[jobData.qualification1, jobData.qualification2, jobData.qualification3, jobData.qualification4, jobData.qualification5].filter(Boolean).join(', ')}</p><hr>
+                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ')}</p><hr>
+                <p><strong>Facilities:</strong> ${jobData.facilities}</p><hr>
+                <p><strong>Description:</strong> ${jobData.description}</p>
+            `;
+            jobDetailsPopup.style.display = 'flex';
+        } else {
+            alert("Job details not found.");
+        }
+    }).catch((error) => {
+        console.error("Error fetching job details:", error);
+        alert("Failed to load job details.");
+    });
+}
+
+// Close job details pop-up
+document.getElementById('closeViewJobDetailsPopup').addEventListener('click', () => {
+    document.getElementById('viewJobDetailsPopup').style.display = 'none';
+});
+
+// Update the job table with "View" button
 function updateJobTable() {
     const tableBody = document.getElementById('jobTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = ''; // Clear existing rows
+
+    filteredJobs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).forEach(job => {
+        const newRow = tableBody.insertRow();
+        
+        const cells = ['position', 'company', 'location', 'vacancy', 'type', 'contact'];
+        cells.forEach(field => {
+            const cell = newRow.insertCell();
+            cell.textContent = job[field] || 'N/A';
+        });
+
+        const viewCell = newRow.insertCell();
+        const viewButton = document.createElement('button');
+        viewButton.textContent = 'View';
+        viewButton.classList.add('view-btn');
+        viewButton.addEventListener('click', () => viewJobDetails(job.id));
+        viewCell.appendChild(viewButton);
+    });
+
+    document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
+    updatePaginationControls();
+}
 
     // Sort jobs by `unarchivedAt` first, then by `createdAt` (descending order)
     filteredJobs.sort((a, b) => {
@@ -132,7 +191,7 @@ function updateJobTable() {
 
     document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
     updatePaginationControls();
-}
+
 
 
 //Search 

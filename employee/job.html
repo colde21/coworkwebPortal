@@ -6,6 +6,7 @@
     <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
     <link rel="stylesheet" href="job.css">
     <script src="database.js" type="module"></script>
+    <script type="module" src="job.js"></script>
 </head>
 <body>
     <!-- Navigation bar-->
@@ -35,6 +36,7 @@
                         <th>Vacancy</th>
                         <th>Type</th>
                         <th>Email</th>
+                        <th>View</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,6 +45,17 @@
             </table>
         </div>
     </div>
+    
+        <!-- Job Details Pop-up -->
+        <div id="viewJobDetailsPopup" class="popup" style="display: none;">
+            <div class="popup-content">
+                <span class="close" id="closeViewJobDetailsPopup">&times;</span>
+                <h2>Job Details</h2>
+                <div id="jobDetailsContent">
+                    <!-- Job details will be dynamically populated here -->
+                </div>
+            </div>
+        </div>
     
     <div id="paginationControls" class="pagination"></div>
 
