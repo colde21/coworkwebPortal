@@ -1,7 +1,7 @@
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { fetchAllApplications, fetchHiredApplicants, fetchRejectedApplicants, fetchInterviewApplicants, hireApplicant, rejectApplicant, moveToInterview, logAudit } from './database.js';
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -35,7 +35,7 @@ function requireLogin() {
         }
     });
 }
-
+//Sign out!
 async function performSignOut() {
     const signOutConfirmation = document.getElementById('signOutConfirmation');
     const confirmSignOutBtn = document.getElementById('confirmSignOutBtn');
@@ -83,11 +83,9 @@ async function fetchUserDetails(userId) {
 
 // Updated function with detailed logging to debug the applications object
 function openUserDetailsDialog(userDetails, imageUrl, applications) {
-    // Log userDetails and applications data to see their structure
     console.log("User Details:", userDetails);
     console.log("Applications data:", applications);
 
-    // Safeguard check to avoid errors if applications is undefined or doesn't have expected fields
     const userName = applications?.userName || 'N/A';
     const userEmail = applications?.userEmail || 'N/A';
     const userPhone = applications?.userPhone || 'N/A';
@@ -113,6 +111,7 @@ function openUserDetailsDialog(userDetails, imageUrl, applications) {
             <p><strong>Company:</strong> ${company}</p>
             <p><strong>Preferred Jobs:</strong> ${userDetails.preferredJobs || 'N/A'}</p>
             <p><strong>Skills:</strong> ${userDetails.skills || 'N/A'}</p>
+
         </div>
     `;
 
@@ -123,10 +122,6 @@ function openUserDetailsDialog(userDetails, imageUrl, applications) {
         document.body.removeChild(dialogOverlay);
     });
 }
-
-
-
-
 
 document.addEventListener('DOMContentLoaded', () => {
     requireLogin();
@@ -149,29 +144,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchApplicationsAndUpdateUI();
 });
-
+//Fetch application 
 async function fetchApplicationsAndUpdateUI() {
     try {
+        // Fetch the applications based on the selected filter
+        let applications = [];  // Define applications here
+
         if (selectedFilter === 'applied') {
-            const applications = await fetchAllApplications();
-            allApplications = applications;
+            applications = await fetchAllApplications();
         } else if (selectedFilter === 'hired') {
-            const hired = await fetchHiredApplicants();
-            allApplications = hired;
+            applications = await fetchHiredApplicants();
         } else if (selectedFilter === 'rejected') {
-            const rejected = await fetchRejectedApplicants();
-            allApplications = rejected;
+            applications = await fetchRejectedApplicants();
         } else if (selectedFilter === 'interview') {
-            const interview = await fetchInterviewApplicants();
-            allApplications = interview;
+            applications = await fetchInterviewApplicants();
         }
+        
+        // Fetch job matches for each application
+        for (const app of applications) {
+            const jobMatchesRef = collection(firestore, `applied/${app.id}/job_matches`);
+            const jobMatchesSnapshot = await getDocs(jobMatchesRef);
+            
+            app.job_matches = jobMatchesSnapshot.docs.map(jobDoc => ({
+                jobId: jobDoc.id,
+                matchPercentage: jobDoc.data().matchPercentage
+            }));
+        }
+        
+        allApplications = applications;
         filteredApplications = allApplications;
         updateApplicationList(filteredApplications);
     } catch (error) {
         console.error("Failed to fetch applications:", error);
     }
 }
+function renderJobMatchChart(canvas, jobMatches) {
+    if (!canvas) {
+        console.error("Canvas element not found for job match chart.");
+        return;
+    }
+    
+    if (!jobMatches || jobMatches.length === 0) {
+        console.warn("No job matches data found.");
+        return;
+    }
 
+    const labels = jobMatches.map(job => job.jobId);
+    const data = jobMatches.map(job => parseInt(job.matchPercentage, 10) || 0);
+
+    try {
+        new Chart(canvas, {
+            type: "doughnut",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Job Match Percentages",
+                    data: data,
+                    backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Job Match Percentages'
+                    }
+                }
+            }
+        });
+
+        console.log("Chart rendered successfully.");
+    } catch (error) {
+        console.error("Error rendering chart:", error);
+    }
+}
+//Update Application
 function updateApplicationList(applications) {
     const applicationList = document.getElementById('applicationList');
     if (!applicationList) return;
@@ -218,7 +269,7 @@ function updateApplicationList(applications) {
         buttonsContainer.className = 'buttons-container';
 
         const contactButton = createButton('Contact', (event) => {
-            event.stopPropagation(); // Prevent user profile popup
+            event.stopPropagation(); 
             const subject = `Application Status for ${application.position || 'N/A'} at ${application.company || 'N/A'}`;
             const body = `Dear ${application.userName || 'N/A'},\n\nYou have applied for ${application.position || 'N/A'} at ${application.company || 'N/A'}.`;
             const mailtoLink = `mailto:${application.userEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -227,7 +278,7 @@ function updateApplicationList(applications) {
 
         if (selectedFilter === 'applied') {
             const interviewButton = createButton('For Interview', async (event) => {
-                event.stopPropagation(); // Prevent user profile popup
+                event.stopPropagation();
                 const interviewDetails = await showInterviewModal(application);
                 if (interviewDetails) {
                     const fullInterviewData = {
@@ -244,7 +295,7 @@ function updateApplicationList(applications) {
             buttonsContainer.appendChild(interviewButton);
         } else if (selectedFilter === 'interview') {
             const hireButton = createButton('Hire', async (event) => {
-                event.stopPropagation(); // Prevent user profile popup
+                event.stopPropagation();
                 const confirm = await showCustomModal('Are you sure you want to hire this applicant?');
                 if (confirm) {
                     await hireApplicant(application.id, application);
@@ -254,7 +305,7 @@ function updateApplicationList(applications) {
             });
 
             const rejectButton = createButton('Reject', async (event) => {
-                event.stopPropagation(); // Prevent user profile popup
+                event.stopPropagation();
                 const confirm = await showCustomModal('Are you sure you want to reject this applicant?');
                 if (confirm) {
                     await rejectApplicant(application.id, application);
@@ -267,6 +318,14 @@ function updateApplicationList(applications) {
             buttonsContainer.appendChild(hireButton);
             buttonsContainer.appendChild(rejectButton);
         }
+
+        const chartContainer = document.createElement('div');
+        chartContainer.className = 'chart-container';
+        const canvas = document.createElement('canvas');
+        canvas.id = `chart-${application.id}`;
+        chartContainer.appendChild(canvas);
+
+        renderJobMatchChart(canvas, application.job_matches || []);
 
         listItem.appendChild(profileImageDiv);  
         listItem.appendChild(detailsDiv);      
@@ -283,8 +342,7 @@ function updateApplicationList(applications) {
                     console.error("Error fetching profile image, using placeholder:", error);
                 }
         
-                // Pass the 'application' object properly when opening the dialog
-                openUserDetailsDialog(userDetails, imageUrl, application); // Pass the application data here
+                openUserDetailsDialog(userDetails, imageUrl, application);
             } else {
                 alert('Failed to fetch user details.');
             }
@@ -296,6 +354,10 @@ function updateApplicationList(applications) {
 
     updatePaginationControls(applications);
 }
+//Render job match chart
+
+
+
 
 function updatePaginationControls(applications) {
     const paginationControls = document.getElementById('paginationControls');
