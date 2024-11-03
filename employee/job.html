@@ -6,19 +6,22 @@
     <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
     <link rel="stylesheet" href="job.css">
     <script src="database.js" type="module"></script>
+    <script nonce="brostop">  
+        console.log('it is working now?');
+        </script>
 </head>
 <body>
-    <!-- Navigation bar-->
-    <div class="nav">
-        <div class="links"> 
-            <button onclick="location.href='home.html'">HOME</button>
-            <button onclick="location.href='job.html'">JOB LIST</button>
-            <button onclick="location.href='app.html'">APPLICATION</button>
-            <button onclick="location.href='archive.html'">ARCHIVED </button>
+     <!-- Navigation Bar -->
+     <div class="nav">
+        <div class="links">
+            <button id="homeButton">HOME</button>
+            <button id="jobButton">JOB LIST</button>
+            <button id="appButton">APPLICATION</button>
+            <button id="archiveButton">ARCHIVED</button>
             <button id="signOutBtn">SIGN OUT</button>
         </div>
-    </div> 
-
+    </div>
+       <!-- Navigation Bar -->
     <div class="job-container">
         <div class="job-actions">
             <h2>Job List | <span id="jobCount">Total Jobs: 0</span></h2>
