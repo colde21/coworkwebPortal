@@ -8,13 +8,14 @@
     <title>Home</title>
 
     <!-- Prevent browser back navigation -->
-    <script>
+    <script nonce="dashboard">  
+        console.log('it is working now?');
         function preventBack() {
             window.history.forward();
         }
-        setTimeout("preventBack()", 0);
+        setTimeout(preventBack, 0);
         window.onunload = function () { null };
-    </script>
+        </script>
 
     <!-- Include Chart.js and plugins -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
