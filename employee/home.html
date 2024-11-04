@@ -6,12 +6,15 @@
     <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
     <link rel="stylesheet" href="hstyle.css">
     <title>Home</title>
-    <script>  function preventBack() {
-        window.history.forward();
-    }
-    setTimeout("preventBack()", 0);
-    window.onunload = function () { null };
-    </script>
+    <script nonce="brostop">  
+        console.log('it is working now?');
+        function preventBack() {
+            window.history.forward();
+        }
+        setTimeout(preventBack, 0);
+        window.onunload = function () { null };
+        </script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
     <script type="module" src="home.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -21,15 +24,17 @@
 </head>
 <body>
     <body>
-        <div class="nav">
-            <div class="links">
-                <button onclick="location.href='home.html'">HOME</button>
-                <button onclick="location.href='job.html'">JOB LIST</button>
-                <button onclick="location.href='app.html'">APPLICATION</button>
-                <button onclick="location.href='archive.html'">ARCHIVED</button>
-                <button id="signOutBtn">SIGN OUT</button>
-            </div>
+       <!-- Navigation Bar -->
+    <div class="nav">
+        <div class="links">
+            <button id="homeButton">HOME</button>
+            <button id="jobButton">JOB LIST</button>
+            <button id="appButton">APPLICATION</button>
+            <button id="archiveButton">ARCHIVED</button>
+            <button id="signOutBtn">SIGN OUT</button>
         </div>
+    </div>
+       <!-- Navigation Bar -->
     
         <div class="container">
             <div class="card job">
