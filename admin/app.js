@@ -1,7 +1,7 @@
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { fetchAllApplications, fetchHiredApplicants, fetchRejectedApplicants, fetchInterviewApplicants, hireApplicant, rejectApplicant, moveToInterview, logAudit } from './database.js';
-import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -139,7 +139,7 @@ function openUserDetailsDialog(userDetails, imageUrl, applications) {
         </div>
     `;
 
-    dialogOverlay.appendChild(dialogContent);
+    dialogOverlay.appendChild(dialogContent)
     document.body.appendChild(dialogOverlay);
 
     dialogOverlay.querySelector('.close-dialog').addEventListener('click', () => {
@@ -184,17 +184,6 @@ async function fetchApplicationsAndUpdateUI() {
             applications = await fetchInterviewApplicants();
         }
         
-        // Fetch job matches for each application
-        for (const app of applications) {
-            const jobMatchesRef = collection(firestore, `applied/${app.id}/job_matches`);
-            const jobMatchesSnapshot = await getDocs(jobMatchesRef);
-            
-            app.job_matches = jobMatchesSnapshot.docs.map(jobDoc => ({
-                jobId: jobDoc.id,
-                matchPercentage: jobDoc.data().matchPercentage
-            }));
-        }
-        
         allApplications = applications;
         filteredApplications = allApplications;
         updateApplicationList(filteredApplications);
@@ -202,50 +191,7 @@ async function fetchApplicationsAndUpdateUI() {
         console.error("Failed to fetch applications:", error);
     }
 }
-function renderJobMatchChart(canvas, jobMatches) {
-    if (!canvas) {
-        console.error("Canvas element not found for job match chart.");
-        return;
-    }
-    
-    if (!jobMatches || jobMatches.length === 0) {
-        console.warn("No job matches data found.");
-        return;
-    }
 
-    const labels = jobMatches.map(job => job.jobId);
-    const data = jobMatches.map(job => parseInt(job.matchPercentage, 10) || 0);
-
-    try {
-        new Chart(canvas, {
-            type: "doughnut",
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "Job Match Percentages",
-                    data: data,
-                    backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Job Match Percentages'
-                    }
-                }
-            }
-        });
-
-        console.log("Chart rendered successfully.");
-    } catch (error) {
-        console.error("Error rendering chart:", error);
-    }
-}
 //Update Application
 function updateApplicationList(applications) {
     const applicationList = document.getElementById('applicationList');
@@ -343,14 +289,6 @@ function updateApplicationList(applications) {
             buttonsContainer.appendChild(rejectButton);
         }
 
-        const chartContainer = document.createElement('div');
-        chartContainer.className = 'chart-container';
-        const canvas = document.createElement('canvas');
-        canvas.id = `chart-${application.id}`;
-        chartContainer.appendChild(canvas);
-
-        renderJobMatchChart(canvas, application.job_matches || []);
-
         listItem.appendChild(profileImageDiv);  
         listItem.appendChild(detailsDiv);      
         listItem.appendChild(buttonsContainer); 
@@ -378,7 +316,6 @@ function updateApplicationList(applications) {
 
     updatePaginationControls(applications);
 }
-//Render job match chart
 
 function updatePaginationControls(applications) {
     const paginationControls = document.getElementById('paginationControls');
