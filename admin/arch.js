@@ -309,6 +309,7 @@ async function deleteJob(jobId, listItem) {
 
             // Remove the job from the DOM after deletion
             listItem.remove();
+            window.location.reload();
         } catch (error) {
             console.error(`Failed to delete job ${jobId}:`, error);
         }
