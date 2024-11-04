@@ -1,7 +1,7 @@
-import { fetchArchivedJobs, logAudit, } from './database.js';
+import { fetchArchivedJobs, logAudit, deleteArchivedJob } from './database.js';
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, getDoc, doc, addDoc, collection, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
@@ -128,34 +128,32 @@ function updateArchiveTable() {
     const jobsToDisplay = filteredJobs.slice(start, end);
 
     jobsToDisplay.forEach(job => {
-        const listItem = document.createElement('li');
-        listItem.className = 'archived-job';
+        const row = document.createElement('div');
+        row.className = 'table-row';
 
-        const title = document.createElement('div');
-        title.className = 'jobTitle';
-        title.textContent = `Position: ${job.position}`;
+        const positionCell = document.createElement('div');
+        positionCell.className = 'table-cell';
+        positionCell.textContent = job.position;
 
-        const company = document.createElement('div');
-        company.className = 'company';
-        company.textContent = `Company: ${job.company}`;
+        const companyCell = document.createElement('div');
+        companyCell.className = 'table-cell';
+        companyCell.textContent = job.company;
 
-        const location = document.createElement('div');
-        location.className = 'location';
-        location.textContent = `Location: ${job.location}`;
+        const locationCell = document.createElement('div');
+        locationCell.className = 'table-cell';
+        locationCell.textContent = job.location;
 
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'button-container';
+       
+        row.appendChild(positionCell);
+        row.appendChild(companyCell);
+        row.appendChild(locationCell);
 
-        listItem.appendChild(title);
-        listItem.appendChild(company);
-        listItem.appendChild(location);
-        listItem.appendChild(buttonContainer);
-
-        archiveList.appendChild(listItem);
+        archiveList.appendChild(row);
     });
 
     updatePaginationControls();
 }
+
 
 function handleSearch() {
     const query = document.getElementById('searchBar').value.toLowerCase();
@@ -189,4 +187,114 @@ function updatePaginationControls() {
         });
         paginationControls.appendChild(button);
     }
+}
+
+function showConfirmationDialog(message, onConfirm) {
+    const confirmationDialog = document.getElementById('confirmationDialog');
+    const confirmationMessage = document.getElementById('confirmationMessage');
+    const confirmButton = document.getElementById('confirmActionBtn');
+    const cancelButton = document.getElementById('cancelActionBtn');
+
+    confirmationMessage.textContent = message;
+    confirmationDialog.style.display = 'flex';
+
+    confirmButton.replaceWith(confirmButton.cloneNode(true));
+    cancelButton.replaceWith(cancelButton.cloneNode(true));
+
+    document.getElementById('confirmActionBtn').onclick = () => {
+        confirmationDialog.style.display = 'none';
+        onConfirm();
+    };
+    
+    document.getElementById('cancelActionBtn').onclick = () => {
+        confirmationDialog.style.display = 'none';
+    };
+}
+
+function showVacancyInputDialog(message, defaultValue, onConfirm) {
+    const vacancyDialog = document.getElementById('vacancyDialog');
+    const vacancyMessage = document.getElementById('vacancyDialogMessage');
+    const vacancyInput = document.getElementById('vacancyInput');
+    const confirmButton = document.getElementById('confirmVacancyBtn');
+    const cancelButton = document.getElementById('cancelVacancyBtn');
+
+    vacancyMessage.textContent = message;
+    vacancyInput.value = defaultValue;
+    vacancyDialog.style.display = 'flex';
+
+    confirmButton.replaceWith(confirmButton.cloneNode(true));
+    cancelButton.replaceWith(cancelButton.cloneNode(true));
+
+    document.getElementById('confirmVacancyBtn').onclick = () => {
+        const newValue = vacancyInput.value;
+        if (!isNaN(newValue) && newValue >= 0) {
+            vacancyDialog.style.display = 'none';
+            onConfirm(newValue);
+        } else {
+            alert('Please enter a valid vacancy number.');
+        }
+    };
+
+    document.getElementById('cancelVacancyBtn').onclick = () => {
+        vacancyDialog.style.display = 'none';
+    };
+}
+
+async function unarchiveJob(jobId) {
+    const jobDocRef = doc(firestore, `archive/${jobId}`);
+    const jobData = await getDoc(jobDocRef);
+
+    if (jobData.exists()) {
+        showConfirmationDialog("Do you want to unarchive this job?", async () => {
+            const currentVacancy = jobData.data().vacancy || 0;
+            showVacancyInputDialog(
+                `Edit the vacancy number for "${jobData.data().position}" at "${jobData.data().company}":`,
+                currentVacancy,
+                async (newVacancy) => {
+                    showConfirmationDialog("Are you sure you want to unarchive this job with the updated vacancy?", async () => {
+                        try {
+                            const user = auth.currentUser;
+                            const userEmail = user ? user.email : "Unknown user";
+                            
+                            const updatedJobData = {
+                                ...jobData.data(),
+                                vacancy: parseInt(newVacancy, 10),
+                                unarchivedAt: Timestamp.now()
+                            };
+
+                            await addDoc(collection(firestore, 'jobs'), updatedJobData);
+                            await deleteArchivedJob(jobId);
+                            await logAudit(userEmail, "Job Unarchived", { jobId, newVacancy });
+
+                            window.location.reload();
+                        } catch (error) {
+                            console.error(`Failed to unarchive job ${jobId}:`, error);
+                        }
+                    });
+                }
+            );
+        });
+    } else {
+        alert("Job data not found.");
+    }
+}
+
+async function deleteJob(jobId, listItem) {
+    showConfirmationDialog("Are you sure you want to delete this job permanently?", async () => {
+        try {
+            const user = auth.currentUser;
+            const userEmail = user ? user.email : "Unknown user";
+
+            // Delete the job from the archive collection
+            await deleteArchivedJob(jobId);
+            
+            // Log the audit with the info "Job Deleted"
+            await logAudit(userEmail, "Job Deleted", { jobId });
+
+            // Remove the job from the DOM after deletion
+            listItem.remove();
+        } catch (error) {
+            console.error(`Failed to delete job ${jobId}:`, error);
+        }
+    });
 }

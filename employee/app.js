@@ -119,10 +119,6 @@ function openUserDetailsDialog(userDetails, imageUrl, applications) {
         <p><strong>Company:</strong> ${applications?.company || 'N/A'}</p>
         <p><strong>Preferred Jobs:</strong> ${userDetails.preferredJobs || 'N/A'}</p>
         <p><strong>Skills:</strong> ${userDetails.skills || 'N/A'}</p>
-        <p><strong>Reason for Leaving:</strong> ${userDetails.reasonForLeaving || 'N/A'}</p>
-        <p><strong>Salary:</strong> ${userDetails.salary || 'N/A'}</p>
-        <p><strong>Work Phone:</strong> ${userDetails.workPhone || 'N/A'}</p>
-        <p><strong>Work Address:</strong> ${userDetails.workAddress || 'N/A'}</p>
     `;
 
     // Show the modal

@@ -24,26 +24,19 @@ body {
 }
 
 .links button {
-    background: none; 
-    border: none; 
+    background: none;
+    border: none;
     color: #f2f2f2;
     padding: 16px 10px;
     text-decoration: none;
     font-size: 16px;
     font-weight: bold;
     margin-right: 10px;
-    cursor: pointer; /* Ensure it's clear this is clickable */
-}
-
-.nav h2 {
-    font-size: 30px;
-    color: #f2f2f2;
-    margin-left: 20px;
-    margin-right: auto;
+    cursor: pointer;
 }
 
 .links button:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Change background color on hover */
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Main container */
@@ -61,47 +54,7 @@ body {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-}
-
-.dropdown {
-    position: relative;
-    display: inline-block;
-    margin-right: 10px;
-}
-
-.dropbtn {
-    background-color: #f1f1f1;
-    color: #333;
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    border-radius: 5px;
-}
-
-.dropdown-content a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    border-bottom: 1px solid #ddd;
-}
-
-.dropdown-content a:hover {
-    background-color: #f1f1f1;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
+    gap: 10px; /* Added spacing between elements */
 }
 
 #searchBar {
@@ -112,12 +65,40 @@ body {
     box-sizing: border-box;
 }
 
+.filter-dropdown {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.refresh-btn {
+    padding: 10px;
+    border: none;
+    background-color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.refresh-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.refresh-btn:hover {
+    background-color: #f1f1f1;
+}
+
 ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
+/* Style for list items */
 li {
     background-color: #f9f9f9;
     padding: 15px;
@@ -125,60 +106,153 @@ li {
     border-radius: 8px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    align-items: center;  /* Align items vertically */
+    flex-wrap: wrap; /* Allow items to wrap in smaller screens */
 }
 
-li:last-child {
-    margin-bottom: 0;
-}
-
-li:hover {
-    background-color: #f1f1f1;
-}
-
+/* Style for details section */
 .details {
     flex-grow: 1;
     margin-right: 20px;
     line-height: 1.6;
     text-align: left;
+    font-size: 16px;
 }
 
-.jobTitle {
-    font-weight: bold;
-    margin-bottom: 5px;
+/* Style for buttons */
+li button {
+    background-color: #E74C3C;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 14px;
 }
 
-.company {
-    color: #666;
-    margin-bottom: 5px;
+/* Align buttons horizontally */
+li .buttons-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+/* Button hover effect */
+li button:hover {
+    background-color: #c0392b;
 }
 
-.location {
-    color: #999;
-}
-
+/* Adjustments for smaller screens */
 @media (max-width: 768px) {
-    .header-container {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    h1 {
-        margin-bottom: 10px;
-    }
-
     li {
         flex-direction: column;
         align-items: flex-start;
     }
 
-    .details {
-        margin-bottom: 10px;
-    }
-
-    #searchBar {
+    .buttons-container {
+        margin-top: 10px;
         width: 100%;
+        justify-content: flex-start;
     }
+}
+
+/* Pagination styling */
+/* Pagination styling */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination .page-numbers {
+    font-size: 14px; /* Smaller font size */
+    font-weight: bold;
+    margin: 0 5px; /* Less margin between elements */
+}
+
+.pagination button {
+    width: 30px; /* Adjust width for compact look */
+    height: 30px; /* Adjust height for compact look */
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    color: #333;
+    margin: 0 2px; /* Reduced margin */
+}
+
+.pagination button:disabled {
+    background-color: #f1f1f1;
+    cursor: not-allowed;
+    color: #999;
+    border-color: #ddd; /* Light border for disabled state */
+}
+
+.pagination button:hover:not(:disabled) {
+    background-color: #e0e0e0;
+}
+
+.pagination button.active {
+    background-color: #333;
+    color: white;
+    border-color: #333;
+}
+
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.confirm-btn {
+    background-color: #E74C3C;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.cancel-btn {
+    background-color: #E74C3C;
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.confirm-btn:hover {
+    background-color: #c0392b;
+}
+
+.cancel-btn:hover {
+    background-color: #c0392b;
 }
 
 /* Confirmation Dialog */
@@ -203,6 +277,25 @@ li:hover {
     text-align: center;
 }
 
+.confirmation-dialog-buttons {
+    display: block;
+    margin-top: 20px;
+}
+
+.confirmation-dialog-buttons button {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.confirmation-dialog-buttons button:hover {
+    background-color: darkred;
+}
+
 /* Loading Screen */
 .loading-screen {
     display: none;
@@ -219,7 +312,7 @@ li:hover {
 .load-circle {
     width: 100px;
     height: 40px;
-    --g: radial-gradient(farthest-side,#0000 calc(95% - 3px),#fff calc(100% - 3px) 98%,#0000 101%) no-repeat;
+    --g: radial-gradient(farthest-side, #0000 calc(95% - 3px), #fff calc(100% - 3px) 98%, #0000 101%) no-repeat;
     background: var(--g), var(--g), var(--g);
     background-size: 30px 30px;
     animation: la9 1s infinite alternate;
@@ -246,53 +339,67 @@ li:hover {
     }
 }
 
-/* Profile Image */
-.profile-image {
-    margin-right: 15px;
-}
-
-.profile-pic {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-}
-
-/* Modal styling */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    display: none; /* Hidden by default */
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Ensure it appears on top */
-}
-
-.modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 50%;
-    max-width: 600px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.dialog-header {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.dialog-body {
-    padding: 10px;
-}
-
+/* Applicant Picture Styling */
 .profile-pic {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    margin-bottom: 10px;
+    object-fit: cover; /* Ensures the image maintains aspect ratio and covers the entire element */
+    margin-right: 20px; /* Adds spacing between the image and the details */
+    cursor: pointer;
+}
+
+.placeholder-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adds spacing between image and other elements */
+}
+
+.dialog-header {
+    text-align: right;
+}
+
+.dialog-header .close-dialog {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.dialog-body {
+    margin-top: 20px;
+}
+
+.dialog-body img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+.chart-container {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px; /* Adjust to add space between chart and details */
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
