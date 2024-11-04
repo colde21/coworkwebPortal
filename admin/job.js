@@ -35,6 +35,7 @@ function requireLogin() {
     });
 }
 
+
 //Navigation
 document.getElementById('homeButton').addEventListener('click', function () {
     location.href = 'home.html';
@@ -124,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         filteredJobs = jobs;
         updateJobTable();
     }).catch(err => console.error("Failed to fetch jobs:", err));
+
 });
 
 // Display job details pop-up
@@ -164,54 +166,83 @@ document.getElementById('closeViewJobDetailsPopup').addEventListener('click', ()
 });
 
 
+
+
+function showLoader() {
+    const loader = document.getElementById('paginationLoader');
+    if (loader) {
+        loader.style.display = 'inline-block';
+    }
+}
+
+function hideLoader() {
+    const loader = document.getElementById('paginationLoader');
+    if (loader) {
+        loader.style.display = 'none';
+    }
+}
+
 // Update the job table
-function updateJobTable() {
+async function updateJobTable() {
     const tableBody = document.getElementById('jobTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = '';
 
-    filteredJobs.sort((a, b) => {
-        const timeA = a.unarchivedAt ? a.unarchivedAt.seconds : (a.createdAt ? a.createdAt.seconds : 0);
-        const timeB = b.unarchivedAt ? b.unarchivedAt.seconds : (b.createdAt ? b.createdAt.seconds : 0);
-        return timeB - timeA;
-    });
+    // Show loader while updating job table
+    showLoader();
 
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const jobsToDisplay = filteredJobs.slice(start, end);
-
-    jobsToDisplay.forEach(job => {
-        const newRow = tableBody.insertRow(-1);
-        newRow.dataset.id = job.id;
-
-        const checkboxCell = newRow.insertCell();
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = 'circular-checkbox';
-        checkbox.dataset.id = job.id;
-        checkboxCell.appendChild(checkbox);
-
-        const cells = ['position', 'company', 'location', 'vacancy', 'type', 'contact'];
-        cells.forEach(field => {
-            const cell = newRow.insertCell();
-            cell.textContent = job[field] || 'N/A';
+    try {
+        // Sort and filter jobs
+        filteredJobs.sort((a, b) => {
+            const timeA = a.unarchivedAt ? a.unarchivedAt.seconds : (a.createdAt ? a.createdAt.seconds : 0);
+            const timeB = b.unarchivedAt ? b.unarchivedAt.seconds : (b.createdAt ? b.createdAt.seconds : 0);
+            return timeB - timeA;
         });
 
-        const editCell = newRow.insertCell();
-        const editButton = document.createElement('button');
-        editButton.textContent = 'Edit';
-        editButton.addEventListener('click', () => editJob(job.id));
-        editCell.appendChild(editButton);
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const jobsToDisplay = filteredJobs.slice(start, end);
 
-        const viewCell = newRow.insertCell();
-        const viewButton = document.createElement('button');
-        viewButton.textContent = 'View';
-        viewButton.addEventListener('click', () => viewJobDetails(job.id));
-        viewCell.appendChild(viewButton);
-    });
+        // Populate job table rows
+        jobsToDisplay.forEach(job => {
+            const newRow = tableBody.insertRow(-1);
+            newRow.dataset.id = job.id;
 
-    document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
-    updatePaginationControls();
+            const checkboxCell = newRow.insertCell();
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'circular-checkbox';
+            checkbox.dataset.id = job.id;
+            checkboxCell.appendChild(checkbox);
+
+            const cells = ['position', 'company', 'location', 'vacancy', 'type', 'contact'];
+            cells.forEach(field => {
+                const cell = newRow.insertCell();
+                cell.textContent = job[field] || 'N/A';
+            });
+
+            const editCell = newRow.insertCell();
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Edit';
+            editButton.addEventListener('click', () => editJob(job.id));
+            editCell.appendChild(editButton);
+
+            const viewCell = newRow.insertCell();
+            const viewButton = document.createElement('button');
+            viewButton.textContent = 'View';
+            viewButton.addEventListener('click', () => viewJobDetails(job.id));
+            viewCell.appendChild(viewButton);
+        });
+
+        document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
+        updatePaginationControls();
+    } catch (error) {
+        console.error("Failed to update job table:", error);
+    } finally {
+        // Hide loader after updating job table
+        hideLoader();
+    }
 }
+
 
 //Search 
 function handleSearch() {
@@ -444,21 +475,26 @@ function updatePaginationControls() {
     const prevButton = document.createElement('button');
     prevButton.textContent = '<';
     prevButton.disabled = currentPage === 1;
-    prevButton.addEventListener('click', () => {
+    prevButton.addEventListener('click', async () => {
+        showLoader();
         currentPage--;
-        updateJobTable();
+        await updateJobTable();
+        hideLoader();
     });
     paginationControls.appendChild(prevButton);
 
     const nextButton = document.createElement('button');
     nextButton.textContent = '>';
     nextButton.disabled = currentPage === totalPages;
-    nextButton.addEventListener('click', () => {
+    nextButton.addEventListener('click', async () => {
+        showLoader();
         currentPage++;
-        updateJobTable();
+        await updateJobTable();
+        hideLoader();
     });
     paginationControls.appendChild(nextButton);
 }
+
 document.getElementById('generateLinkButton').addEventListener('click', async () => {
     const companyName = prompt("Enter the company name for which you want to generate the link:");
     if (companyName) {

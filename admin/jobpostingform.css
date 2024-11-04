@@ -270,3 +270,23 @@ button{
 .success-message-content h4{
   font-size: 20px; /* Adjust the margin between the checkmark and the message */
 }
+
+.currency-input input[type="number"]::-webkit-outer-spin-button,
+.currency-input input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.currency-input input[type="number"],
+input[type="number"] {
+    -webkit-appearance: none; /* Chrome, Safari, Edge */
+   /* Firefox */
+    appearance: textfield; /* Standard property for compatibility */
+    margin: 0;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

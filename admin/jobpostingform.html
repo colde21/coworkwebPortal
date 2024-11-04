@@ -25,8 +25,8 @@
                     <input type="text" id="location" name="location" placeholder="Enter job location" required>
                 </div>
                 <div class="form-group">
-                    <label for="age">Age Requirement:</label>
-                    <input type="number" id="age" name="age" placeholder="Enter Age Requirement" min="18" max="60" required>
+                    <label for="age">Minimum Age Requirement:</label>
+                    <input type="number" id="age" name="age" placeholder="Enter Minimum age Requirement" min="18" max="60" required>
                 </div>
                 <div class="form-group">
                     <label for="contact">Contact Email:</label>
@@ -42,8 +42,12 @@
                 </div>
                 <div class="form-group">
                     <label for="expectedSalary">Expected Salary:</label>
-                    <input type="number" id="expectedSalary" name="expectedSalary" placeholder="Enter expected salary" min="0" required>
+                    <div class="currency-input">
+                        <span>₱</span>
+                        <input type="number" id="expectedSalary" name="expectedSalary" placeholder="Enter expected salary" min="0" required>
+                    </div>
                 </div>
+                
             </div>
 
             <!-- Right Column with Skills, Qualifications, Vacancy, Company, and Job Type -->
