@@ -128,23 +128,23 @@ function updateArchiveTable() {
     const jobsToDisplay = filteredJobs.slice(start, end);
 
     jobsToDisplay.forEach(job => {
-        const listItem = document.createElement('li');
-        listItem.className = 'archived-job';
+        const row = document.createElement('div');
+        row.className = 'table-row';
 
-        const title = document.createElement('div');
-        title.className = 'jobTitle';
-        title.textContent = `Position: ${job.position}`;
+        const positionCell = document.createElement('div');
+        positionCell.className = 'table-cell';
+        positionCell.textContent = job.position;
 
-        const company = document.createElement('div');
-        company.className = 'company';
-        company.textContent = `Company: ${job.company}`;
+        const companyCell = document.createElement('div');
+        companyCell.className = 'table-cell';
+        companyCell.textContent = job.company;
 
-        const location = document.createElement('div');
-        location.className = 'location';
-        location.textContent = `Location: ${job.location}`;
+        const locationCell = document.createElement('div');
+        locationCell.className = 'table-cell';
+        locationCell.textContent = job.location;
 
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'button-container';
+        const actionsCell = document.createElement('div');
+        actionsCell.className = 'table-cell';
 
         const unarchiveButton = document.createElement('button');
         unarchiveButton.textContent = 'Unarchive';
@@ -154,21 +154,22 @@ function updateArchiveTable() {
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.className = 'delete-button';
-        deleteButton.addEventListener('click', () => deleteJob(job.id, listItem));
+        deleteButton.addEventListener('click', () => deleteJob(job.id, row));
 
-        buttonContainer.appendChild(unarchiveButton);
-        buttonContainer.appendChild(deleteButton);
+        actionsCell.appendChild(unarchiveButton);
+        actionsCell.appendChild(deleteButton);
 
-        listItem.appendChild(title);
-        listItem.appendChild(company);
-        listItem.appendChild(location);
-        listItem.appendChild(buttonContainer);
+        row.appendChild(positionCell);
+        row.appendChild(companyCell);
+        row.appendChild(locationCell);
+        row.appendChild(actionsCell);
 
-        archiveList.appendChild(listItem);
+        archiveList.appendChild(row);
     });
 
     updatePaginationControls();
 }
+
 
 function handleSearch() {
     const query = document.getElementById('searchBar').value.toLowerCase();
@@ -313,6 +314,3 @@ async function deleteJob(jobId, listItem) {
         }
     });
 }
-
-
-
