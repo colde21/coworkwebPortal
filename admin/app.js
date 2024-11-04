@@ -328,6 +328,7 @@ function updateApplicationList(applications) {
                 if (confirm) {
                     await hireApplicant(application.id, application);
                     alert('Applicant has been hired.');
+                    
                     fetchApplicationsAndUpdateUI();
                 }
             });
