@@ -256,10 +256,14 @@ function updateApplicationList(applications) {
                         ...interviewDetails
                     };
                     await moveToInterview(application.id, fullInterviewData);
-                    alert('Applicant has been moved to the "For Interview" filter.');
+                    
+                    // Show the success modal instead of alert
+                    showSuccessModal();
+                    
                     fetchApplicationsAndUpdateUI();
                 }
             });
+            
 
             buttonsContainer.appendChild(contactButton);
             buttonsContainer.appendChild(interviewButton);
@@ -453,6 +457,7 @@ function showInterviewModal(application) {
                     contactPerson: contactPerson
                 };
                 document.body.removeChild(modal);
+                showSuccessModal(); // Show success message after confirming
                 resolve(interviewDetails);
             } else {
                 alert("Please fill out all the interview details.");
@@ -465,3 +470,25 @@ function showInterviewModal(application) {
         });
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const closeSuccessModalButton = document.getElementById('closeSuccessModal');
+    const successModal = document.getElementById('successModal');
+
+    // Add event listener to close button only if element is found
+    if (closeSuccessModalButton) {
+        closeSuccessModalButton.addEventListener('click', () => {
+            successModal.style.display = 'none'; // Hide the modal
+        });
+    }
+});
+
+// Function to show the success modal
+function showSuccessModal() {
+    const successModal = document.getElementById('successModal');
+    if (successModal) {
+        successModal.style.display = 'flex'; // Show the modal
+    }
+}
+
+

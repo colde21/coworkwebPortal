@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
     <link rel="stylesheet" href="astyle.css">
-    <script nonce="brostop">  
-      console.log('it is working now?');
-      </script>
     <title>Application</title>
 </head>
 <body>
+  <script nonce = "brostop">
+    console.log('it is working now?');
+</script>
 
  <!-- Navigation Bar -->
  <div class="nav">
@@ -40,7 +40,6 @@
     <!-- Application list -->
     <ul id="applicationList">
         <!-- List items will be dynamically added here using JavaScript -->
-   
     </ul>
 
     <!-- Pagination Controls -->
@@ -49,8 +48,8 @@
     </div>
   </div>
 
-  
  <!--- Sign out --->
+
  <div id="signOutConfirmation" class="confirmation-dialog" style="display: none;">
   <div class="confirmation-dialog-content">
       <h4>Are you sure you want to sign out?</h4>
@@ -61,6 +60,26 @@
   </div>
 </div>
 <!--- Sign out --->
+
+  <!-- Success Message Checkmark -->
+  <div id="successModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="success-checkmark">
+            <div class="check-icon">
+                <span class="icon-line line-tip"></span>
+                <span class="icon-line line-long"></span>
+                <div class="icon-circle"></div>
+                <div class="icon-fix"></div>
+            </div>
+        </div>
+        <h2>Success</h2>
+        <p>Applicant has been moved to the "For Interview" filter.</p>
+        <button id="closeSuccessModal" class="confirm-btn">OK</button>
+    </div>
+</div>
+
+
+
 
   <div id="loading-screen" class="loading-screen">
     <div class="load-circle"></div>
