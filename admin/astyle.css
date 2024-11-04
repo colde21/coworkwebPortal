@@ -207,6 +207,7 @@ li button:hover {
 
 
 /* Modal Overlay */
+/* Modal Overlay */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -220,13 +221,86 @@ li button:hover {
     z-index: 1000;
 }
 
+/* Form Modal */
 .modal-content {
     background: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    text-align: left;
+    max-width: 400px;
+    width: 100%;
 }
+
+.modal-content h2 {
+    text-align: center;
+    font-size: 20px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="date"],
+.modal-content input[type="time"],
+.modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.modal-content textarea {
+    resize: vertical;
+    height: 80px;
+}
+
+.modal-content .form-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.modal-content .confirm-btn,
+.modal-content .cancel-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content .confirm-btn {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.modal-content .cancel-btn {
+    background-color: #ccc;
+    color: #333;
+}
+
+.modal-content .confirm-btn:hover {
+    background-color: #c0392b;
+}
+
+.modal-content .cancel-btn:hover {
+    background-color: #b3b3b3;
+}
+
 
 .confirm-btn {
     background-color: #E74C3C;
