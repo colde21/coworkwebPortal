@@ -135,17 +135,17 @@ function viewJobDetails(jobId) {
         if (jobDoc.exists()) {
             const jobData = jobDoc.data();
             jobDetailsContent.innerHTML = `
-                <p><strong>Position:</strong> ${jobData.position}</p>
-                <p><strong>Company:</strong> ${jobData.company}</p>
-                <p><strong>Location:</strong> ${jobData.location}</p>
-                <p><strong>Vacancy:</strong> ${jobData.vacancy}</p>
-                <p><strong>Type:</strong> ${jobData.type}</p>
-                <p><strong>Email:</strong> ${jobData.contact}</p>
-                <p><strong>Expected Salary:</strong> ${jobData.expectedSalary}</p>
-                <p><strong>Skills:</strong> ${[jobData.skills1, jobData.skills2, jobData.skills3, jobData.skills4, jobData.skills5].filter(Boolean).join(', ')}</p>
-                <p><strong>Qualifications:</strong> ${[jobData.qualification1, jobData.qualification2, jobData.qualification3, jobData.qualification4, jobData.qualification5].filter(Boolean).join(', ')}</p>
-                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ')}</p>
-                <p><strong>Facilities:</strong> ${jobData.facilities}</p>
+                <p><strong>Position:</strong> ${jobData.position}</p><hr>
+                <p><strong>Company:</strong> ${jobData.company}</p><hr>
+                <p><strong>Location:</strong> ${jobData.location}</p><hr>
+                <p><strong>Vacancy:</strong> ${jobData.vacancy}</p><hr>
+                <p><strong>Type:</strong> ${jobData.type}</p><hr>
+                <p><strong>Email:</strong> ${jobData.contact}</p><hr>
+                <p><strong>Expected Salary:</strong> ${jobData.expectedSalary}</p><hr>
+                <p><strong>Skills:</strong> ${[jobData.skills1, jobData.skills2, jobData.skills3, jobData.skills4, jobData.skills5].filter(Boolean).join(', ')}</p><hr>
+                <p><strong>Qualifications:</strong> ${[jobData.qualification1, jobData.qualification2, jobData.qualification3, jobData.qualification4, jobData.qualification5].filter(Boolean).join(', ')}</p><hr>
+                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ')}</p><hr>
+                <p><strong>Facilities:</strong> ${jobData.facilities}</p><hr>
                 <p><strong>Description:</strong> ${jobData.description}</p>
             `;
             jobDetailsPopup.style.display = 'flex';

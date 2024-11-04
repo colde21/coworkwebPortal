@@ -722,6 +722,18 @@ input[type="button"]:disabled {
 
 #jobDetailsContent {
     text-align: left;
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+#jobDetailsContent p {
+    margin: 10px 0;
+}
+
+#jobDetailsContent hr {
+    border: 0;
+    border-top: 1px solid #ddd;
+    margin: 10px 0;
 }
 
 
