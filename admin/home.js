@@ -340,7 +340,8 @@ function createEmployedByCompanyChart(employedByCompany) {
 
 
 // Create Text Summary
-function createTextSummary(summaryElementId, labels, data, percentages) {
+// Create Text Summary
+function createTextSummary(summaryElementId, title, labels, data, percentages) {
     const summaryElement = document.getElementById(summaryElementId);
     if (!summaryElement) {
         console.error(`Summary element with ID '${summaryElementId}' not found.`);
@@ -348,7 +349,7 @@ function createTextSummary(summaryElementId, labels, data, percentages) {
     }
     summaryElement.innerHTML = ''; 
 
-    let summaryHTML = '<h3>Summary:</h3><ul>';
+    let summaryHTML = `<h3>${title}</h3><ul>`;
     labels.forEach((label, index) => {
         const total = typeof data[index] === 'object' ? Object.values(data[index]).reduce((sum, count) => sum + count, 0) : data[index];
         summaryHTML += `<li><b>${label}</b> (${total}) - ${percentages[index]}</li>`;
@@ -358,6 +359,8 @@ function createTextSummary(summaryElementId, labels, data, percentages) {
     summaryElement.innerHTML = summaryHTML;
 }
 
+
+// Create Charts
 // Create Charts
 function createCharts(applications, employed) {
     const { applicationsByCompany, employedByCompany, employedByPosition } = aggregateDataByCompany(applications, employed);
@@ -366,10 +369,11 @@ function createCharts(applications, employed) {
     createEmployedByPositionChart(employedByPosition);
     createEmployedByCompanyChart(employedByCompany);
 
-    createTextSummary('applicationsByCompanySummary', Object.keys(applicationsByCompany), Object.values(applicationsByCompany), calculatePercentage(Object.values(applicationsByCompany)));
-    createTextSummary('employedByPositionSummary', Object.keys(employedByPosition), Object.values(employedByPosition), calculatePercentage(Object.values(employedByPosition).map(position => Object.values(position).reduce((sum, val) => sum + val, 0))));
-    createTextSummary('employedByCompanySummary', Object.keys(employedByCompany), Object.values(employedByCompany), calculatePercentage(Object.values(employedByCompany)));
+    createTextSummary('applicationsByCompanySummary', 'Applications by Company:', Object.keys(applicationsByCompany), Object.values(applicationsByCompany), calculatePercentage(Object.values(applicationsByCompany)));
+    createTextSummary('employedByPositionSummary', 'Employed by Position:', Object.keys(employedByPosition), Object.values(employedByPosition), calculatePercentage(Object.values(employedByPosition).map(position => Object.values(position).reduce((sum, val) => sum + val, 0))));
+    createTextSummary('employedByCompanySummary', 'Employed by Company:', Object.keys(employedByCompany), Object.values(employedByCompany), calculatePercentage(Object.values(employedByCompany)));
 }
+
 
 // Calculate Percentage
 function calculatePercentage(data) {
