@@ -1,46 +1,52 @@
 body {
-    background: url(industrial-style-office.jpg);    
+    background: url(industrial-style-office.jpg) no-repeat center center fixed;
     background-size: cover;
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
-    padding-top: 70px;
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: #333;
 }
 
+/* Remove top padding since we are centering vertically */
+.content {
+    max-width: 600px;
+    padding: 40px 30px;
+    background-color: rgba(255, 255, 255, 0.9); /* Light background for readability */
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Navigation Bar */
 header.nav {
-    background: rgba(189, 26, 26, 0.85); /* Semi-transparent navbar */
-    position: fixed;
-    width: 100%;
+    background: rgba(189, 26, 26, 0.9); /* Slightly darker for readability */
+    position: absolute; /* Fixed at the top without affecting centering */
     top: 0;
+    width: 100%;
     left: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 15px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 header.nav h1 {
     color: #FFFFFF;
-    font-size: 24px;
+    font-size: 26px;
     font-weight: bold;
     margin: 0;
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* Content styles */
-.content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent content background */
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
+/* Content Styling */
 .download-section h2 {
     color: #bd1a1a;
-    font-size: 26px;
+    font-size: 28px;
     margin-bottom: 15px;
     font-weight: bold;
 }
@@ -57,21 +63,21 @@ header.nav h1 {
     display: inline-block;
     background-color: #e74c3c;
     color: #fff;
-    padding: 12px 25px;
+    padding: 14px 30px;
     font-size: 18px;
     font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
+    border-radius: 8px;
     text-decoration: none;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .download-btn:hover {
     background-color: #c0392b;
-    transform: translateY(-2px);
+    transform: translateY(-3px);
 }
 
+/* Installation Instructions */
 .install-instructions {
     text-align: left;
     margin-top: 30px;
@@ -81,7 +87,7 @@ header.nav h1 {
 
 .install-instructions h3 {
     color: #bd1a1a;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
     margin-bottom: 10px;
 }
@@ -95,18 +101,18 @@ header.nav h1 {
     margin-bottom: 10px;
 }
 
-/* Responsive adjustments */
+/* Responsive Adjustments */
 @media (max-width: 768px) {
     .content {
-        padding: 20px 15px;
+        padding: 30px 20px;
     }
 
     header.nav h1 {
-        font-size: 20px;
+        font-size: 22px;
     }
 
     .download-section h2 {
-        font-size: 22px;
+        font-size: 24px;
     }
 
     .download-btn {

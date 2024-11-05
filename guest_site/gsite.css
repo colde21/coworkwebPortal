@@ -7,23 +7,23 @@ body {
 
 /* Transparent Navigation Bar */
 .nav {
-    background-color: rgba(189, 26, 26, 0.8); /* Semi-transparent red */
+    background-color: rgba(189, 26, 26, 0.95); /* Reduced transparency */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 15px 25px;
     position: fixed;
     top: 0;
     width: 100%;
     z-index: 1000;
 }
 
-/* Navigation logo styling */
+/* Logo Styling */
 .logo h1 {
     color: #ffffff;
     cursor: pointer;
     margin: 0;
-    font-size: 24px;
+    font-size: 26px;
 }
 
 /* Jumbotron and Image Section */
@@ -198,6 +198,13 @@ body {
     }
 }
 
+@media (max-width: 768px) {
+    .contact-info {
+        font-size: 12px;
+        gap: 10px;
+    }
+}
+
 @media (max-width: 480px) {
     .jumbotron h1 {
         font-size: 28px;
@@ -214,4 +221,17 @@ body {
     .about p, .features ul {
         font-size: 14px;
     }
+}
+
+.contact-info {
+    color: #ffffff;
+    display: flex;
+    gap: 15px;
+    font-size: 14px;
+    margin-right: 40px;
+}
+
+.contact-info span {
+    display: inline-flex;
+    align-items: center;
 }
