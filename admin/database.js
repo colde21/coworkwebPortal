@@ -161,7 +161,11 @@ export async function rejectApplicant(applicationId, applicantData) {
 export async function moveToInterview(applicationId, applicantData) {
     try {
         const interviewCol = collection(firestore, 'interview');
-        await addDoc(interviewCol, applicantData);
+
+        // Extract the original userId from applicantData and omit the id field
+        const { id, ...dataToStore } = applicantData; // Destructure and omit the 'id'
+        
+        await addDoc(interviewCol, dataToStore); // Store without 'id'
         await deleteDoc(doc(firestore, `applied/${applicationId}`));
         console.log(`Applicant with ID: ${applicationId} has been moved to the interview collection.`);
     } catch (error) {
@@ -169,6 +173,7 @@ export async function moveToInterview(applicationId, applicantData) {
         throw error;
     }
 }
+
 
 // Function to fetch interview applicants
 export async function fetchInterviewApplicants() {

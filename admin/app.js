@@ -255,7 +255,7 @@ function updateApplicationList(applications) {
                         ...application,
                         ...interviewDetails
                     };
-                    await moveToInterview(application.id, fullInterviewData);
+                    await moveToInterview(application.id, { ...application, ...interviewDetails }); // Application object here will not include 'id'
                     
                     // Show the success modal instead of alert
                     showSuccessModal();
@@ -267,6 +267,7 @@ function updateApplicationList(applications) {
 
             buttonsContainer.appendChild(contactButton);
             buttonsContainer.appendChild(interviewButton);
+
         } else if (selectedFilter === 'interview') {
             const hireButton = createButton('Hire', async (event) => {
                 event.stopPropagation();
@@ -274,7 +275,6 @@ function updateApplicationList(applications) {
                 if (confirm) {
                     await hireApplicant(application.id, application);
                     alert('Applicant has been hired.');
-
                     fetchApplicationsAndUpdateUI();
                 }
             });
