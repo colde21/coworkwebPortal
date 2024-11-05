@@ -184,17 +184,6 @@ async function fetchApplicationsAndUpdateUI() {
             applications = await fetchInterviewApplicants();
         }
         
-        // Fetch job matches for each application
-        for (const app of applications) {
-            const jobMatchesRef = collection(firestore, `applied/${app.id}/job_matches`);
-            const jobMatchesSnapshot = await getDocs(jobMatchesRef);
-            
-            app.job_matches = jobMatchesSnapshot.docs.map(jobDoc => ({
-                jobId: jobDoc.id,
-                matchPercentage: jobDoc.data().matchPercentage
-            }));
-        }
-        
         allApplications = applications;
         filteredApplications = allApplications;
         updateApplicationList(filteredApplications);
@@ -202,50 +191,7 @@ async function fetchApplicationsAndUpdateUI() {
         console.error("Failed to fetch applications:", error);
     }
 }
-function renderJobMatchChart(canvas, jobMatches) {
-    if (!canvas) {
-        console.error("Canvas element not found for job match chart.");
-        return;
-    }
-    
-    if (!jobMatches || jobMatches.length === 0) {
-        console.warn("No job matches data found.");
-        return;
-    }
 
-    const labels = jobMatches.map(job => job.jobId);
-    const data = jobMatches.map(job => parseInt(job.matchPercentage, 10) || 0);
-
-    try {
-        new Chart(canvas, {
-            type: "doughnut",
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "Job Match Percentages",
-                    data: data,
-                    backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Job Match Percentages'
-                    }
-                }
-            }
-        });
-
-        console.log("Chart rendered successfully.");
-    } catch (error) {
-        console.error("Error rendering chart:", error);
-    }
-}
 //Update Application
 function updateApplicationList(applications) {
     const applicationList = document.getElementById('applicationList');
@@ -328,7 +274,7 @@ function updateApplicationList(applications) {
                 if (confirm) {
                     await hireApplicant(application.id, application);
                     alert('Applicant has been hired.');
-                    
+
                     fetchApplicationsAndUpdateUI();
                 }
             });
@@ -353,8 +299,6 @@ function updateApplicationList(applications) {
         const canvas = document.createElement('canvas');
         canvas.id = `chart-${application.id}`;
         chartContainer.appendChild(canvas);
-
-        renderJobMatchChart(canvas, application.job_matches || []);
 
         listItem.appendChild(profileImageDiv);  
         listItem.appendChild(detailsDiv);      
