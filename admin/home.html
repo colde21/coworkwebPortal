@@ -7,17 +7,15 @@
     <link rel="stylesheet" href="home.css">
     <title>Home</title>
 
-    <!-- Prevent browser back navigation -->
-   <script nonce="brostop">  
-    console.log('it is working now?');
-    function preventBack() {
-        window.history.forward();
-    }
-    setTimeout(preventBack, 0);
-    window.onunload = function () { null };
+    <script nonce="brostop">  
+        console.log('it is working now?');
+        function preventBack() {
+            window.history.forward();
+        }
+        setTimeout(preventBack, 0);
+        window.onunload = function () { null };
     </script>
 
-    <!-- Include Chart.js and plugins -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
@@ -25,7 +23,6 @@
 </head>
 <body>
 
-    <!-- Navigation Bar -->
     <div class="nav">
         <div class="links">
             <button id="homeButton">HOME</button>
@@ -35,62 +32,58 @@
             <button id="signOutBtn">SIGN OUT</button>
         </div>
     </div>
-       <!-- Navigation Bar -->
 
-    <!-- Cards for dashboard data -->
-    <div class="container">
-        <div class="card job">
-            <h3>JOB</h3>
-            <p id="jobCount">Total: 0</p>
-        </div>
-        <div class="card app">
-            <h3>APPLICATION</h3>
-            <p id="applicationCount">Total: 0</p>
-        </div>
-        <div class="card emp">
-            <h3>EMPLOYED</h3>
-            <p id="employedCount">Total: 0</p>
-        </div>
-        <div class="card vac">
-            <h3>VACANCIES</h3>
-            <p id="vacanciesCount">Total: 0</p>
-        </div>
+<!-- Cards for dashboard data -->
+<div class="container">
+    <div class="card job">
+        <h3>JOB</h3>
+        <p id="jobCount">Total: 0</p>
     </div>
+    <div class="card app">
+        <h3>APPLICATION</h3>
+        <p id="applicationCount">Total: 0</p>
+    </div>
+    <div class="card emp">
+        <h3>EMPLOYED</h3>
+        <p id="employedCount">Total: 0</p>
+    </div>
+    <div class="card vac">
+        <h3>VACANCIES</h3>
+        <p id="vacanciesCount">Total: 0</p>
+    </div>
+</div>
 
-    <!-- Chart and summary sections -->
+
     <div class="charts-wrapper">
         <div class="chart-summary-wrapper">
             <div class="chart-container">
                 <canvas id="applicationsByCompanyChart"></canvas>
             </div>
-            <div id="applicationsByCompanySummary" class="summary-container"></div>
+            <div id="applicationsByCompanySummary" class="summary-container summary-scrollable"></div>
         </div>
         <div class="chart-summary-wrapper">
             <div class="chart-container">
                 <canvas id="employedByPositionChart"></canvas>
             </div>
-            <div id="employedByPositionSummary" class="summary-container"></div>
+            <div id="employedByPositionSummary" class="summary-container summary-scrollable"></div>
         </div>
         <div class="chart-summary-wrapper">
             <div class="chart-container">
                 <canvas id="employedByCompanyChart"></canvas>
             </div>
-            <div id="employedByCompanySummary" class="summary-container"></div>
+            <div id="employedByCompanySummary" class="summary-container summary-scrollable"></div>
         </div>
     </div>
 
-    <!-- Section for Most Applied Jobs -->
     <div class="most-applied-jobs">
         <h3>Most Applied Jobs</h3>
         <ul id="mostAppliedJobsList"></ul>
     </div>
     
-    <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
         <div class="load-circle"></div>
     </div>
 
-    <!-- Sign out confirmation dialog -->
     <div id="signOutConfirmation" class="confirmation-dialog" style="display: none;">
         <div class="confirmation-dialog-content">
             <h4>Are you sure you want to sign out?</h4>

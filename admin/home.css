@@ -49,28 +49,29 @@ body {
 .chart-summary-wrapper {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: stretch; /* Make sure items stretch to fill space */
     width: 100%;
     margin: 20px 0;
 }
 
 .chart-container {
-    width: 80%;
-    height: 400px;
+    flex: 1; /* Allow charts to take equal space */
+    height: 300px; /* Fixed height for consistency */
     background-color: #f4f4f4;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     padding: 10px;
+    margin: 0 10px; /* Add horizontal margin for spacing */
 }
 
 .summary-container {
-    width: 15%;
+    flex: 0 0 250px; /* Fixed width for summary to maintain layout */
     background-color: #fff;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    font-size: 14px; /* Ensure text size is smaller to fit better */
-    overflow-wrap: break-word; /* Handle long company names */
+    font-size: 14px; 
+    overflow-wrap: break-word; 
 }
 
 .summary-container h3 {
@@ -87,49 +88,22 @@ body {
 
 .summary-container li {
     margin-bottom: 10px;
-    font-size: 14px; /* Adjust font size */
-    word-wrap: break-word; /* Wrap long words or text */
-    line-height: 1.5; /* Add line height for better readability */
+    font-size: 14px; 
+    word-wrap: break-word; 
+    line-height: 1.5; 
 }
 
-.summary-container b {
-    font-size: 14px;
+.summary-scrollable {
+    max-height: 300px; /* Match the height of the chart */
+    overflow-y: auto; /* Make the summary scrollable */
+    padding: 10px;
+    border: 1px solid #ccc; /* Optional border for summary */
+    border-radius: 5px; /* Optional rounded corners */
 }
 
 canvas {
     width: 100% !important;
     height: 100% !important;
-}
-
-.container {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin: 20px auto;
-    width: 80%;
-}
-
-.card {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin: 10px;
-    flex: 1;
-    max-width: 250px;
-}
-
-.card h3 {
-    margin: 0;
-    font-size: 24px;
-    color: #333;
-}
-
-.card p {
-    margin: 10px 0 0;
-    font-size: 16px;
-    color: #666;
 }
 
 .most-applied-jobs {
@@ -156,7 +130,6 @@ canvas {
     font-size: 18px;
 }
 
-/* loading */
 .loading-screen {
     display: none;
     position: fixed;
@@ -168,37 +141,37 @@ canvas {
     justify-content: center;
     align-items: center;
 }
-.load-circle{
+
+.load-circle {
     width: 100px;
     height: 40px;
-    --g: radial-gradient(farthest-side,#0000 calc(95% - 3px),#fff calc(100% - 3px) 98%,#0000 101%) no-repeat;
+    --g: radial-gradient(farthest-side, #0000 calc(95% - 3px), #fff calc(100% - 3px) 98%, #0000 101%) no-repeat;
     background: var(--g), var(--g), var(--g);
     background-size: 30px 30px;
     animation: la9 1s infinite alternate;
 }
+
 @keyframes la9 {
     0% {
-      background-position: 0 50%, 50% 50%, 100% 50%;
+        background-position: 0 50%, 50% 50%, 100% 50%;
     }
     20% {
-      background-position: 0 0, 50% 50%, 100% 50%;
+        background-position: 0 0, 50% 50%, 100% 50%;
     }
     40% {
-      background-position: 0 100%, 50% 0, 100% 50%;
+        background-position: 0 100%, 50% 0, 100% 50%;
     }
     60% {
-      background-position: 0 50%, 50% 100%, 100% 0;
+        background-position: 0 50%, 50% 100%, 100% 0;
     }
     80% {
-      background-position: 0 50%, 50% 50%, 100% 100%;
+        background-position: 0 50%, 50% 50%, 100% 100%;
     }
     100% {
-      background-position: 0 50%, 50% 50%, 100% 50%;
+        background-position: 0 50%, 50% 50%, 100% 50%;
     }
 }
-/*loading screen */
 
-/* confirmation-dialog */
 .confirmation-dialog {
     position: fixed;
     top: 0;
@@ -239,3 +212,35 @@ canvas {
 .confirmation-dialog-buttons button:hover {
     background-color: darkred;
 }
+
+.container {
+    display: flex;
+    justify-content: space-between; /* Equal spacing between cards */
+    align-items: center;
+    margin: 20px auto; /* Center the container */
+    width: 90%; /* Adjusted width for responsiveness */
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 10px; /* Space between cards */
+    flex: 1; /* Allow cards to take equal space */
+    max-width: 220px; /* Max width for responsiveness */
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.card p {
+    margin: 10px 0 0;
+    font-size: 16px;
+    color: #666;
+}
+
