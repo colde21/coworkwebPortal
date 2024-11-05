@@ -50,10 +50,8 @@ document.getElementById('archiveButton').addEventListener('click', function () {
 
 // Assuming the sign-out functionality is handled in the same JavaScript file
 document.getElementById('signOutBtn').addEventListener('click', function () {
-    // Add your sign-out logic here
     console.log('Sign out button clicked');
 });
-//Navigation
 
 // Sign out functionality
 async function performSignOut() {
@@ -62,13 +60,11 @@ async function performSignOut() {
     const cancelSignOutBtn = document.getElementById('cancelSignOutBtn');
     const loadingScreen = document.getElementById('loading-screen');
 
-    // Show the confirmation dialog
     signOutConfirmation.style.display = 'flex';
 
-    // If the user confirms, proceed with sign-out
     confirmSignOutBtn.addEventListener('click', async function() {
-        signOutConfirmation.style.display = 'none'; // Hide the confirmation dialog
-        if (loadingScreen) loadingScreen.style.display = 'flex'; // Show loading screen
+        signOutConfirmation.style.display = 'none';
+        if (loadingScreen) loadingScreen.style.display = 'flex';
 
         try {
             const user = auth.currentUser;
@@ -91,11 +87,11 @@ async function performSignOut() {
         }
     });
 
-    // If the user cancels, hide the confirmation dialog
     cancelSignOutBtn.addEventListener('click', function() {
         signOutConfirmation.style.display = 'none';
     });
 }
+
 document.addEventListener('DOMContentLoaded', () => {
     const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
@@ -133,7 +129,6 @@ async function loadMostAppliedJobs() {
     }
 }
 
-
 // Fetch applications and employed data
 async function fetchApplicationsAndEmployed() {
     const applicationCol = collection(firestore, 'applied');
@@ -151,7 +146,7 @@ async function fetchApplicationsAndEmployed() {
 
 // Update dashboard data
 function updateDashboardData() {
-    Promise.all([
+    Promise.all([ 
         updateJobCount(),
         updateVacanciesCount(),
         updateApplicationCount(),
@@ -256,15 +251,14 @@ const coolShades = [
     'rgba(122, 197, 205, 0.7)',  // Soft Teal
 ];
 
-
+// Create Applications by Company Chart
 function createApplicationsByCompanyChart(applicationsByCompany) {
     const ctxApplications = document.getElementById('applicationsByCompanyChart').getContext('2d');
     const companies = Object.keys(applicationsByCompany);
     const applications = Object.values(applicationsByCompany);
 
-    // Create gradients for each bar using cooler colors
     const gradients = companies.map((_, index) => {
-        const gradient = ctxApplications.createLinearGradient(0, 0, ctxApplications.canvas.width, 0); // Horizontal gradient
+        const gradient = ctxApplications.createLinearGradient(0, 0, ctxApplications.canvas.width, 0);
         gradient.addColorStop(0, 'rgba(85, 172, 238, 0.1)'); // Lighter start
         gradient.addColorStop(1, coolShades[index % coolShades.length]); // Full color end
         return gradient;
@@ -277,56 +271,21 @@ function createApplicationsByCompanyChart(applicationsByCompany) {
             datasets: [{
                 label: 'Applications by Company',
                 data: applications,
-                backgroundColor: gradients, // Use the gradients for background color
+                backgroundColor: gradients,
                 borderColor: coolShades.map(shade => shade.replace('0.7', '1')),
                 borderWidth: 1
             }]
         },
-        options: {
-            indexAxis: 'y', // Make bars horizontal
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Applications per Company'
-                },
-                legend: {
-                    display: false // Hide legends for cleaner UI
-                },
-                datalabels: {
-                    anchor: 'center',
-                    align: 'center',
-                    color: 'white',
-                    font: {
-                        weight: 'bold'
-                    },
-                    formatter: (value, context) => {
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const percentage = ((value / total) * 100).toFixed(2) + '%';
-                        return `${value} (${percentage})`;
-                    }
-                }
-            },
-            scales: {
-                x: { beginAtZero: true } // Start the bars from 0
-            }
-        },
-        plugins: [ChartDataLabels]
+        options: chartOptions // Use the predefined options
     });
 }
 
 
-
-// Create Employed by Position Chart with Adjustments
+// Create Employed by Position Chart
 function createEmployedByPositionChart(employedByPosition) {
     const ctxEmployedByPosition = document.getElementById('employedByPositionChart').getContext('2d');
     const positions = Object.keys(employedByPosition);
     const companies = [...new Set(Object.values(employedByPosition).flatMap(position => Object.keys(position)))];
-
-    const totalEmployees = positions.reduce((sum, position) => {
-        return sum + Object.values(employedByPosition[position]).reduce((posSum, val) => posSum + val, 0);
-    }, 0);
 
     const datasets = companies.map((company, index) => {
         const data = positions.map(position => employedByPosition[position][company] || 0);
@@ -345,62 +304,17 @@ function createEmployedByPositionChart(employedByPosition) {
             labels: positions,
             datasets
         },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Positions per Company'
-                },
-                legend: {
-                    display: false // Hide the legend to declutter
-                },
-                datalabels: {
-                    anchor: 'end',
-                    align: 'end',
-                    color: 'black',
-                    font: {
-                        weight: 'bold',
-                        size: 10
-                    },
-                    formatter: (value) => {
-                        const percentage = ((value / totalEmployees) * 100).toFixed(2) + '%';
-                        return value > 0 ? `${value} (${percentage})` : '';
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    max: Math.max(...positions.map(position => 
-                        companies.reduce((sum, company) => sum + (employedByPosition[position][company] || 0), 0)
-                    )) + 1,
-                    grid: {
-                        display: false
-                    }
-                },
-                y: {
-                    ticks: {
-                        font: {
-                            size: 10 // Smaller font size for better readability
-                        }
-                    }
-                }
-            }
-        },
-        plugins: [ChartDataLabels]
+        options: chartOptions // Use the predefined options
     });
 }
 
 
+// Create Employed by Company Chart
 function createEmployedByCompanyChart(employedByCompany) {
     const ctxEmployedByCompany = document.getElementById('employedByCompanyChart').getContext('2d');
     const companies = Object.keys(employedByCompany);
     const employedCounts = Object.values(employedByCompany);
 
-    // Create gradients for each bar using cooler colors
     const gradients = companies.map((_, index) => {
         const gradient = ctxEmployedByCompany.createLinearGradient(0, 0, ctxEmployedByCompany.canvas.width, 0);
         gradient.addColorStop(0, 'rgba(85, 172, 238, 0.1)'); // Lighter start
@@ -415,45 +329,14 @@ function createEmployedByCompanyChart(employedByCompany) {
             datasets: [{
                 label: 'Employed by Company',
                 data: employedCounts,
-                backgroundColor: gradients, // Use the gradients for background color
+                backgroundColor: gradients,
                 borderColor: coolShades.map(shade => shade.replace('0.7', '1')),
                 borderWidth: 1
             }]
         },
-        options: {
-            indexAxis: 'y', // Make bars horizontal
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Employed per Company'
-                },
-                legend: {
-                    display: false // Hide legends for cleaner UI
-                },
-                datalabels: {
-                    anchor: 'center',
-                    align: 'center',
-                    color: 'white',
-                    font: {
-                        weight: 'bold'
-                    },
-                    formatter: (value, context) => {
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const percentage = ((value / total) * 100).toFixed(2) + '%';
-                        return `${value} (${percentage})`;
-                    }
-                }
-            },
-            scales: {
-                x: { beginAtZero: true } // Start the bars from 0
-            }
-        },
-        plugins: [ChartDataLabels]
+        options: chartOptions // Use the predefined options
     });
 }
-
 
 
 // Create Text Summary
@@ -493,3 +376,30 @@ function calculatePercentage(data) {
     const total = data.reduce((sum, value) => sum + value, 0);
     return data.map(value => ((value / total) * 100).toFixed(2) + '%');
 }
+
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    // Set the height to match the height of your summary
+    plugins: {
+        legend: {
+            display: false // Hide legends for cleaner UI
+        },
+        datalabels: {
+            anchor: 'center',
+            align: 'center',
+            color: 'white',
+            font: {
+                weight: 'bold'
+            },
+            formatter: (value, context) => {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((value / total) * 100).toFixed(2) + '%';
+                return `${value} (${percentage})`;
+            }
+        }
+    }
+};
+
+
+
