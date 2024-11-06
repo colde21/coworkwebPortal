@@ -249,26 +249,34 @@ function updateApplicationList(applications) {
         if (selectedFilter === 'applied') {
             const interviewButton = createButton('For Interview', async (event) => {
                 event.stopPropagation();
+                
+                // Copy FCM Tokens of the applicant
+                const fcmTokens = await copyFCMTokens(application.userId);
+                
+                if (fcmTokens) {
+                    console.log("FCM Tokens copied:", fcmTokens); // Optional: Log tokens to verify copy
+                }
+        
+                // Show the interview modal
                 const interviewDetails = await showInterviewModal(application);
                 if (interviewDetails) {
                     const fullInterviewData = {
                         ...application,
                         ...interviewDetails
                     };
-                    await moveToInterview(application.id, { ...application, ...interviewDetails }); // Application object here will not include 'id'
-                    
-                    // Show the success modal instead of alert
+                    await moveToInterview(application.id, { ...application, ...interviewDetails });
+        
                     showSuccessModal();
-                    
                     fetchApplicationsAndUpdateUI();
                 }
             });
-            
-
+        
             buttonsContainer.appendChild(contactButton);
             buttonsContainer.appendChild(interviewButton);
-
-        } else if (selectedFilter === 'interview') {
+        }
+        
+        
+        else if (selectedFilter === 'interview') {
             const hireButton = createButton('Hire', async (event) => {
                 event.stopPropagation();
                 const confirm = await showCustomModal('Are you sure you want to hire this applicant?');
@@ -499,4 +507,29 @@ function showSuccessModal() {
     }
 }
 
+async function copyFCMTokens(userId) {
+    try {
+        const userDocRef = doc(firestore, 'users', userId);
+        const userDocSnapshot = await getDoc(userDocRef);
+
+        if (userDocSnapshot.exists()) {
+            const userData = userDocSnapshot.data();
+            const fcmTokens = userData.fcmTokens;
+
+            if (fcmTokens) {
+                console.log('FCM Tokens copied successfully:', fcmTokens);
+                return fcmTokens; // Return the tokens if needed elsewhere
+            } else {
+                console.log('No FCM Tokens found for this user.');
+                return null;
+            }
+        } else {
+            console.log('User document does not exist.');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error copying FCM Tokens:', error);
+        return null;
+    }
+}
 
