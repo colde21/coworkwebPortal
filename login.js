@@ -57,9 +57,13 @@ document.getElementById('submit').addEventListener("click", async function (even
             // Redirect based on the role
             if (role === "admin") {
                 window.location.href = "../admin/home.html";
-            } else if (role === "employee") {
-                window.location.href = "../employee/home.html"; // Make sure the path is correct
-            } else {
+            } 
+         else if (role === "hr" || role === "hr2") {
+            window.location.href = "../hr/dashboard_hr.html";
+        } 
+         else if (role === "employee") {
+            window.location.href = "../employee/home.html"; // Make sure the path is correct
+        } else {
                 throw new Error('Role not recognized or not assigned'); // Handle unexpected roles
             }
         } else {

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
+    <link rel="stylesheet" href="styles/archive.css">
+    <script nonce="brostop">  
+        console.log('it is working now?');
+    </script>
+    <title>Archived Jobs</title>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="nav">
+        <div class="links">
+            <button id="homeButton">HOME</button>
+            <button id="jobButton">JOB LIST</button>
+            <button id="appButton">APPLICATION</button>
+            <button id="archiveButton">ARCHIVED</button>
+            <button id="signOutBtn">SIGN OUT</button>
+        </div>
+    </div>
+    <!-- Navigation Bar -->
+
+    <!-- Unarchive and delete dialog -->
+    <div id="confirmationDialog" class="confirmation-dialog" style="display: none;">
+        <div class="confirmation-dialog-content">
+            <p id="confirmationMessage">Are you sure?</p>
+            <div class="confirmation-dialog-buttons">
+                <button id="confirmActionBtn">Confirm</button>
+                <button id="cancelActionBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vacancy Input Dialog -->
+    <div id="vacancyDialog" class="dialog-overlay" style="display: none;">
+        <div class="dialog-content">
+            <p id="vacancyDialogMessage">Edit the vacancy number:</p>
+            <input type="number" id="vacancyInput" min="0" placeholder="Enter vacancy number">
+            <div class="dialog-buttons">
+                <button id="confirmVacancyBtn">OK</button>
+                <button id="cancelVacancyBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main container -->
+    <div class="container">
+        <h1>Archived Jobs</h1>
+        <input type="text" id="searchBar" placeholder="Search archived jobs..." class="search-bar">
+
+        <!-- Table-like structure for archived jobs -->
+        <div class="table">
+            <!-- Table header -->
+            <div class="table-row table-header">
+                <div class="table-cell" style="color: white;">Position</div>
+                <div class="table-cell" style="color: white;">Company</div>
+                <div class="table-cell" style="color: white;">Location</div>
+                <div class="table-cell" style="color: white;">Actions</div>
+            </div>
+            
+            <!-- Dynamically generated job rows will go here -->
+            <div id="archiveList">
+                <!-- Archived jobs will be dynamically inserted here as rows -->
+            </div>
+        </div>
+
+        <!-- Pagination controls -->
+        <div id="paginationControls" class="pagination"></div>
+    </div>
+
+    <!-- Sign out confirmation dialog -->
+    <div id="signOutConfirmation" class="confirmation-dialog" style="display: none;">
+        <div class="confirmation-dialog-content">
+            <h4>Are you sure you want to sign out?</h4>
+            <div class="confirmation-dialog-buttons">
+                <button id="confirmSignOutBtn">Yes, Sign Out</button>
+                <button id="cancelSignOutBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen" style="display: none;">
+        <div class="load-circle"></div>
+    </div>    
+
+    <div id="error-message" class="error-message"></div>
+
+    <script type="module" src="src/archive.js"></script>
+</body>
+</html>

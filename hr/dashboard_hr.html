@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
+    <link rel="stylesheet" href="./styles/dashboard.css">
+    <title>Home</title>
+
+    <script nonce="brostop">  
+        console.log('it is working now?');
+        function preventBack() {
+            window.history.forward();
+        }
+        setTimeout(preventBack, 0);
+        window.onunload = function () { null };
+    </script>
+    <script type="module" src="./src/dashboard.js" defer></script>
+</head>
+<body>
+
+    <div class="nav">
+        <div class="links">
+            <button id="homeButton">HOME</button>
+            <button id="jobButton">JOB LIST</button>
+            <button id="appButton">APPLICATION</button>
+            <button id="archiveButton">ARCHIVED</button>
+            <button id="signOutBtn">SIGN OUT</button>
+        </div>
+    </div>
+    <div id="loading-screen" class="loading-screen">
+        <div class="load-circle"></div>
+    </div>
+
+    <div id="signOutConfirmation" class="confirmation-dialog" style="display: none;">
+        <div class="confirmation-dialog-content">
+            <h4>Are you sure you want to sign out?</h4>
+            <div class="confirmation-dialog-buttons">
+                <button id="confirmSignOutBtn">Yes, Sign Out</button>
+                <button id="cancelSignOutBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

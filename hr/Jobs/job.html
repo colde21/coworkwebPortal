@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Job</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
+    <link rel="stylesheet" type="text/css" href="../styles/job.css">
+    <script type="module" src="../src/job.js"></script>
+    <script src="../src/db.js" type="module"></script>
+    <script nonce="brostop">  
+        console.log('it is working now?');
+        </script>
+</head>
+<body>
+  
+    <!-- Navigation Bar -->
+    <div class="nav">
+        <div class="links">
+            <button id="homeButton">HOME</button>
+            <button id="jobButton">JOB LIST</button>
+            <button id="appButton">APPLICATION</button>
+            <button id="archiveButton">ARCHIVED</button>
+            <button id="signOutBtn">SIGN OUT</button>
+        </div>
+    </div>
+       <!-- Navigation Bar -->
+
+    <div class="job-container">
+        <div class="job-actions">
+            <h2>Job List | <span id="jobCount">Total Jobs: 0</span></h2>
+            <input type="text" id="searchBar" placeholder="Search">
+            <a href="jobposting.html"><button>Add Job</button></a>
+            <button id="archiveSelectedJobsButton">Archive Selected Jobs</button>
+            <br>
+            <div>
+                <button id="generateLinkButton">Generate Applicant Link</button>
+            </div>
+            <div id="disposableLinkContainer" style="display: none;">
+                <p>Disposable Link: <span id="disposableLinkText" ></span></p>
+                <button id="copyLinkButton">Copy Link</button>
+            </div>
+        </div>
+        <div class="jable">
+            <table id="jobTable">
+                <thead>
+                    <tr>
+                        <th>Archive</th>
+                        <th>Position</th>
+                        <th>Company</th>
+                        <th>Location</th>
+                        <th>Vacancy</th>
+                        <th>Type</th>
+                        <th>Email</th>
+                        <th>Edit</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamic rows will be added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Job Details Pop-up -->
+    <div id="viewJobDetailsPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <span class="close" id="closeViewJobDetailsPopup">&times;</span>
+            <h2>Job Details</h2>
+            <div id="jobDetailsContent">
+                <!-- Job details will be dynamically populated here -->
+            </div>
+        </div>
+    </div>
+    
+    <div id="confirmationDialog" class="confirmation-dialog" style="display: none;">
+        <div class="confirmation-dialog-content">
+            <h4>Are you sure you want to archive the selected jobs?</h4>
+            <div class="confirmation-dialog-buttons">
+                <button id="confirmArchiveBtn">Yes, Archive</button>
+                <button id="cancelArchiveBtn">Cancel</button>
+                
+            </div>
+        </div>
+    </div>
+        <div id="editJobForm" style="display: none;">
+            <h2>Edit Job</h2>
+            <form id="editForm">
+                <div class="form-grid">
+                    <!-- Left Column -->
+                    <div class="form-group">
+                        <label for="position">Position:</label>
+                        <input type="text" id="position" name="position" placeholder="Enter job position" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="company">Company:</label>
+                        <input type="text" id="company" name="company" placeholder="Enter company name" required>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="location">Location:</label>
+                        <input type="text" id="location" name="location" placeholder="Enter job location" required>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="type">Job Type:</label>
+                        <select id="type" name="type" required>
+                            <option value="full-time">Full-Time</option>
+                            <option value="part-time">Part-Time</option>
+                            <option value="contract">Contract</option>
+                        </select>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="age">Minimum Age Requirement:</label>
+                        <input type="number" id="age" name="age" placeholder="Enter Minimum Age Requirement" min="18" max="60" required>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="vacancy">Vacancy:</label>
+                        <input type="number" id="vacancy" name="vacancy" placeholder="Enter number of vacancies" required>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="email">Contact Email:</label>
+                        <input type="email" id="email" name="email" placeholder="Enter contact email" required>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="expectedSalary">Expected Salary:</label>
+                        <input type="number" id="expectedSalary" name="expectedSalary" placeholder="Enter expected salary" min="0" required>
+                    </div>
+        
+                    <!-- Skills Inputs -->
+                    <div class="form-group">
+                        <label for="skills">Skills:</label>
+                        <input type="text" id="skills1" name="skills1" placeholder="Skill 1">
+                        <input type="text" id="skills2" name="skills2" placeholder="Skill 2">
+                        <input type="text" id="skills3" name="skills3" placeholder="Skill 3">
+                        <input type="text" id="skills4" name="skills4" placeholder="Skill 4">
+                        <input type="text" id="skills5" name="skills5" placeholder="Skill 5">
+                    </div>
+        
+                    <!-- Qualifications -->
+                    <div class="form-group">
+                        <label for="qualifications">Qualification:</label>
+                        <input type="text" id="qualification1" name="qualification1" placeholder="Qualification 1">
+                        <input type="text" id="qualification2" name="qualification2" placeholder="Qualification 2">
+                        <input type="text" id="qualification3" name="qualification3" placeholder="Qualification 3">
+                        <input type="text" id="qualification4" name="qualification4" placeholder="Qualification 4">
+                        <input type="text" id="qualification5" name="qualification5" placeholder="Qualification 5">
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="education">Educational Attainment:</label>
+                        <select id="education" name="education">
+                            <option value="high-school">High School</option>
+                            <option value="college">College</option>
+                            <option value="undergrad">Undergraduate</option>
+                        </select>
+                    </div>
+        
+                    <div class="form-group">
+                        <label for="experience">Work Experience:</label>
+                        <input type="text" id="experience1" name="experience1" placeholder="Experience 1">
+                        <input type="text" id="experience2" name="experience2" placeholder="Experience 2">
+                        <input type="text" id="experience3" name="experience3" placeholder="Experience 3">
+                    </div>
+                    <div class="form-group">
+                        <label>Job Category:</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="jobType" value="Blue Collar"> Blue Collar</label>
+                            <label><input type="radio" name="jobType" value="White Collar"> White Collar</label>
+                        </div>
+                    </div>
+        
+                    <div class="full-width">
+                        <label for="facilities">Facilities:</label>
+                        <textarea id="facilities" name="facilities" placeholder="Enter work environment"></textarea>
+                    </div>
+        
+                    <div class="full-width">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" placeholder="Enter job description"></textarea>
+                    </div>
+                </div>
+        
+                <!-- Form Buttons -->
+                <div class="form-buttons">
+                    <button type="button" id="goBackButton">Go Back</button>
+                    <button type="submit" id="saveJobButton">Save Changes</button>
+                </div>
+            </form>
+        </div>
+       
+     
+        <!-- Edit Job Confirmation Dialog -->
+<div id="editJobConfirmation" class="confirmation-dialog" style="display: none;">
+    <div class="confirmation-dialog-content">
+        <h4>Are you sure you want to save changes to this job?</h4>
+        <div class="confirmation-dialog-buttons">
+            <button id="confirmEditJobBtn">Yes, Save</button>
+            <button id="cancelEditJobBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Message -->
+<div id="successMessage" class="success-message" style="display: none;">
+    <div class="success-message-content">
+        <div class="success-animation">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+        </div>
+        <h4>Job Updated Successfully!</h4>
+        <button id="closeSuccessBtn">Close</button>
+    </div>
+</div>
+ <!--- Pagination --->
+<div id="paginationControls" class="pagination">
+    <div class="loader" id="paginationLoader" style="display: none;" ></div>
+</div>
+
+    <div id="loading-screen" class="loading-screen">
+        <div class="load-circle"></div>
+    </div>
+
+       <!--- Sign out --->
+       <div id="signOutConfirmation" class="confirmation-dialog" style="display: none;">
+        <div class="confirmation-dialog-content">
+            <h4>Are you sure you want to sign out?</h4>
+            <div class="confirmation-dialog-buttons">
+                <button id="confirmSignOutBtn">Yes, Sign Out</button>
+                <button id="cancelSignOutBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+     <!--- Sign out --->
+
+</body>
+</html>
