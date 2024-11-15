@@ -1,7 +1,7 @@
 import { fetchAllJobs, logAudit, exportAuditLog, generateDisposableLink } from './db.js';
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, getDoc, addDoc, doc, collection, deleteDoc, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, getDoc, addDoc, doc, collection, deleteDoc, updateDoc, Timestamp,getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
 // Firebase configuration
@@ -35,10 +35,10 @@ function requireLogin() {
             const role = await fetchUserRole(user.uid);
             if (role === 'hr') {
                 console.log("Welcome HR");
-                document.getElementById('homeButton').textContent = 'HR Dashboard';
+     
             } else if (role === 'hr2') {
                 console.log("Welcome HR2");
-                document.getElementById('homeButton').textContent = 'HR2 Dashboard';
+ 
             } else {
                 alert('Unauthorized access. Only HR users are allowed.');
                 await firebaseSignOut(auth);
@@ -80,7 +80,7 @@ function setupNavigation() {
     });
 
     document.getElementById('archiveButton').addEventListener('click', function () {
-        location.href = 'archive.html';
+        location.href = '../archive.html';
     });
 }
 
@@ -153,8 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateJobTable();
     }).catch(err => console.error("Failed to fetch jobs:", err));
 });
-
-// Other existing functions (e.g., viewJobDetails, archiveSelectedJobs, editJob) remain unchanged
 
 // Display job details pop-up
 function viewJobDetails(jobId) {
@@ -325,6 +323,17 @@ async function archiveJobIfNeeded(jobId, userEmail) {
 
         if (jobDocSnap.exists()) {
             const jobData = jobDocSnap.data();
+
+            // Check if there are applicants for this job
+            const applicationsColRef = collection(firestore, 'applied');
+            const applicationsSnapshot = await getDocs(applicationsColRef);
+            const hasApplicants = applicationsSnapshot.docs.some(doc => doc.data().jobId === jobId);
+
+            if (hasApplicants) {
+                alert("This job cannot be archived or unarchived because it has applicants.");
+                return;
+            }
+
             const archiveData = {
                 ...jobData,
                 archivedAt: Timestamp.now()
@@ -350,6 +359,11 @@ async function editJob(jobId) {
         if (jobDocSnap.exists()) {
             const jobData = jobDocSnap.data();
 
+            // Check if there are applicants for this job
+            const applicationsColRef = collection(firestore, 'applied');
+            const applicationsSnapshot = await getDocs(applicationsColRef);
+            const hasApplicants = applicationsSnapshot.docs.some(doc => doc.data().jobId === jobId);
+
             // List of fields to update
             const fields = {
                 position: 'position',
@@ -373,16 +387,30 @@ async function editJob(jobId) {
                 const fieldElement = document.getElementById(fieldId);
                 if (fieldElement) {
                     fieldElement.value = jobData[key] || '';
+
+                    // Disable editing for fields other than 'vacancy' if the job has applicants
+                    if (hasApplicants && fieldId !== 'vacancy') {
+                        fieldElement.disabled = true;
+                    } else {
+                        fieldElement.disabled = false;
+                    }
                 } else {
                     console.warn(`Element with id "${fieldId}" not found.`);
                 }
             }
+            document.getElementById('darkOverlay').style.display = 'block';
+            document.getElementById('editJobForm').style.display = 'flex';
 
             // Set the selected radio button based on jobData
             if (jobData.jobType) {
                 const jobTypeRadio = document.querySelector(`input[name="jobType"][value="${jobData.jobType}"]`);
                 if (jobTypeRadio) {
                     jobTypeRadio.checked = true;
+
+                    // Disable radio buttons if the job has applicants
+                    if (hasApplicants) {
+                        jobTypeRadio.disabled = true;
+                    }
                 }
             }
 
@@ -391,8 +419,8 @@ async function editJob(jobId) {
             editJobForm.dataset.jobId = jobId;
             editJobForm.style.display = 'block';
 
-            // Add blur effect to background
-            document.querySelector('.job-container').classList.add('blur');
+            // Add dark effect to background
+            document.querySelector('.job-container').classList.add('darkOverlay');
         } else {
             alert('Job not found!');
         }
@@ -400,6 +428,7 @@ async function editJob(jobId) {
         console.error('Error fetching job for editing:', error);
     }
 }
+
 // Save job changes
 document.getElementById('saveJobButton').addEventListener('click', function(event) {
     event.preventDefault();
@@ -462,7 +491,7 @@ document.getElementById('saveJobButton').addEventListener('click', function(even
             document.getElementById('closeSuccessBtn').addEventListener('click', () => {
                 successMessage.style.display = 'none';
                 document.getElementById('editJobForm').style.display = 'none';
-                document.querySelector('.job-container').classList.remove('blur');
+                document.querySelector('.job-container').classList.remove('darkOverlay');
                 fetchAllJobs().then(jobs => {
                     window.allJobs = jobs;
                     filteredJobs = jobs;
@@ -483,7 +512,7 @@ document.getElementById('saveJobButton').addEventListener('click', function(even
 // "Go Back" button functionality
 document.getElementById('goBackButton').addEventListener('click', function () {
     document.getElementById('editJobForm').style.display = 'none';
-    document.querySelector('.job-container').classList.remove('blur');
+    document.getElementById('darkOverlay').style.display = 'none';
 });
 
 // Pagination controls

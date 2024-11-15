@@ -271,8 +271,7 @@ function updateApplicationList(applications) {
                 }
             });
         
-            buttonsContainer.appendChild(contactButton);
-            buttonsContainer.appendChild(interviewButton);
+        
         }
         
         

@@ -1,21 +1,22 @@
 /* Main body styles */
 body {
-    background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
+    background: linear-gradient(90deg, #FF5F5F 46%, #D7263D 63%, #8B1D1D 97%);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
+    color: #333333; /* Dark charcoal for default text color */
 }
 
 /* Login Container */
 .login-container {
-    background-color: #ffffff;
+    background-color: #FFFFFF; /* White background for the login card */
     padding: 40px;
     width: 350px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     text-align: center;
     position: relative;
 }
@@ -31,6 +32,17 @@ body {
     width: 80px;
 }
 
+/* Title and Subtitle Styling */
+h2 {
+    color: #333333; /* Dark charcoal */
+    margin-bottom: 5px;
+}
+
+p {
+    color: #666666; /* Mid-gray */
+    font-size: 12px;
+    margin-bottom: 20px;
+}
 
 /* Login Form Fields */
 .elements {
@@ -43,12 +55,12 @@ body {
 .input1 {
     width: 100%;
     position: relative;
-    border-bottom: 2px solid #9c0100;
+    border-bottom: 2px solid #D7263D; /* Red accent for input underline */
     margin-top: 10px;
 }
 
 .input1 label {
-    color: #ff0000;
+    color: #D7263D; /* Red for labels */
     font-size: 14px;
     position: absolute;
     top: -20px;
@@ -61,22 +73,22 @@ body {
     padding: 10px;
     background: none;
     border: none;
-    color: #000000;
+    color: #333333; /* Dark charcoal for input text */
     font-size: 14px;
     border-radius: 5px;
 }
 
 input:focus {
     outline: none;
-    border-bottom: 1px solid #ff0000;
+    border-bottom: 1px solid #D7263D; /* Red accent when focused */
 }
 
 /* Button Styles */
 button {
     width: 100%;
     padding: 12px 0;
-    background-color: #f72222;
-    color: #fff;
+    background-color: #D7263D; /* Red background for primary button */
+    color: #FFFFFF; /* White text for contrast */
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -86,41 +98,40 @@ button {
 }
 
 button:hover {
-    background-color: darkred;
+    background-color: #8B1D1D; /* Darker red on hover */
 }
 
 button:active {
-    transform: scale(0.1s);
+    transform: scale(0.98); /* Subtle scale effect on click */
 }
 
 /* Error Message */
 .error-message {
-    color: red;
+    color: #D7263D; /* Red for error messages */
     font-size: 12px;
     margin-top: 10px;
 }
 
-
+/* Toggle Password Button */
 .toggle-password {
     position: absolute;
     right: 1px;
-    top: 49%;
-    transform: translateY(-58%);
+    top: 50%;
+    transform: translateY(-50%);
     width: 50px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    padding-left: 1px;
-    padding-right: 1px;
+    padding: 2px;
+    background: none;
     border: none;
-    border-radius: 10;
-    font-size: 12px;
-    color: #ffffff;
+    color: #D7263D; /* Red text for toggle button */
     cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .toggle-password:hover {
-    color: #ffffff;
+    color: #8B1D1D; /* Darker red on hover */
 }
+
 /* Loading Screen */
 .loading-screen {
     display: none;
@@ -133,32 +144,33 @@ button:active {
     justify-content: center;
     align-items: center;
 }
-.load-circle{
+
+.load-circle {
     width: 100px;
     height: 40px;
-    --g: radial-gradient(farthest-side,#0000 calc(95% - 3px),#fff calc(100% - 3px) 98%,#0000 101%) no-repeat;
+    --g: radial-gradient(farthest-side, #0000 calc(95% - 3px), #fff calc(100% - 3px) 98%, #0000 101%) no-repeat;
     background: var(--g), var(--g), var(--g);
     background-size: 30px 30px;
     animation: la9 1s infinite alternate;
 }
-  @keyframes la9 {
+
+@keyframes la9 {
     0% {
-      background-position: 0 50%, 50% 50%, 100% 50%;
+        background-position: 0 50%, 50% 50%, 100% 50%;
     }
     20% {
-      background-position: 0 0, 50% 50%, 100% 50%;
+        background-position: 0 0, 50% 50%, 100% 50%;
     }
     40% {
-      background-position: 0 100%, 50% 0, 100% 50%;
+        background-position: 0 100%, 50% 0, 100% 50%;
     }
     60% {
-      background-position: 0 50%, 50% 100%, 100% 0;
+        background-position: 0 50%, 50% 100%, 100% 0;
     }
     80% {
-      background-position: 0 50%, 50% 50%, 100% 100%;
+        background-position: 0 50%, 50% 50%, 100% 100%;
     }
     100% {
-      background-position: 0 50%, 50% 50%, 100% 50%;
+        background-position: 0 50%, 50% 50%, 100% 50%;
     }
-  }
-  /*loading screen */
+}

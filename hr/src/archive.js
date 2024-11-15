@@ -1,7 +1,7 @@
 import { fetchArchivedJobs, logAudit, deleteArchivedJob } from './db.js';
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js"; 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import { getFirestore, getDoc, doc, addDoc, collection, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, getDoc, doc, addDoc, collection, Timestamp, getDocs,deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -34,10 +34,9 @@ function requireLogin() {
             const role = await fetchUserRole(user.uid);
             if (role === 'hr') {
                 console.log("Welcome HR");
-                document.getElementById('homeButton').textContent = 'HR Dashboard';
             } else if (role === 'hr2') {
                 console.log("Welcome HR2");
-                document.getElementById('homeButton').textContent = 'HR2 Dashboard';
+          
             } else {
                 alert('Unauthorized access. Only HR users are allowed.');
                 await firebaseSignOut(auth);
@@ -290,6 +289,16 @@ async function unarchiveJob(jobId) {
     const jobData = await getDoc(jobDocRef);
 
     if (jobData.exists()) {
+        // Check if there are applicants for this job
+        const applicationsColRef = collection(firestore, 'applied');
+        const applicationsSnapshot = await getDocs(applicationsColRef);
+        const hasApplicants = applicationsSnapshot.docs.some(doc => doc.data().jobId === jobId);
+
+        if (hasApplicants) {
+            alert("This job cannot be unarchived because it has applicants.");
+            return; // Exit the function if there are applicants
+        }
+
         showConfirmationDialog("Do you want to unarchive this job?", async () => {
             const currentVacancy = jobData.data().vacancy || 0;
             showVacancyInputDialog(
@@ -308,7 +317,7 @@ async function unarchiveJob(jobId) {
                             };
 
                             await addDoc(collection(firestore, 'jobs'), updatedJobData);
-                            await deleteArchivedJob(jobId);
+                            await deleteDoc(jobDocRef); // Delete from archive
                             await logAudit(userEmail, "Job Unarchived", { jobId, newVacancy });
 
                             window.location.reload();

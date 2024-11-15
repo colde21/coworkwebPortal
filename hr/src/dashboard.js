@@ -31,11 +31,11 @@ function requireLogin() {
             if (role === 'hr') {
                 console.log("Welcome HR");
                 // Custom logic for HR
-                document.getElementById('homeButton').textContent = 'HR Dashboard';
+           
             } else if (role === 'hr2') {
                 console.log("Welcome HR2");
                 // Custom logic for HR2
-                document.getElementById('homeButton').textContent = 'HR2 Dashboard';
+    
             } else {
                 alert('Unauthorized access. Only HR users are allowed.');
                 await firebaseSignOut(auth);

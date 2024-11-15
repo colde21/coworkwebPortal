@@ -143,10 +143,13 @@ function updateArchiveTable() {
         locationCell.className = 'table-cell';
         locationCell.textContent = job.location;
 
-       
+        const actionsCell = document.createElement('div');
+        actionsCell.className = 'table-cell';
+        
         row.appendChild(positionCell);
         row.appendChild(companyCell);
         row.appendChild(locationCell);
+        row.appendChild(actionsCell);
 
         archiveList.appendChild(row);
     });
@@ -293,6 +296,7 @@ async function deleteJob(jobId, listItem) {
 
             // Remove the job from the DOM after deletion
             listItem.remove();
+            window.location.reload();
         } catch (error) {
             console.error(`Failed to delete job ${jobId}:`, error);
         }

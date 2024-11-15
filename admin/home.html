@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
-    <link rel="stylesheet" href="home.css">
-    <title>Home</title>
-
+    <link rel="stylesheet" href="./admin_styles/home.css">
+    <title>Admin Dashboard</title>
     <script nonce="brostop">  
         console.log('it is working now?');
         function preventBack() {
@@ -19,67 +18,86 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    <script type="module" src="home.js" defer></script>
+    <script type="module" src="./admin_src/home.js" defer></script>
+
 </head>
+
 <body>
 
     <div class="nav">
+        <div class="sidebar-header">
+            <img src="../logowhite.png" alt="App Logo" class="logo"> <!-- Replace with your actual logo path -->
+            <h1 class="app-name">Cowork</h1>
+        </div>
         <div class="links">
-            <button id="homeButton">HOME</button>
-            <button id="jobButton">JOB LIST</button>
-            <button id="appButton">APPLICATION</button>
-            <button id="archiveButton">ARCHIVED</button>
-            <button id="signOutBtn">SIGN OUT</button>
+            <button id="homeButton" class="active">  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
+            </svg>Dashboard</button>
+            <button id="jobButton"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7-1c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-1 16l-3-3 1.41-1.41L11 15.17l4.59-4.59L17 12l-6 6z"/>
+            </svg>Job list</button>
+            <button id="appButton">  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm3 14H8v-2h7v2zm2-4H8v-2h9v2zm0-4H8V7h9v2z"/>
+            </svg>Application</button>
+            <button id="archiveButton"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+            </svg>Archive</button>
+            <button id="signOutBtn"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                <path d="M10 17l1.41-1.41L7.83 12H20v-2H7.83l3.58-3.59L10 5l-7 7 7 7zm9-15H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-3h-2v3H5V4h14v3h2V4c0-1.1-.9-2-2-2z"/>
+            </svg>Sign out</button>
         </div>
     </div>
-
-<!-- Cards for dashboard data -->
-<div class="container">
-    <div class="card job">
-        <h3>JOB</h3>
-        <p id="jobCount">Total: 0</p>
-    </div>
-    <div class="card app">
-        <h3>APPLICATION</h3>
-        <p id="applicationCount">Total: 0</p>
-    </div>
-    <div class="card emp">
-        <h3>EMPLOYED</h3>
-        <p id="employedCount">Total: 0</p>
-    </div>
-    <div class="card vac">
-        <h3>VACANCIES</h3>
-        <p id="vacanciesCount">Total: 0</p>
-    </div>
-</div>
-
-
-    <div class="charts-wrapper">
-        <div class="chart-summary-wrapper">
-            <div class="chart-container">
-                <canvas id="applicationsByCompanyChart"></canvas>
+    <div class="content-wrapper">
+        <!-- Cards for dashboard data -->
+        <div class="container">
+            <div class="card job">
+                <h3>JOB</h3>
+                <p id="jobCount">Total: 0</p>
             </div>
-            <div id="applicationsByCompanySummary" class="summary-container summary-scrollable"></div>
-        </div>
-        <div class="chart-summary-wrapper">
-            <div class="chart-container">
-                <canvas id="employedByPositionChart"></canvas>
+            <div class="card app">
+                <h3>APPLICATION</h3>
+                <p id="applicationCount">Total: 0</p>
             </div>
-            <div id="employedByPositionSummary" class="summary-container summary-scrollable"></div>
-        </div>
-        <div class="chart-summary-wrapper">
-            <div class="chart-container">
-                <canvas id="employedByCompanyChart"></canvas>
+            <div class="card emp">
+                <h3>EMPLOYED</h3>
+                <p id="employedCount">Total: 0</p>
             </div>
-            <div id="employedByCompanySummary" class="summary-container summary-scrollable"></div>
+            <div class="card vac">
+                <h3>VACANCIES</h3>
+                <p id="vacanciesCount">Total: 0</p>
+            </div>
+        </div>
+
+        <!-- Charts and summaries -->
+        <div class="charts-wrapper">
+            <div class="chart-summary-wrapper">
+                <div class="chart-container">
+                    <canvas id="applicationsByCompanyChart"></canvas>
+                </div>
+                <div id="applicationsByCompanySummary" class="summary-container summary-scrollable"></div>
+            </div>
+            <div class="chart-summary-wrapper">
+                <div class="chart-container">
+                    <canvas id="employedByPositionChart"></canvas>
+                </div>
+                <div id="employedByPositionSummary" class="summary-container summary-scrollable"></div>
+            </div>
+            <div class="chart-summary-wrapper">
+                <div class="chart-container">
+                    <canvas id="employedByCompanyChart"></canvas>
+                </div>
+                <div id="employedByCompanySummary" class="summary-container summary-scrollable"></div>
+            </div>
+        </div>
+
+        <!-- Most Applied Jobs section -->
+        <div class="most-applied-jobs">
+            <h3>Most Applied Jobs</h3>
+            <ul id="mostAppliedJobsList"></ul>
         </div>
     </div>
 
-    <div class="most-applied-jobs">
-        <h3>Most Applied Jobs</h3>
-        <ul id="mostAppliedJobsList"></ul>
-    </div>
-    
+    <!-- Loading and confirmation dialogs -->
     <div id="loading-screen" class="loading-screen">
         <div class="load-circle"></div>
     </div>
@@ -93,6 +111,5 @@
             </div>
         </div>
     </div>
-
 </body>
 </html>

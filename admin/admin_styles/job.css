@@ -1,73 +1,120 @@
-body {
-    background-color: #F2F2F2;
-    font-family: Arial, Helvetica, sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Navigation bar */
-.nav {
-    background: linear-gradient(90deg, rgba(223, 75, 75, 1) 46%, rgba(189, 26, 26, 1) 63%, rgba(130, 20, 20, 1) 97%);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    overflow: hidden;
+body {
+    font-family: Arial, Helvetica, sans-serif;
     display: flex;
-    justify-content: center;
+    background-color: #FFEBEE; /* Adjust as needed */
+}
+
+/* Sidebar Navigation */
+.nav {
+    background-color: #1A1A1A; /* Dark charcoal background */
+    width: 240px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 20px;
+    position: fixed;
+}
+
+.sidebar-header {
+    display: flex;
     align-items: center;
+    padding: 20px;
+    width: 100%;
+}
+
+.logo {
+    width: 30px; /* Adjust logo size */
+    margin-right: 10px;
+}
+
+.app-name {
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .links {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    width: 100%;
 }
 
 .links button {
-    background: none; 
-    border: none; 
-    color: #f2f2f2;
-    padding: 16px 10px;
-    text-decoration: none;
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    padding: 15px 20px;
+    text-align: left;
     font-size: 16px;
     font-weight: bold;
-    margin-right: 10px;
-    cursor: pointer; /* Ensure it's clear this is clickable */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
 }
 
-.nav h2 {
-    font-size: 30px;
-    color: #f2f2f2;
-    margin-left: 20px;
-    margin-right: auto;
+.links button .icon {
+    width: 20px;
+    height: 20px;
+    color: #FFFFFF; /* Inherits color from button */
+}
+
+.links button.active {
+    background-color: #333;
+    border-left: 4px solid #D7263D;
 }
 
 .links button:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Change background color on hover */
+    background-color: #333;
 }
-/* End Navigation bar */
 
+/* Main Content Offset */
+.main-content {
+    margin-left: 240px;
+    padding: 20px;
+    background-color: #FFEBEE;
+    width: calc(100% - 240px);
+}
+
+/* Top Bar */
 .job-container {
-    padding: 16px;
-    padding-top: 100px;
-    margin-top: 1px;
-    display: flex;
-    flex-wrap: wrap; /* Allows the content to wrap */
-    gap: 10px;
-}
-
-.job-actions {
-    align-content: center;
     display: flex;
     flex-direction: column;
-    padding: 30px;
+    gap: 20px;
+}
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.job-actions {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
     background-color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    flex-shrink: 0;
-    width: 100%;
-    max-width: 250px;   
+    width: 50%;
+    flex: 1; /* Allow it to grow within the container */
+    box-sizing: border-box;
 }
-
 .job-actions h2 {
+    font-size: 1.5em;
     margin-bottom: 10px;
 }
 
@@ -88,21 +135,24 @@ body {
 }
 
 .job-actions button {
-    background-color: #e74c3c;  /* example color */
+    background-color: #D7263D;
     color: white;
-    padding: 10px 20px;
+    padding: 8px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 10px;
-    width: 100%; /* Full width */
-    box-sizing: border-box;
+    transition: background-color 0.3s ease;
 }
-
 .job-actions button:hover {
     background-color: darkred;
 }
-
+#searchBar {
+    width: 300px; /* Adjust the width as needed */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
 .sort-container {
     display: flex;
     align-items: center;
@@ -119,31 +169,31 @@ body {
     margin-right: 0; /* Remove margin from last button */
 }
 
+/* Table and Content Area */
+.jable {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    width: 100%; /* Ensure it takes full width of parent container */
+}
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* Set minimum width for table for smaller viewports */
 }
 
 th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    padding: 10px;
     text-align: left;
+    border: 1px solid #ddd;
 }
 
 th {
     background-color: #f2f2f2;
 }
-.jable {
-    display: flex;
-    padding: 30px;
-    width: 76%; /* Adjust width */
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow-x: auto;
-}
-
 /* Circular checkboxes */
 .circular-checkbox {
     -webkit-appearance: none;
@@ -172,7 +222,7 @@ th {
 
 /* Edit Button Styles */
 table td button {
-    background-color: #e74c3c; /* Primary blue color */
+    background-color: #D7263D; /* Primary blue color */
     color: white;
     border: none;
     padding: 8px 15px;
@@ -193,9 +243,9 @@ table td button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 20px;
+    margin-top: auto;
+    padding-top: 20px;
 }
-
 .pagination span {
     margin-right: 10px;
 }
@@ -226,7 +276,7 @@ table td button:hover {
 }
 
 .pagination button.active {
-    background-color: #333;
+    background-color: #c51818;
     color: #fff;
     border-color: #333;
 }
@@ -237,7 +287,7 @@ table td button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed; /* Fixed position to ensure it stays centered */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -251,12 +301,22 @@ table td button:hover {
     max-height: 80%; /* Ensures the form doesn't exceed screen height */
     overflow-y: auto; /* Scroll if content overflows */
     width: 100%;
+    z-index: 1000; /* Above the overlay */
 }
-/* Blur Effect */
-.blur {
-    filter: blur(5px);
-    pointer-events: none;
+/* darkoverlay Effect */
+.dark-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
+
 #editJobForm h2 {
     text-align: center;
     margin-bottom: 20px;
@@ -295,7 +355,7 @@ table td button:hover {
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-    border-color: #e74c3c;
+    border-color: #D7263D;
     outline: none;
 }
 
@@ -323,7 +383,7 @@ table td button:hover {
 button,
 input[type="submit"],
 input[type="button"] {
-    background-color: #e74c3c;
+    background-color: #D7263D;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -392,7 +452,7 @@ input[type="button"]:disabled {
 }
 
 .confirmation-dialog-buttons button {
-    background-color: #e74c3c;
+    background-color:#D7263D;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -405,7 +465,6 @@ input[type="button"]:disabled {
     background-color: darkred;
 }
 /* Loading Screen */
-/* loading */
 .loading-screen {
     display: none;
     position: fixed;
@@ -431,7 +490,7 @@ input[type="button"]:disabled {
     display: block; /* Set display to block */
     margin: 20px auto; /* Center horizontally */
     padding: 15px 20px;
-    border: 2px  #e74c3c; /* Dashed red border */
+    border: 2px #D7263D; /* Dashed red border */
     border-radius: 8px; /* Rounded corners */
     background-color: #fff8f8; /* Light red background */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
@@ -452,7 +511,7 @@ input[type="button"]:disabled {
     display: inline-block;
     margin-top: 10px;
     padding: 10px 20px;
-    background-color: #e74c3c;
+    background-color: #D7263D;
     color: #ffffff;
     border: none;
     border-radius: 5px;
@@ -483,7 +542,7 @@ input[type="button"]:disabled {
 }
 
 .full-width textarea:focus {
-    border-color: #e74c3c;
+    border-color: #D7263D;
     outline: none;
 }
 .radio-group {
@@ -521,7 +580,7 @@ input[type="button"]:disabled {
 }
 
 .confirmation-dialog-buttons button {
-    background-color: #e74c3c;
+    background-color: #D7263D;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -562,7 +621,7 @@ input[type="button"]:disabled {
   }
   
   #closeSuccessBtn {
-    background-color: #e74c3c;
+    background-color:#D7263D;
     color: white;
     padding: 10px 20px;
     border: none;
