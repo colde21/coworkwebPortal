@@ -133,19 +133,25 @@ function viewJobDetails(jobId) {
     getDoc(doc(firestore, 'jobs', jobId)).then((jobDoc) => {
         if (jobDoc.exists()) {
             const jobData = jobDoc.data();
+
+            // Fetch skills and qualifications as arrays
+            const skills = jobData.skills || [];
+            const qualifications = jobData.qualifications || [];
+
             jobDetailsContent.innerHTML = `
-                <p><strong>Position:</strong> ${jobData.position}</p><hr>
-                <p><strong>Company:</strong> ${jobData.company}</p><hr>
-                <p><strong>Location:</strong> ${jobData.location}</p><hr>
-                <p><strong>Vacancy:</strong> ${jobData.vacancy}</p><hr>
-                <p><strong>Type:</strong> ${jobData.type}</p><hr>
-                <p><strong>Email:</strong> ${jobData.contact}</p><hr>
-                <p><strong>Expected Salary:</strong> ${jobData.expectedSalary}</p><hr>
-                <p><strong>Skills:</strong> ${[jobData.skills1, jobData.skills2, jobData.skills3, jobData.skills4, jobData.skills5].filter(Boolean).join(', ')}</p><hr>
-                <p><strong>Qualifications:</strong> ${[jobData.qualification1, jobData.qualification2, jobData.qualification3, jobData.qualification4, jobData.qualification5].filter(Boolean).join(', ')}</p><hr>
-                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ')}</p><hr>
-                <p><strong>Facilities:</strong> ${jobData.facilities}</p><hr>
-                <p><strong>Description:</strong> ${jobData.description}</p>
+                <p><strong>Position:</strong> ${jobData.position || 'N/A'}</p><hr>
+                <p><strong>Company:</strong> ${jobData.company || 'N/A'}</p><hr>
+                <p><strong>Location:</strong> ${jobData.location || 'N/A'}</p><hr>
+                <p><strong>Vacancy:</strong> ${jobData.vacancy || 'N/A'}</p><hr>
+                 <p><strong>Contact:</strong> ${jobData.contact || 'N/A'}</p><hr>
+                <p><strong>Type:</strong> ${jobData.type || 'N/A'}</p><hr>
+                <p><strong>Email:</strong> ${jobData.email || 'N/A'}</p><hr>
+                <p><strong> Salary:</strong> ${jobData.salary || 'N/A'}</p><hr>
+                <p><strong>Skills:</strong> ${skills.length > 0 ? skills.join(', ') : 'N/A'}</p><hr>
+                <p><strong>Qualifications:</strong> ${qualifications.length > 0 ? qualifications.join(', ') : 'N/A'}</p><hr>
+                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ') || 'N/A'}</p><hr>
+                <p><strong>Facilities:</strong> ${jobData.facilities || 'N/A'}</p><hr>
+                <p><strong>Description:</strong> ${jobData.description || 'N/A'}</p>
             `;
             jobDetailsPopup.style.display = 'flex';
         } else {

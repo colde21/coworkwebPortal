@@ -34,8 +34,6 @@ function requireLogin() {
         }
     });
 }
-
-
 //Navigation
 document.getElementById('homeButton').addEventListener('click', function () {
     location.href = 'home.html';
@@ -133,19 +131,25 @@ function viewJobDetails(jobId) {
     getDoc(doc(firestore, 'jobs', jobId)).then((jobDoc) => {
         if (jobDoc.exists()) {
             const jobData = jobDoc.data();
+
+            // Fetch skills and qualifications as arrays
+            const skills = jobData.skills || [];
+            const qualifications = jobData.qualifications || [];
+
             jobDetailsContent.innerHTML = `
-                <p><strong>Position:</strong> ${jobData.position}</p><hr>
-                <p><strong>Company:</strong> ${jobData.company}</p><hr>
-                <p><strong>Location:</strong> ${jobData.location}</p><hr>
-                <p><strong>Vacancy:</strong> ${jobData.vacancy}</p><hr>
-                <p><strong>Type:</strong> ${jobData.type}</p><hr>
-                <p><strong>Email:</strong> ${jobData.contact}</p><hr>
-                <p><strong>Expected Salary:</strong> ${jobData.expectedSalary}</p><hr>
-                <p><strong>Skills:</strong> ${[jobData.skills1, jobData.skills2, jobData.skills3, jobData.skills4, jobData.skills5].filter(Boolean).join(', ')}</p><hr>
-                <p><strong>Qualifications:</strong> ${[jobData.qualification1, jobData.qualification2, jobData.qualification3, jobData.qualification4, jobData.qualification5].filter(Boolean).join(', ')}</p><hr>
-                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ')}</p><hr>
-                <p><strong>Facilities:</strong> ${jobData.facilities}</p><hr>
-                <p><strong>Description:</strong> ${jobData.description}</p>
+                <p><strong>Position:</strong> ${jobData.position || 'N/A'}</p><hr>
+                <p><strong>Company:</strong> ${jobData.company || 'N/A'}</p><hr>
+                <p><strong>Location:</strong> ${jobData.location || 'N/A'}</p><hr>
+                <p><strong>Vacancy:</strong> ${jobData.vacancy || 'N/A'}</p><hr>
+                 <p><strong>Contact:</strong> ${jobData.contact || 'N/A'}</p><hr>
+                <p><strong>Type:</strong> ${jobData.type || 'N/A'}</p><hr>
+                <p><strong>Email:</strong> ${jobData.email || 'N/A'}</p><hr>
+                <p><strong> Salary:</strong> ${jobData.salary || 'N/A'}</p><hr>
+                <p><strong>Skills:</strong> ${skills.length > 0 ? skills.join(', ') : 'N/A'}</p><hr>
+                <p><strong>Qualifications:</strong> ${qualifications.length > 0 ? qualifications.join(', ') : 'N/A'}</p><hr>
+                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ') || 'N/A'}</p><hr>
+                <p><strong>Facilities:</strong> ${jobData.facilities || 'N/A'}</p><hr>
+                <p><strong>Description:</strong> ${jobData.description || 'N/A'}</p>
             `;
             jobDetailsPopup.style.display = 'flex';
         } else {
@@ -180,31 +184,53 @@ async function updateJobTable() {
     const tableBody = document.getElementById('jobTable').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = '';
 
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const jobsToDisplay = filteredJobs.slice(start, end);
+    // Show loader while updating job table
+    showLoader();
 
-    jobsToDisplay.forEach(job => {
-        const newRow = tableBody.insertRow(-1);
-        newRow.dataset.id = job.id;
-
-        // Read-only cells
-        const cells = ['position', 'company', 'location', 'vacancy', 'type', 'contact'];
-        cells.forEach(field => {
-            const cell = newRow.insertCell();
-            cell.textContent = job[field] || 'N/A';
+    try {
+        // Sort and filter jobs
+        filteredJobs.sort((a, b) => {
+            const timeA = a.unarchivedAt ? a.unarchivedAt.seconds : (a.createdAt ? a.createdAt.seconds : 0);
+            const timeB = b.unarchivedAt ? b.unarchivedAt.seconds : (b.createdAt ? b.createdAt.seconds : 0);
+            return timeB - timeA;
         });
 
-        // Add view button
-        const viewCell = newRow.insertCell();
-        const viewButton = document.createElement('button');
-        viewButton.textContent = 'View';
-        viewButton.addEventListener('click', () => viewJobDetails(job.id));
-        viewCell.appendChild(viewButton);
-        updatePaginationControls();
-    });
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const jobsToDisplay = filteredJobs.slice(start, end);
 
-    document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
+        // Populate job table rows
+        jobsToDisplay.forEach(job => {
+            const newRow = tableBody.insertRow(-1);
+            newRow.dataset.id = job.id;
+
+            const checkboxCell = newRow.insertCell();
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'circular-checkbox';
+            checkbox.dataset.id = job.id;
+            checkboxCell.appendChild(checkbox);
+
+            const cells = ['position', 'company', 'location', 'vacancy', 'type', 'contact'];
+            cells.forEach(field => {
+                const cell = newRow.insertCell();
+                cell.textContent = job[field] || 'N/A';
+            });
+            const viewCell = newRow.insertCell();
+            const viewButton = document.createElement('button');
+            viewButton.textContent = 'View';
+            viewButton.addEventListener('click', () => viewJobDetails(job.id));
+            viewCell.appendChild(viewButton);
+        });
+
+        document.getElementById('jobCount').textContent = `Total Jobs: ${filteredJobs.length}`;
+        updatePaginationControls();
+    } catch (error) {
+        console.error("Failed to update job table:", error);
+    } finally {
+        // Hide loader after updating job table
+        hideLoader();
+    }
 }
 
 //Search 
@@ -275,4 +301,77 @@ document.getElementById('exportAuditLogBtn').addEventListener('click', () => {
     }).catch(error => {
         console.error("Error exporting audit log:", error);
     });
+});
+// Attach event listener to the Archive Selected Jobs button
+document.getElementById('archiveSelectedJobsButton').addEventListener('click', archiveSelectedJobs);
+
+async function archiveSelectedJobs() {
+    const checkedBoxes = document.querySelectorAll('#jobTable tbody input[type="checkbox"]:checked');
+    if (checkedBoxes.length === 0) {
+        alert("No jobs selected for archiving.");
+        return;
+    }
+
+    const confirmationDialog = document.getElementById('confirmationDialog');
+    confirmationDialog.style.display = 'flex';
+
+    document.getElementById('confirmArchiveBtn').onclick = async () => {
+        confirmationDialog.style.display = 'none';
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
+
+        for (const box of checkedBoxes) {
+            const jobId = box.closest('tr').dataset.id;
+            await archiveJobIfNeeded(jobId, userEmail);
+            box.closest('tr').remove();
+        }
+        window.location.reload();
+    };
+
+    document.getElementById('cancelArchiveBtn').onclick = () => {
+        confirmationDialog.style.display = 'none';
+    };
+}
+
+// Archive job function
+async function archiveJobIfNeeded(jobId, userEmail) {
+    try {
+        const jobDocRef = doc(firestore, 'jobs', jobId);
+        const jobDocSnap = await getDoc(jobDocRef);
+
+        if (jobDocSnap.exists()) {
+            const jobData = jobDocSnap.data();
+            const archiveData = {
+                ...jobData,
+                archivedAt: Timestamp.now()
+            };
+
+            await addDoc(collection(firestore, 'archive'), archiveData);
+            await deleteDoc(jobDocRef);
+            await logAudit(userEmail, "Job Archived", { jobId });
+            console.log(`Archived job with ID: ${jobId}`);
+        }
+    } catch (error) {
+        console.error(`Failed to archive job with ID: ${jobId}`, error);
+        alert(`Failed to archive job with ID: ${jobId}.`);
+    }
+}
+
+document.getElementById('generateLinkButton').addEventListener('click', async () => {
+    const companyName = prompt("Enter the company name for which you want to generate the link:").trim().toLowerCase();
+    if (companyName) {
+        const link = await generateDisposableLink(companyName);
+        if (link) {
+            // Display the link and update the link text
+            document.getElementById('disposableLinkText').textContent = link;
+            document.getElementById('disposableLinkContainer').style.display = 'block';
+
+            // Automatically copy the link to the clipboard
+            document.getElementById('copyLinkButton').addEventListener('click', () => {
+                copyToClipboard(link);
+            });
+        } else {
+            alert("Failed to generate the link. Please try again.");
+        }
+    }
 });

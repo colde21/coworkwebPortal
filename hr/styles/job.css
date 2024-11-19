@@ -360,10 +360,46 @@ table td button:hover {
 }
 
 /* Skills and Qualifications Grid */
-.skills-qualifications {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+.skills-container,
+.qualifications-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.skill-tag,
+.qualification-tag {
+    background: #D7263D;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+}
+
+.skill-tag button,
+.qualification-tag button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.skill-tag button:hover,
+.qualification-tag button:hover {
+    color: #000;
+}
+
+.form-buttons {
+    grid-column: span 2;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
 }
 
 /* Full Width Inputs */

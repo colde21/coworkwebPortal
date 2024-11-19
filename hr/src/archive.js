@@ -176,7 +176,7 @@ function updateArchiveTable() {
         const actionsCell = document.createElement('div');
         actionsCell.className = 'table-cell';
 
-        const unarchiveButton = document.createElement('button');
+        /*const unarchiveButton = document.createElement('button');
         unarchiveButton.textContent = 'Unarchive';
         unarchiveButton.className = 'unarchive-button';
         unarchiveButton.addEventListener('click', () => unarchiveJob(job.id));
@@ -187,12 +187,11 @@ function updateArchiveTable() {
         deleteButton.addEventListener('click', () => deleteJob(job.id, row));
 
         actionsCell.appendChild(unarchiveButton);
-        actionsCell.appendChild(deleteButton);
+        actionsCell.appendChild(deleteButton);*/
 
         row.appendChild(positionCell);
         row.appendChild(companyCell);
         row.appendChild(locationCell);
-        row.appendChild(actionsCell);
 
         archiveList.appendChild(row);
     });
@@ -284,7 +283,7 @@ function showVacancyInputDialog(message, defaultValue, onConfirm) {
     };
 }
 
-async function unarchiveJob(jobId) {
+/*async function unarchiveJob(jobId) {
     const jobDocRef = doc(firestore, `archive/${jobId}`);
     const jobData = await getDoc(jobDocRef);
 
@@ -333,7 +332,7 @@ async function unarchiveJob(jobId) {
     }
 }
 
-async function deleteJob(jobId, listItem) {
+/*async function deleteJob(jobId, listItem) {
     showConfirmationDialog("Are you sure you want to delete this job permanently?", async () => {
         try {
             const user = auth.currentUser;
@@ -353,3 +352,4 @@ async function deleteJob(jobId, listItem) {
         }
     });
 }
+*/

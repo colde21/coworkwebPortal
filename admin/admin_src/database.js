@@ -57,6 +57,7 @@ export async function fetchArchivedJobs() {
     }
 }
 
+
 // Function to delete an archived job
 export async function deleteArchivedJob(jobId) {
     try {
