@@ -28,7 +28,106 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show confirmation dialog when form is submitted
    document.getElementById('jobForm').addEventListener('submit', function(event) {
         event.preventDefault();
+        let isValid = true;
+
         confirmationDialog.style.display = 'flex'; // Show confirmation dialog
+
+             // Validate position (character limit: 50)
+             const position = document.getElementById('position');
+             if (position.value.trim() === '' || position.value.length > 50) {
+                 alert('Position is required and cannot exceed 50 characters.');
+                 isValid = false;
+             }
+     
+             // Validate location (character limit: 100)
+             const location = document.getElementById('location');
+             if (location.value.trim() === '' || location.value.length > 100) {
+                 alert('Location is required and cannot exceed 100 characters.');
+                 isValid = false;
+             }
+     
+             // Validate age (range: 18-60)
+             const age = parseInt(document.getElementById('age').value, 10);
+             if (isNaN(age) || age < 18 || age > 60) {
+                 alert('Age must be between 18 and 60.');
+                 isValid = false;
+             }
+     
+             // Validate contact (character limit: 50)
+             const contact = document.getElementById('contact');
+             if (contact.value.trim() === '' || contact.value.length > 50) {
+                 alert('Contact is required and cannot exceed 50 characters.');
+                 isValid = false;
+             }
+     
+             // Validate email (valid format)
+             const email = document.getElementById('email');
+             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+             if (!emailRegex.test(email.value)) {
+                 alert('Please enter a valid email address.');
+                 isValid = false;
+             }
+     
+             // Validate facilities (character limit: 200)
+             const facilities = document.getElementById('facilities');
+             if (facilities.value.length > 200) {
+                 alert('Facilities cannot exceed 200 characters.');
+                 isValid = false;
+             }
+     
+             // Validate description (character limit: 500)
+             const description = document.getElementById('description');
+             if (description.value.length > 500) {
+                 alert('Description cannot exceed 500 characters.');
+                 isValid = false;
+             }
+     
+             // Validate salary (positive number)
+             const salary = document.getElementById('salary');
+             if (!/^\d+$/.test(salary.value) || parseInt(salary.value, 10) <= 0) {
+                 alert('Salary must be a positive number.');
+                 isValid = false;
+             }
+              // Validate contact number (10-12 digits)
+              const contactNumber = document.getElementById('contactNumber');
+              const contactNumberRegex = /^\d{10,12}$/;
+              if (!contactNumberRegex.test(contactNumber.value)) {
+                alert('Contact number must be 10-12 digits long and only contain numbers.');
+                isValid = false;
+            }
+             
+
+             // Validate company name (character limit: 50)
+             const company = document.getElementById('company');
+             if (company.value.trim() === '' || company.value.length > 50) {
+                 alert('Company name is required and cannot exceed 50 characters.');
+                 isValid = false;
+             }
+     
+             // Validate job type (selection required)
+             const jobType = document.getElementById('type');
+             if (!jobType.value) {
+                 alert('Please select a job type.');
+                 isValid = false;
+             }
+     
+             // Validate vacancy (positive number)
+             const vacancy = document.getElementById('vacancy');
+             if (!/^\d{1,2}$/.test(vacancy.value) || parseInt(vacancy.value, 10) <= 0) {
+                alert('Vacancy must be a positive number and contain at most two digits.');
+                isValid = false;
+             }
+     
+             // Validate job category (selection required)
+             const jobCategory = document.getElementById('jobType');
+             if (!jobCategory.value) {
+                 alert('Please select a job category.');
+                 isValid = false;
+             }
+             if (isValid) {
+                confirmationDialog.style.display = 'flex'; // Show confirmation dialog
+            }
+     
     });
 
     // Cancel submission and hide confirmation dialog
@@ -36,6 +135,26 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmationDialog.style.display = 'none'; // Hide confirmation dialog
     });
 
+    age.addEventListener('input', () => {
+        age.value = age.value.replace(/[^0-9]/g, '');
+        if (age.value.length > 2) {
+            age.value = age.value.slice(0, 2);
+        }
+    
+        const ageValue = parseInt(age.value, 10);
+        if (ageValue > 60) {
+            age.value = '60';
+        } else if (ageValue < 18 && age.value.length === 2) {
+            age.value = '18';
+        }
+    });
+    
+    vacancy.addEventListener('input', () => {
+        vacancy.value = vacancy.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+        if (vacancy.value.length > 2) {
+            vacancy.value = vacancy.value.slice(0, 2); // Restrict to two digits
+        }
+    });
     // Confirm submission and handle form submission
     confirmSubmitBtn.addEventListener('click', async function () {
         confirmationDialog.style.display = 'none'; // Hide confirmation dialog
@@ -65,6 +184,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const qualificationTags = Array.from(qualificationsContainer.querySelectorAll('.qualification-tag'));
         const qualifications = qualificationTags.map(qualificationTag => qualificationTag.textContent.replace('×', '').trim());
         entries.qualifications = qualifications;
+
+
+          // Extract fields for prefill
+    const companyDetails = {
+        company: entries.company,
+        contactPerson: entries.contact,
+        contactNumber: entries.contactNumber,
+        email: entries.email,
+    };
     
         try {
             const jobId = await submitJobData(entries);
@@ -181,3 +309,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+

@@ -22,7 +22,13 @@ export async function submitJobData(formData) {
         const jobsCol = collection(firestore, 'jobs');
         const docRef = await addDoc(jobsCol, {
             ...formData,
-            createdAt: formData.createdAt
+            companyDetails: {
+                company: formData.company,
+                contactPerson: formData.contactPerson,
+                contactNumber: formData.contactNumber,
+                email: formData.email,
+            },
+            createdAt: formData.createdAt,
         });
         return docRef.id;
     } catch (error) {
@@ -137,11 +143,38 @@ export async function hireApplicant(applicationId, applicantData) {
         const employedCol = collection(firestore, 'employed');
         await addDoc(employedCol, applicantData);
         await deleteDoc(doc(firestore, `interview/${applicationId}`));
-        console.log(`Applicant with ID: ${applicationId} has been hired and moved to the employed collection.`);
-    } catch (error) {
-        console.error(`Failed to hire applicant ${applicationId}:`, error);
-        throw error;
-    }
+        
+     // Decrement the vacancy count in the corresponding job document
+     const jobId = applicantData.jobId; // Assuming `jobId` exists in `applicantData`
+     if (jobId) {
+         const jobDocRef = doc(firestore, 'jobs', jobId);
+         const jobDocSnapshot = await getDoc(jobDocRef);
+
+         if (jobDocSnapshot.exists()) {
+             const jobData = jobDocSnapshot.data();
+             const currentVacancy = parseInt(jobData.vacancy, 10);
+
+             if (currentVacancy > 0) {
+                 // Update the job document to decrement the vacancy count
+                 await updateDoc(jobDocRef, {
+                     vacancy: currentVacancy - 1,
+                 });
+                 console.log(`Vacancy decremented for job ID: ${jobId}`);
+             } else {
+                 console.warn(`No vacancies left for job ID: ${jobId}`);
+             }
+         } else {
+             console.error(`Job document not found for job ID: ${jobId}`);
+         }
+     } else {
+         console.error('Job ID not found in applicant data.');
+     }
+
+     console.log(`Applicant with ID: ${applicationId} has been hired and moved to the employed collection.`);
+ } catch (error) {
+     console.error(`Failed to hire applicant ${applicationId}:`, error);
+     throw error;
+ }
 }
 
 // Function to reject an applicant from interview

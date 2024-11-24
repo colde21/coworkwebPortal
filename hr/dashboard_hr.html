@@ -6,7 +6,6 @@
     <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
     <link rel="stylesheet" href="./styles/dashboard.css">
     <title>Home</title>
-
     <script nonce="brostop">  
         console.log('it is working now?');
         function preventBack() {
@@ -15,6 +14,8 @@
         setTimeout(preventBack, 0);
         window.onunload = function () { null };
     </script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     <script type="module" src="./src/dashboard.js" defer></script>
 </head>
 <body>
@@ -56,5 +57,8 @@
         </div>
     </div>
 
+    <div class="main-content">
+        <div id="calendar"></div>
+    </div>
 </body>
 </html>

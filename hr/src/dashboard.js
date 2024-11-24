@@ -4,18 +4,6 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js"; // Ensure this import is present
 import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
-    authDomain: "cowork-195c0.firebaseapp.com",
-    databaseURL: "https://cowork-195c0-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "cowork-195c0",
-    storageBucket: "cowork-195c0.appspot.com",
-    messagingSenderId: "151400704939",
-    appId: "1:151400704939:web:934d6d15c66390055440ee",
-    measurementId: "G-8DL6T09CP4"
-};
-
 // Initialize Firebase app
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -42,6 +30,26 @@ function requireLogin() {
                 window.location.href = '/login.html';
             }
         }
+    });
+}
+async function fetchScheduledInterviews() {
+    const firestore = getFirestore(app);
+    const interviewsCol = collection(firestore, 'interview');
+    const querySnapshot = await getDocs(interviewsCol);
+
+    const events = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            title: `${data.position} - ${data.company}`,
+            start: data.date, // Ensure the date is in ISO format (YYYY-MM-DD)
+            time: data.time,
+            description: data.description,
+            jobId: data.jobId,
+            extendedProps: {
+                contactPerson: data.contactPerson,
+                userEmail: data.userEmail,
+            },
+        };
     });
 }
 
@@ -118,10 +126,28 @@ async function performSignOut() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded',async() => {
     const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
         signOutBtn.addEventListener('click', performSignOut);
     }
     requireLogin();
+
+    const calendarEl = document.getElementById('calendar');
+    const events = fetchScheduledInterviews();
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+        },
+        events: events,
+        eventClick: function(info) {
+            alert(`Job ID: ${info.event.extendedProps.jobId}\nPosition: ${info.event.title}\nDate: ${info.event.start.toISOString().split('T')[0]}\nTime: ${info.event.extendedProps.time}\nContact Person: ${info.event.extendedProps.contactPerson}`);
+        },
+    });
+    console.log('FullCalendar:', FullCalendar);
+    calendar.render();
 });
+

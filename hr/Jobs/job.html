@@ -137,6 +137,10 @@
                 <input type="text" id="contact" name="contact" placeholder="Enter contact person's name" required>
             </div>
             <div class="form-group">
+                <label for="contactNumber">Contact Number:</label>
+                <input type="number" id="contactNumber" name="contactNumber" placeholder="Enter contact number of the company" required>
+              </div>
+            <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" placeholder="Enter contact email" required>
             </div>
@@ -149,8 +153,8 @@
                 <textarea id="description" name="description" placeholder="Enter job description"></textarea>
             </div>
             <div class="form-group">
-                <label for="expectedSalary">Salary:</label>
-                <input type="number" id="expectedSalary" name="expectedSalary" placeholder="Enter expected salary" min="0" required>
+                <label for="salary">Salary:</label>
+                <input type="number" id="salary" name="salary" placeholder="Enter salary" min="0" required>
             </div>
             <div class="form-group">
                 <label for="education">Educational Attainment:</label>
@@ -160,13 +164,14 @@
                     <option value="undergrad">Undergraduate</option>
                 </select>
             </div>
-            <div class="form-group full-width">
-                <label>Job Type:</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="jobType" value="Blue Collar"> Blue Collar</label>
-                    <label><input type="radio" name="jobType" value="White Collar"> White Collar</label>
+                <div class="form-group">
+                    <label for="jobType">Job Category:</label>
+                    <select id="jobType" name="jobType" required>
+                        <option value="" disabled selected>Select Job Type</option>
+                        <option value="Blue Collar">Blue Collar</option>
+                        <option value="White Collar">White Collar</option>
+                    </select>
                 </div>
-            </div>
             <div class="form-group">
                 <label for="skills">Skills:</label>
                 <div class="skills-container" id="editSkillsContainer"></div>
@@ -175,6 +180,7 @@
                     <button type="button" id="editAddSkillButton">Add Skill</button>
                 </div>
             </div>
+            
             <div class="form-group">
                 <label for="qualifications">Qualifications:</label>
                 <div class="qualifications-container" id="editQualificationsContainer"></div>

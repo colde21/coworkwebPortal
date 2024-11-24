@@ -106,6 +106,23 @@ async function fetchUserDetails(userId) {
     }
 }
 
+async function fetchContactPerson(jobId) {
+    try {
+        const jobDocRef = doc(firestore, 'jobs', jobId);
+        const jobDocSnapshot = await getDoc(jobDocRef);
+
+        if (jobDocSnapshot.exists()) {
+            const jobData = jobDocSnapshot.data();
+            return jobData.contact || "N/A"; // Return the contact person or "N/A" if not found
+        } else {
+            console.error("Job not found!");
+            return "N/A";
+        }
+    } catch (error) {
+        console.error("Error fetching contact person:", error);
+        return "N/A";
+    }
+}
 // Updated function with detailed logging to debug the applications object
 function openUserDetailsDialog(userDetails, imageUrl, applications) {
     console.log("User Details:", userDetails);
@@ -468,7 +485,10 @@ function showCustomModal(message) {
 }
 
 function showInterviewModal(application) {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
+        // Fetch the contact person for the job
+        const contactPerson = await fetchContactPerson(application.jobId);
+
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
         modal.innerHTML = `
@@ -483,7 +503,7 @@ function showInterviewModal(application) {
                 <label for="interviewRequirements">Requirements:</label>
                 <textarea id="interviewRequirements" rows="3" placeholder="List interview requirements" required></textarea><br><br>
                 <label for="contactPerson">Contact Person:</label>
-                <input type="text" id="contactPerson" placeholder="Enter contact person" required><br><br>
+                <input type="text" id="contactPerson" value="${contactPerson}" placeholder="Enter contact person" required><br><br>
                 <button id="confirmInterviewBtn" class="confirm-btn">Confirm</button>
                 <button id="cancelInterviewBtn" class="cancel-btn">Cancel</button>
             </div>
@@ -496,18 +516,17 @@ function showInterviewModal(application) {
             const interviewTime = document.getElementById('interviewTime').value;
             const interviewLocation = document.getElementById('interviewLocation').value;
             const interviewRequirements = document.getElementById('interviewRequirements').value;
-            const contactPerson = document.getElementById('contactPerson').value;
+            const contactPersonInput = document.getElementById('contactPerson').value;
 
-            if (interviewDate && interviewTime && interviewLocation && interviewRequirements && contactPerson) {
+            if (interviewDate && interviewTime && interviewLocation && interviewRequirements && contactPersonInput) {
                 const interviewDetails = {
                     date: interviewDate,
                     time: interviewTime,
                     location: interviewLocation,
                     requirements: interviewRequirements,
-                    contactPerson: contactPerson
+                    contactPerson: contactPersonInput,
                 };
                 document.body.removeChild(modal);
-                showSuccessModal(); // Show success message after confirming
                 resolve(interviewDetails);
             } else {
                 alert("Please fill out all the interview details.");

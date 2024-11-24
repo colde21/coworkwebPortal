@@ -39,8 +39,13 @@
             <input type="number" id="age" name="age" placeholder="Enter minimum age requirement" min="18" max="60" required>
           </div>
           <div class="form-group">
-            <label for="contact">Contact Person:</label>
-            <input type="text" id="contact" name="contact" placeholder="Enter contact person's name" required>
+            <label for="contactNumber">Contact Number:</label>
+<input type="text" id="contactNumber" name="contactNumber" placeholder="Enter contact number" required>
+
+          </div>
+          <div class="form-group">
+            <label for="contactNumber">Contact Number:</label>
+            <input type="number" id="contactNumber" name="contactNumber" placeholder="Enter contact number of the company" required>
           </div>
           <div class="form-group">
             <label for="email">Email:</label>
@@ -54,6 +59,7 @@
             <label for="description">Description:</label>
             <textarea id="description" name="description" placeholder="Enter job description"></textarea>
           </div>
+          
           <div class="form-group">
             <label for="salary">Salary:</label>
             <div class="currency-input">
@@ -108,12 +114,14 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Job Type:</label>
-            <div class="radio-group">
-              <label><input type="radio" name="jobType" value="Blue Collar"> Blue Collar</label>
-              <label><input type="radio" name="jobType" value="White Collar"> White Collar</label>
-            </div>
-          </div>
+            <label for="jobType">Job Category:</label>
+            <select id="jobType" name="jobType" required>
+                <option value="" disabled selected>Select Job Type</option>
+                <option value="Blue Collar">Blue Collar</option>
+                <option value="White Collar">White Collar</option>
+            </select>
+        </div>
+        
         </div>
       </form>
     </div>
@@ -127,6 +135,7 @@
         </div>
     </div>
 </div>
+
 <!-- Success Message -->
 <div id="successMessage" class="success-message" style="display: none;">
     <div class="success-message-content">

@@ -166,13 +166,14 @@ function viewJobDetails(jobId) {
                 <p><strong>Company:</strong> ${jobData.company || 'N/A'}</p><hr>
                 <p><strong>Location:</strong> ${jobData.location || 'N/A'}</p><hr>
                 <p><strong>Vacancy:</strong> ${jobData.vacancy || 'N/A'}</p><hr>
-                 <p><strong>Contact:</strong> ${jobData.contact || 'N/A'}</p><hr>
+                <p><strong>Contact Person:</strong> ${jobData.contact || 'N/A'}</p><hr>
+                <p><strong>Contact Number:</strong> ${jobData.contactNumber || 'N/A'}</p><hr>
                 <p><strong>Type:</strong> ${jobData.type || 'N/A'}</p><hr>
+                 <p><strong>Job Category:</strong> ${jobData.jobType || 'N/A'}</p><hr>
                 <p><strong>Email:</strong> ${jobData.email || 'N/A'}</p><hr>
                 <p><strong> Salary:</strong> ${jobData.salary || 'N/A'}</p><hr>
                 <p><strong>Skills:</strong> ${skills.length > 0 ? skills.join(', ') : 'N/A'}</p><hr>
                 <p><strong>Qualifications:</strong> ${qualifications.length > 0 ? qualifications.join(', ') : 'N/A'}</p><hr>
-                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ') || 'N/A'}</p><hr>
                 <p><strong>Facilities:</strong> ${jobData.facilities || 'N/A'}</p><hr>
                 <p><strong>Description:</strong> ${jobData.description || 'N/A'}</p>
             `;
@@ -259,6 +260,12 @@ async function updateJobTable() {
     }
 }
 
+document.querySelectorAll('.edit-button').forEach(button => {
+    button.addEventListener('click', () => {
+        const jobId = button.dataset.jobId;
+        editJob(jobId);
+    });
+});
 
 //Search 
 function handleSearch() {
@@ -314,16 +321,32 @@ async function archiveJobIfNeeded(jobId, userEmail) {
     }
 }
 
+async function hasApplicants(jobId) {
+    try {
+        const applicationsRef = collection(firestore, 'applied'); // Replace with your actual collection name
+        const querySnapshot = await getDocs(applicationsRef);
+
+        // Check if any application belongs to this job
+        return querySnapshot.docs.some(doc => doc.data().jobId === jobId);
+    } catch (error) {
+        console.error('Error checking applicants:', error);
+        return false;
+    }
+}
+
 // Edit job function
 async function editJob(jobId) {
     try {
+        const applicantsExist = await hasApplicants(jobId);
+
+        // Fetch job details
         const jobDocRef = doc(firestore, 'jobs', jobId);
         const jobDocSnap = await getDoc(jobDocRef);
 
         if (jobDocSnap.exists()) {
             const jobData = jobDocSnap.data();
 
-            // Populate basic fields
+            // Populate form fields
             const fields = {
                 position: 'position',
                 company: 'company',
@@ -332,6 +355,8 @@ async function editJob(jobId) {
                 type: 'type',
                 vacancy: 'vacancy',
                 contact: 'contact',
+                contactNumber: 'contactNumber',
+                jobType: 'jobType',
                 email: 'email',
                 facilities: 'facilities',
                 education: 'education',
@@ -343,44 +368,67 @@ async function editJob(jobId) {
                 const fieldElement = document.getElementById(fieldId);
                 if (fieldElement) {
                     fieldElement.value = jobData[key] || '';
+                    fieldElement.disabled = applicantsExist && key !== 'vacancy';
                 }
             }
 
-            // Populate skills
+            // Validation handlers for age and vacancy
+            const ageField = document.getElementById('age');
+            const vacancyField = document.getElementById('vacancy');
+
+            // Restrict age to two digits and within range
+            ageField.addEventListener('input', () => {
+                ageField.value = ageField.value.replace(/[^0-9]/g, '');
+                if (ageField.value.length > 2) {
+                    ageField.value = ageField.value.slice(0, 2);
+                }
+
+                const ageValue = parseInt(ageField.value, 10);
+                if (ageValue > 60) {
+                    ageField.value = '60';
+                } else if (ageValue < 18 && ageField.value.length === 2) {
+                    ageField.value = '18';
+                }
+            });
+
+            // Restrict vacancy to two digits
+            vacancyField.addEventListener('input', () => {
+                vacancyField.value = vacancyField.value.replace(/[^0-9]/g, '');
+                if (vacancyField.value.length > 2) {
+                    vacancyField.value = vacancyField.value.slice(0, 2);
+                }
+            });
+             // Validate contact number (10-12 digits)
+             const contactNumber = document.getElementById('contactNumber');
+             const contactNumberRegex = /^\d{10,12}$/;
+             if (!contactNumberRegex.test(contactNumber.value)) {
+               alert('Contact number must be 10-12 digits long and only contain numbers.');
+               isValid = false;
+           }
+
+            // Skills and Qualifications
             const skillsContainer = document.getElementById('editSkillsContainer');
-            skillsContainer.innerHTML = ''; // Clear existing skills
-            if (Array.isArray(jobData.skills)) {
-                jobData.skills.forEach((skill) => {
-                    addSkillToContainer(skill, skillsContainer, 'edit');
-                });
-            }
+            skillsContainer.innerHTML = '';
+            (jobData.skills || []).forEach(skill => {
+                addSkillToContainer(skill, skillsContainer, 'edit', !applicantsExist);
+            });
 
-            // Populate qualifications
             const qualificationsContainer = document.getElementById('editQualificationsContainer');
-            qualificationsContainer.innerHTML = ''; // Clear existing qualifications
-            if (Array.isArray(jobData.qualifications)) {
-                jobData.qualifications.forEach((qualification) => {
-                    addQualificationToContainer(qualification, qualificationsContainer, 'edit');
-                });
-            }
+            qualificationsContainer.innerHTML = '';
+            (jobData.qualifications || []).forEach(qualification => {
+                addQualificationToContainer(qualification, qualificationsContainer, 'edit', !applicantsExist);
+            });
 
-            // Set the selected radio button for jobType
-            if (jobData.jobType) {
-                const jobTypeRadio = document.querySelector(
-                    `input[name="jobType"][value="${jobData.jobType}"]`
-                );
-                if (jobTypeRadio) {
-                    jobTypeRadio.checked = true;
-                }
-            }
+            // Disable add buttons for skills and qualifications if there are applicants
+            document.getElementById('editSkillInput').disabled = applicantsExist;
+            document.getElementById('editAddSkillButton').disabled = applicantsExist;
+            document.getElementById('editQualificationInput').disabled = applicantsExist;
+            document.getElementById('editAddQualificationButton').disabled = applicantsExist;
 
-            // Show the edit form
-            const editJobForm = document.getElementById('editJobForm');
-            editJobForm.dataset.jobId = jobId;
-            editJobForm.style.display = 'block';
-
-            const darkOverlay = document.getElementById('darkOverlay');
-            darkOverlay.style.display = 'block';
+            // Show the edit form and overlay
+            document.getElementById('editJobForm').dataset.jobId = jobId;
+            document.getElementById('editJobForm').style.display = 'block';
+            document.getElementById('darkOverlay').style.display = 'block';
         } else {
             alert('Job not found!');
         }
@@ -389,34 +437,38 @@ async function editJob(jobId) {
     }
 }
 
-function addSkillToContainer(skill, container, type = 'edit') {
+
+function addSkillToContainer(skill, container, type = 'edit', allowRemoval = true) {
     const skillTag = document.createElement('span');
     skillTag.className = 'skill-tag';
     skillTag.textContent = skill;
 
-    const removeButton = document.createElement('button');
-    removeButton.className = `remove-skill-${type}`;
-    removeButton.textContent = '×';
-    removeButton.onclick = () => container.removeChild(skillTag);
+    if (allowRemoval) {
+        const removeButton = document.createElement('button');
+        removeButton.className = `remove-skill-${type}`;
+        removeButton.textContent = '×';
+        removeButton.onclick = () => container.removeChild(skillTag);
+        skillTag.appendChild(removeButton);
+    }
 
-    skillTag.appendChild(removeButton);
     container.appendChild(skillTag);
 }
 
-function addQualificationToContainer(qualification, container, type = 'edit') {
+function addQualificationToContainer(qualification, container, type = 'edit', allowRemoval = true) {
     const qualificationTag = document.createElement('span');
     qualificationTag.className = 'qualification-tag';
     qualificationTag.textContent = qualification;
 
-    const removeButton = document.createElement('button');
-    removeButton.className = `remove-qualification-${type}`;
-    removeButton.textContent = '×';
-    removeButton.onclick = () => container.removeChild(qualificationTag);
+    if (allowRemoval) {
+        const removeButton = document.createElement('button');
+        removeButton.className = `remove-qualification-${type}`;
+        removeButton.textContent = '×';
+        removeButton.onclick = () => container.removeChild(qualificationTag);
+        qualificationTag.appendChild(removeButton);
+    }
 
-    qualificationTag.appendChild(removeButton);
     container.appendChild(qualificationTag);
 }
-
 
 document.getElementById('editAddSkillButton').addEventListener('click', () => {
     const skillInput = document.getElementById('editSkillInput');
@@ -449,8 +501,10 @@ document.getElementById('saveJobButton').addEventListener('click', function (eve
         location: document.getElementById('location').value || '',
         age: document.getElementById('age').value || '',
         type: document.getElementById('type').value || '',
+        jobType: document.getElementById('jobType').value || '',
         vacancy: document.getElementById('vacancy').value || '',
-        contact: document.getElementById('email').value || '',
+        contact: document.getElementById('contact').value || '',
+        email: document.getElementById('email').value || '',
         education: document.getElementById('education').value || '',
         facilities: document.getElementById('facilities').value || '',
         description: document.getElementById('description').value || '',
@@ -523,6 +577,7 @@ document.getElementById('saveJobButton').addEventListener('click', function (eve
         .then(() => {
             alert('Job updated successfully!');
             document.getElementById('editJobForm').style.display = 'none';
+            document.getElementById('darkOverlay').style.display = 'none';
         })
         .catch(error => {
             console.error('Error updating job:', error);
@@ -582,48 +637,3 @@ function updatePaginationControls() {
     });
     paginationControls.appendChild(nextButton);
 }
-
-/*document.getElementById('generateLinkButton').addEventListener('click', async () => {
-    const companyName = prompt("Enter the company name for which you want to generate the link:");
-    if (companyName) {
-        const link = await generateDisposableLink(companyName);
-        if (link) {
-            // Display the link and update the link text
-            document.getElementById('disposableLinkText').textContent = link;
-            document.getElementById('disposableLinkContainer').style.display = 'block';
-
-            // Automatically copy the link to the clipboard
-            document.getElementById('copyLinkButton').addEventListener('click', () => {
-                copyToClipboard(link);
-            });
-        } else {
-            alert("Failed to generate the link. Please try again.");
-        }
-    }
-});*/
-
-// Function to copy the link to the clipboard
-function copyToClipboard(link) {
-    navigator.clipboard.writeText(link).then(() => {
-        alert("Link copied to clipboard!");
-    }).catch(err => {
-        console.error("Failed to copy text: ", err);
-    });
-}
-
-//Export auditLogs
-/*document.getElementById('exportAuditLogBtn').addEventListener('click', () => {
-    exportAuditLog().then(csvContent => {
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'audit_log.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }).catch(error => {
-        console.error("Error exporting audit log:", error);
-    });
-}); */
