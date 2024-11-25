@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
              // Validate contact (character limit: 50)
              const contact = document.getElementById('contactPerson');
              if (contact.value.trim() === '' || contact.value.length > 50 || !positionRegex.test(contact.value)) {
-                alert('Contact is required, cannot exceed 50 characters, and must not contain numbers.');
+                alert('Contact person is required, cannot exceed 50 characters, and must not contain numbers.');
                 isValid = false;
             }
      

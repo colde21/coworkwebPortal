@@ -21,7 +21,6 @@ const firestore = getFirestore(app);
 const storage = getStorage(app);
 
 //Navigation
-//Navigation
 document.getElementById('homeButton').addEventListener('click', function () {
     location.href = 'dashboard_hr.html';
 });
@@ -113,7 +112,7 @@ async function fetchContactPerson(jobId) {
 
         if (jobDocSnapshot.exists()) {
             const jobData = jobDocSnapshot.data();
-            return jobData.contact || "N/A"; // Return the contact person or "N/A" if not found
+            return jobData.contactPerson || "N/A"; // Return the contact person or "N/A" if not found
         } else {
             console.error("Job not found!");
             return "N/A";

@@ -8,6 +8,7 @@ import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstat
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app); // This initializes the Realtime Database
+const firestore = getFirestore(app);
 
 // Ensure the user is authenticated and identify their role from Realtime Database
 function requireLogin() {
@@ -30,26 +31,6 @@ function requireLogin() {
                 window.location.href = '/login.html';
             }
         }
-    });
-}
-async function fetchScheduledInterviews() {
-    const firestore = getFirestore(app);
-    const interviewsCol = collection(firestore, 'interview');
-    const querySnapshot = await getDocs(interviewsCol);
-
-    const events = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-            title: `${data.position} - ${data.company}`,
-            start: data.date, // Ensure the date is in ISO format (YYYY-MM-DD)
-            time: data.time,
-            description: data.description,
-            jobId: data.jobId,
-            extendedProps: {
-                contactPerson: data.contactPerson,
-                userEmail: data.userEmail,
-            },
-        };
     });
 }
 
@@ -86,7 +67,67 @@ document.getElementById('appButton').addEventListener('click', function () {
 document.getElementById('archiveButton').addEventListener('click', function () {
     location.href = 'archive.html';
 });
+async function fetchDashboardData() {
+    try {
+        // Fetch all jobs count
+        const jobsSnapshot = await getDocs(collection(firestore, 'jobs'));
+        const jobCount = jobsSnapshot.size;
 
+        // Fetch all applications count
+        const applicationsSnapshot = await getDocs(collection(firestore, 'applied'));
+        const applicationCount = applicationsSnapshot.size;
+
+        // Fetch all employed count
+        const employedSnapshot = await getDocs(collection(firestore, 'employed'));
+        const employedCount = employedSnapshot.size;
+
+        // Calculate total vacancies
+        let totalVacancies = 0;
+        jobsSnapshot.forEach((doc) => {
+            const data = doc.data();
+            const vacancyCount = parseInt(data.vacancy, 10); // Ensure it's converted to a number
+            if (!isNaN(vacancyCount)) {
+                totalVacancies += vacancyCount;
+            }
+        });
+
+
+        // Update the dashboard elements
+        document.getElementById('jobCount').textContent = `Total: ${jobCount}`;
+        document.getElementById('applicationCount').textContent = `Total: ${applicationCount}`;
+        document.getElementById('employedCount').textContent = `Total: ${employedCount}`;
+        document.getElementById('vacanciesCount').textContent = `Total: ${totalVacancies}`;
+    } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+    }
+}
+async function fetchScheduledInterviews() {
+    try {
+        const interviewsCol = collection(firestore, 'interview');
+        const querySnapshot = await getDocs(interviewsCol);
+
+        // Map Firestore documents to FullCalendar event objects
+        const events = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                title: `${data.position} - ${data.company}`,
+                start: data.date, // Ensure the date is in ISO format (YYYY-MM-DD)
+                extendedProps: {
+                    time: data.time, // Time of the interview
+                    description: data.description,
+                    jobId: data.jobId,
+                    contactPerson: data.contactPerson,
+                    userEmail: data.userEmail,
+                },
+            };
+        });
+
+        return events; // Return the formatted events
+    } catch (error) {
+        console.error('Error fetching scheduled interviews:', error);
+        return [];
+    }
+}
 // Sign out functionality
 async function performSignOut() {
     const signOutConfirmation = document.getElementById('signOutConfirmation');
@@ -125,16 +166,18 @@ async function performSignOut() {
         signOutConfirmation.style.display = 'none';
     });
 }
-
 document.addEventListener('DOMContentLoaded',async() => {
     const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
         signOutBtn.addEventListener('click', performSignOut);
     }
     requireLogin();
+    fetchDashboardData();
 
     const calendarEl = document.getElementById('calendar');
     const events = fetchScheduledInterviews();
+
+
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         headerToolbar: {
@@ -149,5 +192,47 @@ document.addEventListener('DOMContentLoaded',async() => {
     });
     console.log('FullCalendar:', FullCalendar);
     calendar.render();
+});
+document.addEventListener('DOMContentLoaded', async () => {
+    // Fetch Scheduled Interviews
+    const fetchScheduledInterviews = async () => {
+        const interviewsCol = collection(firestore, 'interview');
+        const querySnapshot = await getDocs(interviewsCol);
+
+        // Format interviews for FullCalendar and List
+        const events = [];
+        const interviewList = [];
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            events.push({
+                title: data.position,
+                start: data.date, // Ensure date is in ISO format
+            });
+
+            interviewList.push(`
+                <div class="interview-item">
+                    <p><strong>Date:</strong> ${new Date(data.date).toLocaleDateString()}</p>
+                    <p><strong>Time:</strong> ${data.time}</p>
+                    <p><strong>Interviewer:</strong> ${data.contactPerson}</p>
+                </div>
+            `);
+        });
+
+        // Populate Calendar
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: events,
+        });
+        calendar.render();
+
+        // Populate Interview List
+        const interviewListEl = document.getElementById('interview-list');
+        interviewListEl.innerHTML = interviewList.join('');
+    };
+
+    // Call the function to fetch and display interviews
+    await fetchScheduledInterviews();
 });
 

@@ -43,6 +43,47 @@
             </svg>Sign-Out</button>
         </div>
     </div>
+    
+  <!-- Cards for dashboard data -->
+  <div class="dashboard-wrapper">
+    <!-- Dashboard Cards -->
+    <div class="container">
+        <div class="card job">
+            <h3>JOB</h3>
+            <p id="jobCount">Total: 0</p>
+        </div>
+        <div class="card app">
+            <h3>APPLICATION</h3>
+            <p id="applicationCount">Total: 0</p>
+        </div>
+        <div class="card emp">
+            <h3>EMPLOYED</h3>
+            <p id="employedCount">Total: 0</p>
+        </div>
+        <div class="card vac">
+            <h3>VACANCIES</h3>
+            <p id="vacanciesCount">Total: 0</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <!-- Calendar Section -->
+        <div class="calendar-container">
+            <h2>Calendar</h2>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- Interview Schedule Section -->
+        <div class="interview-schedule">
+            <h2>Interview Schedule</h2>
+            <div id="interview-list">
+                <!-- Dynamically generated interview schedule will go here -->
+            </div>
+        </div>
+    </div>
+
+    
     <div id="loading-screen" class="loading-screen">
         <div class="load-circle"></div>
     </div>
@@ -55,10 +96,6 @@
                 <button id="cancelSignOutBtn">Cancel</button>
             </div>
         </div>
-    </div>
-
-    <div class="main-content">
-        <div id="calendar"></div>
     </div>
 </body>
 </html>
