@@ -14,6 +14,9 @@
         setTimeout(preventBack, 0);
         window.onunload = function () { null };
     </script>
+       <!-- use version 0.20.3 -->
+<script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+ <!-- Include Chart.js -->
     <script type="module" src="./admin_src/audit.js" defer></script>
 
 </head>
@@ -62,5 +65,27 @@
             </div>
         </div>
     </div>
+    
+    <main class="audit-container">
+        <h1>Audit Trail</h1>
+        <button id="exportAuditLogBtn" class="export-btn">Export Audit Log</button>
+        <table id="auditTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>DateTime</th>
+                    <th>Email</th>
+                    <th>Action Made</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Logs will be dynamically added here -->
+            </tbody>
+        </table>
+        <div id="paginationControls" class="pagination-controls">
+            <!-- Pagination buttons will be dynamically added here -->
+        </div>
+    </main>
+
 </body>
 </html>

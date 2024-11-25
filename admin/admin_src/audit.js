@@ -1,7 +1,8 @@
-import { fetchAllJobs, logAudit } from './database.js';
+import { exportAuditLog, logAudit } from './database.js';
 import { getAuth, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import * as XLSX from "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -19,6 +20,9 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
+let logs = []; // To store all fetched logs
+let currentPage = 1;
+const recordsPerPage = 15;
 
 // Ensure the user is authenticated before accessing the page
 function requireLogin() {
@@ -92,10 +96,93 @@ async function performSignOut() {
         signOutConfirmation.style.display = 'none';
     });
 }
-document.addEventListener('DOMContentLoaded', () => {
+// Fetch audit logs from Firestore
+async function fetchAuditLogs() {
+    try {
+        const querySnapshot = await getDocs(collection(firestore, 'auditLogs'));
+        logs = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        displayLogs(); // Display logs with pagination
+    } catch (error) {
+        console.error('Error fetching audit logs:', error);
+    }
+}
+// Display logs with pagination
+function displayLogs() {
+    const tableBody = document.getElementById('auditTable').querySelector('tbody');
+    tableBody.innerHTML = ''; // Clear existing rows
+
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = Math.min(startIndex + recordsPerPage, logs.length);
+
+    logs.slice(startIndex, endIndex).forEach((log, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${startIndex + index + 1}</td>
+            <td>${log.timestamp || 'N/A'}</td>
+            <td>${log.user || 'N/A'}</td>
+            <td>${log.action || 'N/A'}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    updatePaginationControls();
+}
+function updatePaginationControls() {
+    const totalPages = Math.ceil(logs.length / recordsPerPage);
+    const paginationDiv = document.getElementById('paginationControls');
+    paginationDiv.innerHTML = '';
+
+    // Previous button
+    if (currentPage > 1) {
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.addEventListener('click', () => {
+            currentPage--;
+            displayLogs();
+        });
+        paginationDiv.appendChild(prevButton);
+    }
+
+    // Next button
+    if (currentPage < totalPages) {
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.addEventListener('click', () => {
+            currentPage++;
+            displayLogs();
+        });
+        paginationDiv.appendChild(nextButton);
+    }
+
+    // Page indicator
+    const pageIndicator = document.createElement('span');
+    pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+    paginationDiv.appendChild(pageIndicator);
+}
+// Export logs to Excel
+document.getElementById('exportAuditLogBtn').addEventListener('click', () => {
+    exportAuditLog().then(csvContent => {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'audit_log.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }).catch(error => {
+        console.error("Error exporting audit log:", error);
+    });
+});
+document.addEventListener('DOMContentLoaded', async() => {
     const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
         signOutBtn.addEventListener('click', performSignOut);
     }
     requireLogin();
+    const logs = await fetchAuditLogs();
 });
+

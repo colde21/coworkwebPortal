@@ -4,11 +4,10 @@
     padding: 0;
     box-sizing: border-box;
 }
-
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background-color: #FFEBEE;
     display: flex;
+    background-color: #FFEBEE; /* Adjust as needed */
 }
 
 /* Sidebar Navigation */
@@ -82,6 +81,7 @@ body {
 /* Main Content */
 
 .dashboard-wrapper {
+    background-color: #FFEBEE;
     margin-left: 240px;
     width: calc(100% - 240px);
     display: flex;
@@ -124,7 +124,7 @@ body {
 }
 
 
-/* Confirmation Dialog */
+/* Confirmation dialog */
 .confirmation-dialog {
     position: fixed;
     top: 0;
@@ -142,18 +142,18 @@ body {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .confirmation-dialog-buttons {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     margin-top: 20px;
 }
 
 .confirmation-dialog-buttons button {
-    background-color: #D7263D;
+    background-color:#D7263D;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -163,7 +163,7 @@ body {
 }
 
 .confirmation-dialog-buttons button:hover {
-    background-color: #8B1D1D;
+    background-color: darkred;
 }
 
 .dashboard-content {
@@ -186,11 +186,65 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     height: 100%; /* Full height of the parent */
+    color: #1A1A1A;
 }
 .calendar-container h2 {
     margin-bottom: 20px;
     text-align: center;
-    color: #333;
+}
+
+/* Buttons */
+/* Buttons */
+button {
+    background-color: #D7263D; /* Red button */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: darkred;
+}
+/* Modal Styles */
+.modal-content {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    border-bottom: 1px solid #ddd;
+}
+
+.modal-header .modal-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.modal-footer {
+    border-top: 1px solid #ddd;
+}
+
+.modal-footer .btn {
+    background-color: #D7263D; /* Red */
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.modal-footer .btn:hover {
+    background-color: darkred;
+}
+
+.modal-footer .btn-secondary {
+    background-color: #6c757d;
+}
+
+.modal-footer .btn-secondary:hover {
+    background-color: #565e64;
 }
 /* Interview Schedule Section */
 .interview-schedule {

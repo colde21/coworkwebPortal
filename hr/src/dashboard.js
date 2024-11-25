@@ -29,6 +29,44 @@ function requireLogin() {
         }
     });
 }
+// Handle sign-out
+async function performSignOut() {
+    const signOutConfirmation = document.getElementById('signOutConfirmation');
+    const confirmSignOutBtn = document.getElementById('confirmSignOutBtn');
+    const cancelSignOutBtn = document.getElementById('cancelSignOutBtn');
+    const loadingScreen = document.getElementById('loading-screen');
+
+    signOutConfirmation.style.display = 'flex';
+
+    confirmSignOutBtn.addEventListener('click', async function () {
+        signOutConfirmation.style.display = 'none';
+        if (loadingScreen) loadingScreen.style.display = 'flex';
+
+        try {
+            const user = auth.currentUser;
+
+            if (!user) {
+                throw new Error("No authenticated user found.");
+            }
+
+            const userEmail = user.email;
+            await logAudit(userEmail, "Sign out", { status: "Success" });
+            await firebaseSignOut(auth);
+            window.location.href = "/login.html";
+        } catch (error) {
+            console.error("Error during sign-out:", error);
+            const userEmail = auth.currentUser ? auth.currentUser.email : "Unknown user";
+            await logAudit(userEmail, "Sign out", { status: "Failed", error: error.message });
+            alert(error.message || 'Sign out failed. Please try again.');
+        } finally {
+            if (loadingScreen) loadingScreen.style.display = 'none';
+        }
+    });
+
+    cancelSignOutBtn.addEventListener('click', function () {
+        signOutConfirmation.style.display = 'none';
+    });
+}
 
 // Fetch user role from Realtime Database
 async function fetchUserRole(userId) {
@@ -198,3 +236,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const interviewListEl = document.getElementById("interview-list");
     interviewListEl.innerHTML = interviewList.join("");
 });
+// Add event listener to the Sign Out button
+if (document.getElementById('signOutBtn')) {
+    document.getElementById('signOutBtn').addEventListener('click', performSignOut);
+}
