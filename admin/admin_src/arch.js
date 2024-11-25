@@ -50,7 +50,9 @@ document.getElementById('appButton').addEventListener('click', function () {
 document.getElementById('archiveButton').addEventListener('click', function () {
     location.href = 'archive.html';
 });
-
+document.getElementById('auditButton').addEventListener('click', function () {
+    location.href = 'audit.html';
+});
 // Assuming the sign-out functionality is handled in the same JavaScript file
 document.getElementById('signOutBtn').addEventListener('click', function () {
     // Add your sign-out logic here

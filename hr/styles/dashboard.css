@@ -80,13 +80,6 @@ body {
 
 /* Main Content Wrapper */
 /* Main Content */
-.dashboard-content {
-    display: grid;
-    grid-template-columns: 3fr 1fr; /* Calendar takes more space */
-    gap: 20px;
-    width: 100%;
-}
-
 
 .dashboard-wrapper {
     margin-left: 240px;
@@ -130,24 +123,7 @@ body {
     color: #666;
 }
 
-/* Calendar Styling */
-#calendar {
-    margin-top: 10px;
-}
 
-/* Calendar Section */
-.calendar-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    height: 100%; /* Full height of the parent */
-}
-.calendar-container h2 {
-    margin-bottom: 20px;
-    text-align: center;
-    color: #333;
-}
 /* Confirmation Dialog */
 .confirmation-dialog {
     position: fixed;
@@ -190,7 +166,32 @@ body {
     background-color: #8B1D1D;
 }
 
+.dashboard-content {
+    display: grid;
+    grid-template-columns: 3fr 1fr; /* Calendar takes more space */
+    gap: 20px;
+    width: 100%;
+}
 
+
+/* Calendar Styling */
+#calendar {
+    margin-top: 10px;
+}
+
+/* Calendar Section */
+.calendar-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 100%; /* Full height of the parent */
+}
+.calendar-container h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
 /* Interview Schedule Section */
 .interview-schedule {
     background-color: white;

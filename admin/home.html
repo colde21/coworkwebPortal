@@ -15,9 +15,8 @@
         window.onunload = function () { null };
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     <script type="module" src="./admin_src/home.js" defer></script>
 
 </head>
@@ -42,6 +41,10 @@
             <button id="archiveButton"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
                 <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
             </svg>Archive</button>
+            <button id="auditButton">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v16h12V4H6zm4 3h6v2h-6V7zm0 4h6v2h-6v-2zm-2 4v2H8v-2h6zm-4-8h2v2H8v-2zm0 4h2v2H8v-2z" />
+                </svg>Audit</button>
             <button id="signOutBtn"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
                 <path d="M10 17l1.41-1.41L7.83 12H20v-2H7.83l3.58-3.59L10 5l-7 7 7 7zm9-15H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-3h-2v3H5V4h14v3h2V4c0-1.1-.9-2-2-2z"/>
             </svg>Sign-Out</button>
@@ -68,32 +71,20 @@
             </div>
         </div>
 
-        <!-- Charts and summaries -->
-        <div class="charts-wrapper">
-            <div class="chart-summary-wrapper">
-                <div class="chart-container">
-                    <canvas id="applicationsByCompanyChart"></canvas>
-                </div>
-                <div id="applicationsByCompanySummary" class="summary-container summary-scrollable"></div>
-            </div>
-            <div class="chart-summary-wrapper">
-                <div class="chart-container">
-                    <canvas id="employedByPositionChart"></canvas>
-                </div>
-                <div id="employedByPositionSummary" class="summary-container summary-scrollable"></div>
-            </div>
-            <div class="chart-summary-wrapper">
-                <div class="chart-container">
-                    <canvas id="employedByCompanyChart"></canvas>
-                </div>
-                <div id="employedByCompanySummary" class="summary-container summary-scrollable"></div>
-            </div>
+       <!-- Main Content -->
+       <div class="dashboard-content">
+        <!-- Calendar Section -->
+        <div class="calendar-container">
+            <h2>Calendar</h2>
+            <div id="calendar"></div>
         </div>
 
-        <!-- Most Applied Jobs section -->
-        <div class="most-applied-jobs">
-            <h3>Most Applied Jobs</h3>
-            <ul id="mostAppliedJobsList"></ul>
+        <!-- Interview Schedule Section -->
+        <div class="interview-schedule">
+            <h2>Interview Schedule</h2>
+            <div id="interview-list">
+                <!-- Dynamically generated interview schedule will go here -->
+            </div>
         </div>
     </div>
 

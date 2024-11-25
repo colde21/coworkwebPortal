@@ -47,7 +47,9 @@ document.getElementById('appButton').addEventListener('click', function () {
 document.getElementById('archiveButton').addEventListener('click', function () {
     location.href = 'archive.html';
 });
-
+document.getElementById('auditButton').addEventListener('click', function () {
+    location.href = 'audit.html';
+});
 // Assuming the sign-out functionality is handled in the same JavaScript file
 document.getElementById('signOutBtn').addEventListener('click', function () {
     console.log('Sign out button clicked');
@@ -216,194 +218,45 @@ function updateEmployedCount() {
         });
     });
 }
+document.addEventListener('DOMContentLoaded', async () => {
+    // Fetch Scheduled Interviews
+    const fetchScheduledInterviews = async () => {
+        const interviewsCol = collection(firestore, 'interview');
+        const querySnapshot = await getDocs(interviewsCol);
 
-// Aggregate data by company
-function aggregateDataByCompany(applications, employed) {
-    const applicationsByCompany = {};
-    const employedByCompany = {};
-    const employedByPosition = {};
+        // Format interviews for FullCalendar and List
+        const events = [];
+        const interviewList = [];
 
-    applications.forEach(app => {
-        const company = app.company || 'Unknown';
-        applicationsByCompany[company] = (applicationsByCompany[company] || 0) + 1;
-    });
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            events.push({
+                title: data.position,
+                start: data.date, // Ensure date is in ISO format
+            });
 
-    employed.forEach(emp => {
-        const company = emp.company || 'Unknown';
-        const position = emp.position || 'Unknown';
-        employedByCompany[company] = (employedByCompany[company] || 0) + 1;
+            interviewList.push(`
+                <div class="interview-item">
+                    <p><strong>Date:</strong> ${new Date(data.date).toLocaleDateString()}</p>
+                    <p><strong>Time:</strong> ${data.time}</p>
+                    <p><strong>Interviewer:</strong> ${data.contactPerson}</p>
+                </div>
+            `);
+        });
 
-        if (!employedByPosition[position]) {
-            employedByPosition[position] = {};
-        }
-        employedByPosition[position][company] = (employedByPosition[position][company] || 0) + 1;
-    });
+        // Populate Calendar
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: events,
+        });
+        calendar.render();
 
-    return { applicationsByCompany, employedByCompany, employedByPosition };
-}
+        // Populate Interview List
+        const interviewListEl = document.getElementById('interview-list');
+        interviewListEl.innerHTML = interviewList.join('');
+    };
 
-const coolShades = [
-    'rgba(85, 172, 238, 0.7)',   // Light Blue
-    'rgba(93, 156, 236, 0.7)',   // Medium Blue
-    'rgba(72, 133, 237, 0.7)',   // Classic Blue
-    'rgba(153, 102, 255, 0.7)',  // Soft Purple
-    'rgba(102, 204, 255, 0.7)',  // Sky Blue
-    'rgba(122, 197, 205, 0.7)',  // Soft Teal
-];
-
-// Create Applications by Company Chart
-function createApplicationsByCompanyChart(applicationsByCompany) {
-    const ctxApplications = document.getElementById('applicationsByCompanyChart').getContext('2d');
-    const companies = Object.keys(applicationsByCompany);
-    const applications = Object.values(applicationsByCompany);
-
-    const gradients = companies.map((_, index) => {
-        const gradient = ctxApplications.createLinearGradient(0, 0, ctxApplications.canvas.width, 0);
-        gradient.addColorStop(0, 'rgba(85, 172, 238, 0.1)'); // Lighter start
-        gradient.addColorStop(1, coolShades[index % coolShades.length]); // Full color end
-        return gradient;
-    });
-
-    new Chart(ctxApplications, {
-        type: 'bar',
-        data: {
-            labels: companies,
-            datasets: [{
-                label: 'Applications by Company',
-                data: applications,
-                backgroundColor: gradients,
-                borderColor: coolShades.map(shade => shade.replace('0.7', '1')),
-                borderWidth: 1
-            }]
-        },
-        options: chartOptions // Use the predefined options
-    });
-}
-
-
-// Create Employed by Position Chart
-function createEmployedByPositionChart(employedByPosition) {
-    const ctxEmployedByPosition = document.getElementById('employedByPositionChart').getContext('2d');
-    const positions = Object.keys(employedByPosition);
-    const companies = [...new Set(Object.values(employedByPosition).flatMap(position => Object.keys(position)))];
-
-    const datasets = companies.map((company, index) => {
-        const data = positions.map(position => employedByPosition[position][company] || 0);
-        return {
-            label: company,
-            data,
-            backgroundColor: coolShades[index % coolShades.length],
-            borderColor: coolShades[index % coolShades.length].replace('0.7', '1'),
-            borderWidth: 1
-        };
-    });
-
-    new Chart(ctxEmployedByPosition, {
-        type: 'bar',
-        data: {
-            labels: positions,
-            datasets
-        },
-        options: chartOptions // Use the predefined options
-    });
-}
-
-
-// Create Employed by Company Chart
-function createEmployedByCompanyChart(employedByCompany) {
-    const ctxEmployedByCompany = document.getElementById('employedByCompanyChart').getContext('2d');
-    const companies = Object.keys(employedByCompany);
-    const employedCounts = Object.values(employedByCompany);
-
-    const gradients = companies.map((_, index) => {
-        const gradient = ctxEmployedByCompany.createLinearGradient(0, 0, ctxEmployedByCompany.canvas.width, 0);
-        gradient.addColorStop(0, 'rgba(85, 172, 238, 0.1)'); // Lighter start
-        gradient.addColorStop(1, coolShades[index % coolShades.length]); // Full color end
-        return gradient;
-    });
-
-    new Chart(ctxEmployedByCompany, {
-        type: 'bar',
-        data: {
-            labels: companies,
-            datasets: [{
-                label: 'Employed by Company',
-                data: employedCounts,
-                backgroundColor: gradients,
-                borderColor: coolShades.map(shade => shade.replace('0.7', '1')),
-                borderWidth: 1
-            }]
-        },
-        options: chartOptions // Use the predefined options
-    });
-}
-
-
-// Create Text Summary
-// Create Text Summary
-function createTextSummary(summaryElementId, title, labels, data, percentages) {
-    const summaryElement = document.getElementById(summaryElementId);
-    if (!summaryElement) {
-        console.error(`Summary element with ID '${summaryElementId}' not found.`);
-        return;
-    }
-    summaryElement.innerHTML = ''; 
-
-    let summaryHTML = `<h3>${title}</h3><ul>`;
-    labels.forEach((label, index) => {
-        const total = typeof data[index] === 'object' ? Object.values(data[index]).reduce((sum, count) => sum + count, 0) : data[index];
-        summaryHTML += `<li><b>${label}</b> (${total}) - ${percentages[index]}</li>`;
-    });
-    summaryHTML += '</ul>';
-
-    summaryElement.innerHTML = summaryHTML;
-}
-
-
-// Create Charts
-// Create Charts
-function createCharts(applications, employed) {
-    const { applicationsByCompany, employedByCompany, employedByPosition } = aggregateDataByCompany(applications, employed);
-
-    createApplicationsByCompanyChart(applicationsByCompany);
-    createEmployedByPositionChart(employedByPosition);
-    createEmployedByCompanyChart(employedByCompany);
-
-    createTextSummary('applicationsByCompanySummary', 'Applications by Company:', Object.keys(applicationsByCompany), Object.values(applicationsByCompany), calculatePercentage(Object.values(applicationsByCompany)));
-    createTextSummary('employedByPositionSummary', 'Employed by Position:', Object.keys(employedByPosition), Object.values(employedByPosition), calculatePercentage(Object.values(employedByPosition).map(position => Object.values(position).reduce((sum, val) => sum + val, 0))));
-    createTextSummary('employedByCompanySummary', 'Employed by Company:', Object.keys(employedByCompany), Object.values(employedByCompany), calculatePercentage(Object.values(employedByCompany)));
-}
-
-
-// Calculate Percentage
-function calculatePercentage(data) {
-    const total = data.reduce((sum, value) => sum + value, 0);
-    return data.map(value => ((value / total) * 100).toFixed(2) + '%');
-}
-
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    // Set the height to match the height of your summary
-    plugins: {
-        legend: {
-            display: false // Hide legends for cleaner UI
-        },
-        datalabels: {
-            anchor: 'center',
-            align: 'center',
-            color: 'white',
-            font: {
-                weight: 'bold'
-            },
-            formatter: (value, context) => {
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = ((value / total) * 100).toFixed(2) + '%';
-                return `${value} (${percentage})`;
-            }
-        }
-    }
-};
-
-
-
+    // Call the function to fetch and display interviews
+    await fetchScheduledInterviews();
+});
