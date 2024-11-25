@@ -6,7 +6,7 @@
     <link rel="icon" type="image/x-icon" href="coworkfabicon.ico">
     <link rel="stylesheet" href="./styles/dashboard.css">
     <title>Home</title>
-    <script nonce="brostop">  
+    <script nonce="brostop">
         console.log('it is working now?');
         function preventBack() {
             window.history.forward();
@@ -15,7 +15,9 @@
         window.onunload = function () { null };
     </script>
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="./src/dashboard.js" defer></script>
 </head>
 <body>
@@ -26,64 +28,105 @@
             <h1 class="app-name">Cowork</h1>
         </div>
         <div class="links">
-            <button id="homeButton" class="active">  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
-                <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
-            </svg>Dashboard</button>
-            <button id="jobButton"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
-                <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7-1c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-1 16l-3-3 1.41-1.41L11 15.17l4.59-4.59L17 12l-6 6z"/>
-            </svg>Job List</button>
-            <button id="appButton">  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
-                <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm3 14H8v-2h7v2zm2-4H8v-2h9v2zm0-4H8V7h9v2z"/>
-            </svg>Application</button>
-            <button id="archiveButton"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
-                <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-            </svg>Archive</button>
-            <button id="signOutBtn"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
-                <path d="M10 17l1.41-1.41L7.83 12H20v-2H7.83l3.58-3.59L10 5l-7 7 7 7zm9-15H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-3h-2v3H5V4h14v3h2V4c0-1.1-.9-2-2-2z"/>
-            </svg>Sign-Out</button>
+            <button id="homeButton" class="active" onclick="navigateTo('dashboard_hr.html')">  
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                    <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/>
+                </svg>Dashboard
+            </button>
+            <button id="jobButton" onclick="navigateTo('Jobs/job.html')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                    <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7-1c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-1 16l-3-3 1.41-1.41L11 15.17l4.59-4.59L17 12l-6 6z"/>
+                </svg>Job List
+            </button>
+            <button id="appButton" onclick="navigateTo('application.html')">  
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                    <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm3 14H8v-2h7v2zm2-4H8v-2h9v2zm0-4H8V7h9v2z"/>
+                </svg>Application
+            </button>
+            <button id="archiveButton" onclick="navigateTo('archive.html')"> 
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                    <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                </svg>Archive
+            </button>
+            <button id="signOutBtn" onclick="performSignOut()"> 
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
+                    <path d="M10 17l1.41-1.41L7.83 12H20v-2H7.83l3.58-3.59L10 5l-7 7 7 7zm9-15H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-3h-2v3H5V4h14v3h2V4c0-1.1-.9-2-2-2z"/>
+                </svg>Sign-Out
+            </button>
         </div>
     </div>
     
-  <!-- Cards for dashboard data -->
-  <div class="dashboard-wrapper">
-    <!-- Dashboard Cards -->
-    <div class="container">
-        <div class="card job">
-            <h3>JOB</h3>
-            <p id="jobCount">Total: 0</p>
-        </div>
-        <div class="card app">
-            <h3>APPLICATION</h3>
-            <p id="applicationCount">Total: 0</p>
-        </div>
-        <div class="card emp">
-            <h3>EMPLOYED</h3>
-            <p id="employedCount">Total: 0</p>
-        </div>
-        <div class="card vac">
-            <h3>VACANCIES</h3>
-            <p id="vacanciesCount">Total: 0</p>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="dashboard-content">
-        <!-- Calendar Section -->
-        <div class="calendar-container">
-            <h2>Calendar</h2>
-            <div id="calendar"></div>
+    <!-- Cards for dashboard data -->
+    <div class="dashboard-wrapper">
+        <div class="container">
+            <div class="card job">
+                <h3>JOB</h3>
+                <p id="jobCount">Total: 0</p>
+            </div>
+            <div class="card app">
+                <h3>APPLICATION</h3>
+                <p id="applicationCount">Total: 0</p>
+            </div>
+            <div class="card emp">
+                <h3>EMPLOYED</h3>
+                <p id="employedCount">Total: 0</p>
+            </div>
+            <div class="card vac">
+                <h3>VACANCIES</h3>
+                <p id="vacanciesCount">Total: 0</p>
+            </div>
         </div>
 
-        <!-- Interview Schedule Section -->
-        <div class="interview-schedule">
-            <h2>Interview Schedule</h2>
-            <div id="interview-list">
-                <!-- Dynamically generated interview schedule will go here -->
+        <!-- Main Content -->
+        <div class="dashboard-content">
+            <!-- Calendar Section -->
+            <div class="calendar-container">
+                <h2>Calendar</h2>
+                <div id="calendar"></div>
+            </div>
+
+            <!-- Interview Schedule Section -->
+            <div class="interview-schedule">
+                <h2>Interview Schedule</h2>
+                <div id="interview-list"></div>
             </div>
         </div>
     </div>
 
-    
+    <!-- Reschedule Modal -->
+    <div class="modal" id="rescheduleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reschedule Interview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <input type="hidden" id="eventId">
+                        <div class="mb-3">
+                            <label for="interviewDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="interviewDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewTime" class="form-label">Time</label>
+                            <input type="time" class="form-control" id="interviewTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewer" class="form-label">Interviewer</label>
+                            <input type="text" class="form-control" id="interviewer" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <button type="button" class="btn btn-primary" onclick="saveChanges()">Save Changes</button>
+</div>
+
+            </div>
+        </div>
+    </div>
+
     <div id="loading-screen" class="loading-screen">
         <div class="load-circle"></div>
     </div>
@@ -92,10 +135,32 @@
         <div class="confirmation-dialog-content">
             <h4>Are you sure you want to sign out?</h4>
             <div class="confirmation-dialog-buttons">
-                <button id="confirmSignOutBtn">Yes, Sign Out</button>
-                <button id="cancelSignOutBtn">Cancel</button>
+                <button id="confirmSignOutBtn" onclick="confirmSignOut()">Yes, Sign Out</button>
+                <button id="cancelSignOutBtn" onclick="cancelSignOut()">Cancel</button>
             </div>
         </div>
     </div>
 </body>
+<script>
+    function navigateTo(path) {
+        window.location.href = path;
+    }
+
+    function performSignOut() {
+        document.getElementById("signOutConfirmation").style.display = "flex";
+    }
+
+    function confirmSignOut() {
+        document.getElementById("signOutConfirmation").style.display = "none";
+        document.getElementById("loading-screen").style.display = "flex";
+        setTimeout(() => {
+            alert("You have been signed out successfully.");
+            window.location.href = "/login.html";
+        }, 1500);
+    }
+
+    function cancelSignOut() {
+        document.getElementById("signOutConfirmation").style.display = "none";
+    }
+</script>
 </html>
