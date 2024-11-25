@@ -21,6 +21,8 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore(app);
 const database = getDatabase(app);
+const jobDropdown = document.getElementById('jobDropdown');
+const proceedButton = document.getElementById('proceedToJobPosting');
 
 const itemsPerPage = 10;
 let currentPage = 1;
@@ -47,7 +49,36 @@ function requireLogin() {
         }
     });
 }
+// Populate dropdown with existing jobs
+async function populateJobDropdown() {
+    const jobsCol = collection(firestore, 'jobs');
+    const jobDocs = await getDocs(jobsCol);
 
+    jobDocs.forEach(doc => {
+        const job = doc.data();
+        const option = document.createElement('option');
+        option.value = doc.id; // Store job ID for reference
+        option.textContent = `${job.position} - ${job.company}`;
+        jobDropdown.appendChild(option);
+    });
+}
+// Event listener for Proceed button
+proceedButton.addEventListener('click', () => {
+    const selectedJob = jobDropdown.value;
+
+    if (selectedJob === 'new') {
+        // Redirect to job posting form for adding a new job
+        window.location.href = 'jobposting.html';
+    } else {
+        // Redirect to job posting form with the selected job ID
+        window.location.href = `jobposting.html?jobId=${selectedJob}`;
+    }
+});
+
+// Initialize dropdown on page load
+document.addEventListener('DOMContentLoaded', () => {
+    
+});
 // Fetch user role from Realtime Database
 async function fetchUserRole(userId) {
     try {
@@ -130,6 +161,7 @@ if (document.getElementById('signOutBtn')) {
 
 // Event listeners and page logic
 document.addEventListener('DOMContentLoaded', () => {
+    populateJobDropdown();
     setupNavigation();
     requireLogin();
     const signOutBtn = document.getElementById('signOutBtn');
@@ -166,7 +198,7 @@ function viewJobDetails(jobId) {
                 <p><strong>Company:</strong> ${jobData.company || 'N/A'}</p><hr>
                 <p><strong>Location:</strong> ${jobData.location || 'N/A'}</p><hr>
                 <p><strong>Vacancy:</strong> ${jobData.vacancy || 'N/A'}</p><hr>
-                <p><strong>Contact Person:</strong> ${jobData.contact || 'N/A'}</p><hr>
+                <p><strong>Contact Person:</strong> ${jobData.contactPerson || 'N/A'}</p><hr>
                 <p><strong>Contact Number:</strong> ${jobData.contactNumber || 'N/A'}</p><hr>
                 <p><strong>Type:</strong> ${jobData.type || 'N/A'}</p><hr>
                  <p><strong>Job Category:</strong> ${jobData.jobType || 'N/A'}</p><hr>
@@ -286,41 +318,6 @@ function handleSearch() {
     currentPage = 1; // Reset to first page when search is performed
     updateJobTable();
 }
-// Archive job function
-async function archiveJobIfNeeded(jobId, userEmail) {
-    try {
-        const jobDocRef = doc(firestore, 'jobs', jobId);
-        const jobDocSnap = await getDoc(jobDocRef);
-
-        if (jobDocSnap.exists()) {
-            const jobData = jobDocSnap.data();
-
-            // Check if there are applicants for this job
-            const applicationsColRef = collection(firestore, 'applied');
-            const applicationsSnapshot = await getDocs(applicationsColRef);
-            const hasApplicants = applicationsSnapshot.docs.some(doc => doc.data().jobId === jobId);
-
-            if (hasApplicants) {
-                alert("This job cannot be archived or unarchived because it has applicants.");
-                return;
-            }
-
-            const archiveData = {
-                ...jobData,
-                archivedAt: Timestamp.now()
-            };
-
-            await addDoc(collection(firestore, 'archive'), archiveData);
-            await deleteDoc(jobDocRef);
-            await logAudit(userEmail, "Job Archived", { jobId });
-            console.log(`Archived job with ID: ${jobId}`);
-        }
-    } catch (error) {
-        console.error(`Failed to archive job with ID: ${jobId}`, error);
-        alert(`Failed to archive job with ID: ${jobId}.`);
-    }
-}
-
 async function hasApplicants(jobId) {
     try {
         const applicationsRef = collection(firestore, 'applied'); // Replace with your actual collection name
@@ -354,7 +351,7 @@ async function editJob(jobId) {
                 age: 'age',
                 type: 'type',
                 vacancy: 'vacancy',
-                contact: 'contact',
+                contactPerson: 'contactPerson',
                 contactNumber: 'contactNumber',
                 jobType: 'jobType',
                 email: 'email',
@@ -503,7 +500,8 @@ document.getElementById('saveJobButton').addEventListener('click', function (eve
         type: document.getElementById('type').value || '',
         jobType: document.getElementById('jobType').value || '',
         vacancy: document.getElementById('vacancy').value || '',
-        contact: document.getElementById('contact').value || '',
+        contactNumber: document.getElementById('contactNumber').value || '',
+        contactPerson: document.getElementById('contactPerson').value || '',
         email: document.getElementById('email').value || '',
         education: document.getElementById('education').value || '',
         facilities: document.getElementById('facilities').value || '',
@@ -599,10 +597,15 @@ document.getElementById('saveJobButton').addEventListener('click', function (eve
  });
 
 // "Go Back" button functionality
-document.getElementById('goBackButton').addEventListener('click', function () {
-    document.getElementById('editJobForm').style.display = 'none';
-    document.getElementById('darkOverlay').style.display = 'none';
-});
+const goBackButton = document.getElementById('goBackButton');
+if (goBackButton) {
+    goBackButton.addEventListener('click', () => {
+        document.getElementById('editJobForm').style.display = 'none';
+        document.getElementById('darkOverlay').style.display = 'none';
+    });
+} else {
+    console.error('Go Back button not found!');
+}
 
 // Pagination controls
 function updatePaginationControls() {

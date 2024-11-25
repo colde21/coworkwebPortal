@@ -1,17 +1,50 @@
 import { submitJobData, logAudit } from './db.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-
+import { Timestamp, getDoc, doc, getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+// Your Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyDfARYPh7OupPRZvY5AWA7u_vXyXfiX_kg",
+    authDomain: "cowork-195c0.firebaseapp.com",
+    databaseURL: "https://cowork-195c0-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "cowork-195c0",
+    storageBucket: "cowork-195c0.appspot.com",
+    messagingSenderId: "151400704939",
+    appId: "1:151400704939:web:934d6d15c66390055440ee",
+    measurementId: "G-8DL6T09CP4"
+};
 const auth = getAuth();
+const app = initializeApp(firebaseConfig);
 
+// Initialize Firestore
+const firestore = getFirestore(app);
+
+// Navigation setup
+function setupNavigation() {
+    document.getElementById('homeButton').addEventListener('click', function () {
+        location.href = '../dashboard_hr.html';
+    });
+
+    document.getElementById('jobButton').addEventListener('click', function () {
+        location.href = 'job.html';
+    });
+
+    document.getElementById('appButton').addEventListener('click', function () {
+        location.href = '../application.html';
+    });
+
+    document.getElementById('archiveButton').addEventListener('click', function () {
+        location.href = '../archive.html';
+    });
+}
 document.addEventListener('DOMContentLoaded', () => {
+    
     const loadingScreen = document.getElementById('loading-screen');
     const confirmationDialog = document.getElementById('confirmationDialog');
     const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
     const cancelSubmitBtn = document.getElementById('cancelSubmitBtn');
     const successMessage = document.getElementById('successMessage');
     const closeSuccessBtn = document.getElementById('closeSuccessBtn');
-
     const skillsContainer = document.querySelector('.skills-container');
     const qualificationsContainer = document.querySelector('.qualifications-container');
     const maxSkills = 5;
@@ -34,8 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
              // Validate position (character limit: 50)
              const position = document.getElementById('position');
-             if (position.value.trim() === '' || position.value.length > 50) {
-                 alert('Position is required and cannot exceed 50 characters.');
+             const positionRegex = /^[a-zA-Z\s]+$/;
+             if (position.value.trim() === '' || position.value.length > 50 || !positionRegex.test(position.value)) {
+                 alert('Position is required, cannot exceed 50 characters, and must not contain numbers.');
                  isValid = false;
              }
      
@@ -54,11 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
              }
      
              // Validate contact (character limit: 50)
-             const contact = document.getElementById('contact');
-             if (contact.value.trim() === '' || contact.value.length > 50) {
-                 alert('Contact is required and cannot exceed 50 characters.');
-                 isValid = false;
-             }
+             const contact = document.getElementById('contactPerson');
+             if (contact.value.trim() === '' || contact.value.length > 50 || !positionRegex.test(contact.value)) {
+                alert('Contact is required, cannot exceed 50 characters, and must not contain numbers.');
+                isValid = false;
+            }
      
              // Validate email (valid format)
              const email = document.getElementById('email');
@@ -127,9 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
              if (isValid) {
                 confirmationDialog.style.display = 'flex'; // Show confirmation dialog
             }
-     
+            else{
+                 confirmationDialog.style.display = 'none'
+            }
+          
+        
     });
-
     // Cancel submission and hide confirmation dialog
     cancelSubmitBtn.addEventListener('click', () => {
         confirmationDialog.style.display = 'none'; // Hide confirmation dialog
@@ -222,20 +259,24 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '../Jobs/job.html'; // Redirect to job list page
     });
 
-    // Go back button functionality
-    const goBackButton = document.querySelector('input[type="button"]');
-    goBackButton.addEventListener('click', () => {
-        window.location.href = "../Jobs/job.html";
-    });
 });
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async() => {
+    setupNavigation();
+    const buttons = document.querySelectorAll('.links button');
+    buttons.forEach(button => button.classList.remove('active'));
+
+    const loadingScreen = document.getElementById('loading-screen');
     const skillsContainer = document.querySelector('.skills-container');
     const skillInput = document.getElementById('skillInput');
     const qualificationsContainer = document.querySelector('.qualifications-container');
     const qualificationInput = document.getElementById('qualificationInput');
     const maxSkills = 5;
     const maxQualifications = 5;
-
+    
+    const jobButton = document.getElementById('jobButton');
+    if (jobButton) {
+        jobButton.classList.add('active');
+    }
     // Function to add a new skill
     function addSkill(skill) {
         const skillTags = skillsContainer.querySelectorAll('.skill-tag');
@@ -308,5 +349,47 @@ document.addEventListener('DOMContentLoaded', () => {
             qualificationInput.value = '';
         }
     });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobId = urlParams.get('jobId'); // Retrieve `jobId` from URL
+    
+        if (jobId) {
+            console.log('Job ID found in URL:', jobId); // Debugging
+            await prefillForm(jobId); // Call prefillForm with the jobId
+        } else {
+            console.log('No Job ID found in URL.'); // Debugging
+        }
+        loadingScreen.style.display = 'none'; 
 });
 
+// Prefill the form fields based on the selected job data
+async function prefillForm(jobId) {
+    try {
+        console.log('Fetching job data for Job ID:', jobId);
+        const jobDocRef = doc(firestore, 'jobs', jobId);
+        const jobDoc = await getDoc(jobDocRef);
+
+        if (jobDoc.exists()) {
+            const jobData = jobDoc.data();
+
+            // Fill fields
+            document.getElementById('company').value = jobData.company || '';
+            document.getElementById('contactPerson').value = jobData.contact || '';
+            document.getElementById('contactNumber').value = jobData.contactNumber || '';
+            document.getElementById('email').value = jobData.email || '';
+        }
+    } catch (error) {
+        console.error('Error pre-filling form:', error);
+        alert('Failed to pre-fill job details. Please try again.');
+    }
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const goBackButton = document.getElementById('goBackButton');
+    if (goBackButton) {
+        goBackButton.addEventListener('click', () => {
+            window.location.href = "../Jobs/job.html";
+        });
+    } else {
+        console.error("Go Back button not found in the DOM.");
+    }
+});

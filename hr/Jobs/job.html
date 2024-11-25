@@ -43,14 +43,17 @@
             <div class="job-actions">
                 <h2>Job List | <span id="jobCount">Total Jobs: 0</span></h2>
                 <input type="text" id="searchBar" placeholder="Search">
-                <div class="job-actions-buttons">
-                    <a href="jobposting.html"><button>Add Job</button></a>
+                <div class="form-group">
+                    <label for="jobDropdown">Select a Job:</label>
+                    <select id="jobDropdown">
+                        <option value="new">Add New Job</option>
+                    </select>
                 </div>
-                <div id="disposableLinkContainer" style="display: none;">
-                    <p>Disposable Link: <span id="disposableLinkText"></span></p>
-                    <button id="copyLinkButton">Copy Link</button>
+                <div class="job-actions-buttons">
+                    <button id="proceedToJobPosting">Proceed</button>
                 </div>
             </div>
+            
     
             <div class="jable">
                 <table id="jobTable">
@@ -101,95 +104,98 @@
 
 
     <div class="dark-overlay" id="darkOverlay" style="display: none;"></div>
-    <div id="editJobForm" style="display: none;">
-        <h2>Edit Job</h2>
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="position">Position:</label>
-                <input type="text" id="position" name="position" placeholder="Enter job position" required>
-            </div>
-            <div class="form-group">
-                <label for="company">Company:</label>
-                <input type="text" id="company" name="company" placeholder="Enter company name" required>
-            </div>
-            <div class="form-group">
-                <label for="location">Location:</label>
-                <input type="text" id="location" name="location" placeholder="Enter job location" required>
-            </div>
-            <div class="form-group">
-                <label for="type">Job Type:</label>
-                <select id="type" name="type" required>
-                    <option value="full-time">Full-Time</option>
-                    <option value="part-time">Part-Time</option>
-                    <option value="contract">Contract</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="age">Minimum Age Requirement:</label>
-                <input type="number" id="age" name="age" placeholder="Enter minimum age" min="18" max="60" required>
-            </div>
-            <div class="form-group">
-                <label for="vacancy">Vacancy:</label>
-                <input type="number" id="vacancy" name="vacancy" placeholder="Enter number of vacancies" required>
-            </div>
-            <div class="form-group">
-                <label for="contact">Contact Person:</label>
-                <input type="text" id="contact" name="contact" placeholder="Enter contact person's name" required>
-            </div>
-            <div class="form-group">
-                <label for="contactNumber">Contact Number:</label>
-                <input type="number" id="contactNumber" name="contactNumber" placeholder="Enter contact number of the company" required>
-              </div>
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" placeholder="Enter contact email" required>
-            </div>
-            <div class="form-group full-width">
-                <label for="facilities">Facilities:</label>
-                <textarea id="facilities" name="facilities" placeholder="Enter work environment"></textarea>
-            </div>
-            <div class="form-group full-width">
-                <label for="description">Description:</label>
-                <textarea id="description" name="description" placeholder="Enter job description"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="salary">Salary:</label>
-                <input type="number" id="salary" name="salary" placeholder="Enter salary" min="0" required>
-            </div>
-            <div class="form-group">
-                <label for="education">Educational Attainment:</label>
-                <select id="education" name="education" required>
-                    <option value="high-school">High School</option>
-                    <option value="college">College</option>
-                    <option value="undergrad">Undergraduate</option>
-                </select>
-            </div>
-                <div class="form-group">
-                    <label for="jobType">Job Category:</label>
-                    <select id="jobType" name="jobType" required>
-                        <option value="" disabled selected>Select Job Type</option>
-                        <option value="Blue Collar">Blue Collar</option>
-                        <option value="White Collar">White Collar</option>
-                    </select>
-                </div>
-            <div class="form-group">
-                <label for="skills">Skills:</label>
-                <div class="skills-container" id="editSkillsContainer"></div>
-                <div class="skills-input-wrapper">
-                    <input type="text" id="editSkillInput" placeholder="Enter a skill">
-                    <button type="button" id="editAddSkillButton">Add Skill</button>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="qualifications">Qualifications:</label>
-                <div class="qualifications-container" id="editQualificationsContainer"></div>
-                <div class="qualifications-input-wrapper">
-                    <input type="text" id="editQualificationInput" placeholder="Enter a qualification">
-                    <button type="button" id="editAddQualificationButton">Add Qualification</button>
-                </div>
+    <div id="editJobForm"style="display: none;">
+        <!-- Left Column -->
+        <div class="form-group">
+            <label for="position">Position:</label>
+            <input type="text" id="position" name="position" placeholder="Enter job position" required>
+        </div>
+        <div class="form-group">
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" placeholder="Enter job location" required>
+        </div>
+        <div class="form-group">
+            <label for="age">Minimum Age Requirement:</label>
+            <input type="number" id="age" name="age" placeholder="Enter minimum age" min="18" max="60" required>
+        </div>
+        <div class="form-group">
+            <label for="contact">Contact Person:</label>
+            <input type="text" id="contactPerson" name="contactPerson" placeholder="Enter contact person's name" required>
+        </div>
+        <div class="form-group">
+            <label for="contactNumber">Contact Number:</label>
+            <input type="number" id="contactNumber" name="contactNumber" placeholder="Enter contact number" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter contact email" required>
+        </div>
+    
+        <!-- Right Column -->
+        <div class="form-group">
+            <label for="company">Company:</label>
+            <input type="text" id="company" name="company" placeholder="Enter company name" required>
+        </div>
+        <div class="form-group">
+            <label for="type">Job Type:</label>
+            <select id="type" name="type" required>
+                <option value="full-time">Full-Time</option>
+                <option value="part-time">Part-Time</option>
+                <option value="contract">Contract</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="vacancy">Vacancy:</label>
+            <input type="number" id="vacancy" name="vacancy" placeholder="Enter number of vacancies" required>
+        </div>
+        <div class="form-group">
+            <label for="skills">Skills:</label>
+            <div class="skills-container" id="editSkillsContainer"></div>
+            <div class="skills-input-wrapper">
+                <input type="text" id="editSkillInput" placeholder="Enter a skill">
+                <button type="button" id="editAddSkillButton">Add Skill</button>
             </div>
         </div>
+        <div class="form-group">
+            <label for="qualifications">Qualifications:</label>
+            <div class="qualifications-container" id="editQualificationsContainer"></div>
+            <div class="qualifications-input-wrapper">
+                <input type="text" id="editQualificationInput" placeholder="Enter a qualification">
+                <button type="button" id="editAddQualificationButton">Add Qualification</button>
+            </div>
+        </div>
+    
+        <!-- Full Width Fields -->
+        <div class="form-group full-width">
+            <label for="facilities">Facilities:</label>
+            <textarea id="facilities" name="facilities" placeholder="Enter work environment"></textarea>
+        </div>
+        <div class="form-group full-width">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" placeholder="Enter job description"></textarea>
+        </div>
+        <div class="form-group full-width">
+            <label for="salary">Salary:</label>
+            <input type="number" id="salary" name="salary" placeholder="Enter salary" min="0" required>
+        </div>
+        <div class="form-group full-width">
+            <label for="education">Educational Attainment:</label>
+            <select id="education" name="education" required>
+                <option value="high-school">High School</option>
+                <option value="college">College</option>
+                <option value="undergrad">Undergraduate</option>
+            </select>
+        </div>
+        <div class="form-group full-width">
+            <label for="jobType">Job Category:</label>
+            <select id="jobType" name="jobType" required>
+                <option value="" disabled selected>Select Job Type</option>
+                <option value="Blue Collar">Blue Collar</option>
+                <option value="White Collar">White Collar</option>
+            </select>
+        </div>
+    
+        <!-- Buttons -->
         <div class="form-buttons">
             <button type="button" id="goBackButton">Go Back</button>
             <button type="submit" id="saveJobButton">Save Changes</button>
