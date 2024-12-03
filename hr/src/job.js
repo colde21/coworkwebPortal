@@ -483,15 +483,15 @@ document.getElementById('editAddQualificationButton').addEventListener('click', 
     }
 });
 // Save job changes
-document.getElementById('saveJobButton').addEventListener('click', function (event) {
+document.getElementById('saveJobButton').addEventListener('click', async function (event) {
     event.preventDefault();
-
 
     const jobId = document.getElementById('editJobForm').dataset.jobId;
     if (!jobId) {
         alert('No job ID found. Please refresh and try again.');
         return;
     }
+
     const updatedData = {
         position: document.getElementById('position').value || '',
         company: document.getElementById('company').value || '',
@@ -511,76 +511,38 @@ document.getElementById('saveJobButton').addEventListener('click', function (eve
         qualifications: Array.from(document.querySelectorAll('#editQualificationsContainer .qualification-tag')).map(tag => tag.textContent.replace('×', '').trim()),
     };
 
-   
-     async function fetchSkillsAndQualifications(jobId) {
-        try {
-            const jobDoc = await getDoc(doc(firestore, 'jobs', jobId));
-            if (jobDoc.exists()) {
-                const jobData = jobDoc.data();
-    
-                // Populate skills
-                const skillsContainer = document.getElementById('editSkillsContainer');
-                skillsContainer.innerHTML = '';
-                (jobData.skills || []).forEach(skill => addSkillToContainer(skill, skillsContainer));
-    
-                // Populate qualifications
-                const qualificationsContainer = document.getElementById('editQualificationsContainer');
-                qualificationsContainer.innerHTML = '';
-                (jobData.qualifications || []).forEach(qualification =>
-                    addQualificationToContainer(qualification, qualificationsContainer)
-                );
-            } else {
-                console.error('Job not found!');
-            }
-        } catch (error) {
-            console.error('Error fetching skills and qualifications:', error);
-        }
-    }
-    
-    function addSkillToContainer(skill, container) {
-        const skillTag = document.createElement('span');
-        skillTag.className = 'skill-tag';
-        skillTag.textContent = skill;
-    
-        const removeButton = document.createElement('button');
-        removeButton.className = 'remove-skill';
-        removeButton.textContent = '×';
-        removeButton.onclick = () => container.removeChild(skillTag);
-    
-        skillTag.appendChild(removeButton);
-        container.appendChild(skillTag);
-    }
-    
-    function addQualificationToContainer(qualification, container) {
-        const qualificationTag = document.createElement('span');
-        qualificationTag.className = 'qualification-tag';
-        qualificationTag.textContent = qualification;
-    
-        const removeButton = document.createElement('button');
-        removeButton.className = 'remove-qualification';
-        removeButton.textContent = '×';
-        removeButton.onclick = () => container.removeChild(qualificationTag);
-    
-        qualificationTag.appendChild(removeButton);
-        container.appendChild(qualificationTag);
-    }
-    
-    
-    // Example call within `editJob`
-    fetchSkillsAndQualifications(jobId);
-    
-      // Update Firestore
-    const jobDocRef = doc(firestore, 'jobs', jobId);
-    updateDoc(jobDocRef, updatedData)
-        .then(() => {
-            alert('Job updated successfully!');
-            document.getElementById('editJobForm').style.display = 'none';
-            document.getElementById('darkOverlay').style.display = 'none';
-        })
-        .catch(error => {
-            console.error('Error updating job:', error);
-            alert('Failed to update the job.');
+    const user = auth.currentUser;
+    const email = user ? user.email : "Unknown user";
+
+    try {
+        // Update Firestore
+        const jobDocRef = doc(firestore, 'jobs', jobId);
+        await updateDoc(jobDocRef, updatedData);
+
+        // Log audit action
+        await logAudit(email, "Job Edited", {
+            status: "Success",
+            timestamp: new Date().toISOString(), // ISO timestamp
+            jobId,
+            updatedData,
         });
+
+        alert('Job updated successfully!');
+        document.getElementById('editJobForm').style.display = 'none';
+        document.getElementById('darkOverlay').style.display = 'none';
+    } catch (error) {
+        console.error('Error updating job:', error);
+
+        // Log failure audit
+        await logAudit(email, "Job Edit Failed", {
+            status: "Failed",
+            timestamp: new Date().toISOString(), // ISO timestamp
+            jobId,
+            error: error.message,
+        });
+
+        alert('Failed to update the job.');
+    }
 });
  // Collect skills
  const skillsContainer = document.getElementById('editSkillsContainer');

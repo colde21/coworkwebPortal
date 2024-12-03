@@ -221,18 +221,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const qualificationTags = Array.from(qualificationsContainer.querySelectorAll('.qualification-tag'));
         const qualifications = qualificationTags.map(qualificationTag => qualificationTag.textContent.replace('×', '').trim());
         entries.qualifications = qualifications;
-
-
-          // Extract fields for prefill
-    const companyDetails = {
-        company: entries.company,
-        contactPerson: entries.contact,
-        contactNumber: entries.contactNumber,
-        email: entries.email,
-    };
     
         try {
             const jobId = await submitJobData(entries);
+            // Log the audit action for successful job posting
             await logAudit(userEmail, "Job Added", {
                 jobId,
                 jobData: entries,
@@ -242,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
             successMessage.style.display = 'flex'; // Show success message
         } catch (error) {
+            // Log the audit action for failed job posting
             await logAudit(userEmail, "Job Posting Failed", {
                 status: "Failed",
                 error: error.message,
@@ -377,10 +370,29 @@ async function prefillForm(jobId) {
             document.getElementById('contactPerson').value = jobData.contact || '';
             document.getElementById('contactNumber').value = jobData.contactNumber || '';
             document.getElementById('email').value = jobData.email || '';
+
+            // Log the audit action for pre-filling job details
+            const user = auth.currentUser;
+            const userEmail = user ? user.email : "Unknown user";
+            await logAudit(userEmail, "Accessed Job Details", {
+                jobId,
+                status: "Success",
+                timestamp: new Date().toISOString()
+            });
         }
     } catch (error) {
         console.error('Error pre-filling form:', error);
         alert('Failed to pre-fill job details. Please try again.');
+
+        // Log the audit action for failed pre-filling
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
+        await logAudit(userEmail, "Accessed Job Details", {
+            jobId,
+            status: "Failed",
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
     }
 }
 document.addEventListener('DOMContentLoaded', () => {

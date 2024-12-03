@@ -321,6 +321,7 @@ function updateApplicationList(applications) {
                         applicationId: application.id,
                         user: application.userName,
                         status: "Success"
+                        
                     });
                     alert('Applicant has been hired.');
                     fetchApplicationsAndUpdateUI();

@@ -1,3 +1,4 @@
+/*
 Content-Security-Policy: default-src 'self'; 
     script-src 'self' https://www.gstatic.com https://www.googleapis.com 'nonce-brostop' 'unsafe-inline'; 
     style-src 'self' 'unsafe-inline'; 

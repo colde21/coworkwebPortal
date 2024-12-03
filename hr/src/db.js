@@ -83,7 +83,7 @@ export async function logAudit(user, action, details) {
             user,
             action,
             details,
-            timestamp: Timestamp.now()
+            timestamp: Timestamp.now()  // Use Firestore Timestamp
         };
         await addDoc(auditsCol, auditEntry);
     } catch (error) {

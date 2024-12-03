@@ -40,7 +40,7 @@ document.getElementById('submit').addEventListener("click", async function (even
             console.log('Role:', role); // Useful for debugging
 
             // Log audit for successful login
-            await logAudit(email, "Sign in", { status: "Success" });
+            await logAudit(email, "Sign in", {  timestamp: new Date().toISOString(),status: "Success" });
 
             // Block back button navigation after login
             window.onload = function() {

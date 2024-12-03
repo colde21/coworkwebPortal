@@ -172,6 +172,14 @@ window.saveChanges = async function () {
     const interviewer = document.getElementById("interviewer").value;
 
     try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error("No authenticated user found.");
+        }
+
+        const userEmail = user.email;
+
+        // Update the interview document in Firestore
         const interviewRef = doc(firestore, "interview", eventId);
         await updateDoc(interviewRef, {
             date: newDate,
@@ -194,27 +202,115 @@ window.saveChanges = async function () {
                 <p><strong>Date:</strong> ${newDate}</p>
                 <p><strong>Time:</strong> ${newTime}</p>
                 <p><strong>Interviewer:</strong> ${interviewer}</p>
-                <button class="btn btn-primary" onclick="openModal('${eventId}', '${newDate}', '${newTime}', '${interviewer}')">Reschedule</button>
+                <button class="btn btn-primary reschedule-btn" data-id="${eventId}" data-date="${newDate}" data-time="${newTime}" data-interviewer="${interviewer}">Reschedule</button>
             `;
         }
 
+        // Log the rescheduling action in the audit log
+        await logAudit(userEmail, "Rescheduled Interview", {
+            status: "Success",
+            timestamp: new Date().toISOString(),
+        });
+        // Hide the modal
         const modal = bootstrap.Modal.getInstance(document.getElementById("rescheduleModal"));
-modal.hide();
-
+        modal.hide();
 
         alert("Interview rescheduled successfully!");
     } catch (error) {
         console.error("Error saving changes:", error);
+
+        // Log the failure in the audit log
+        const user = auth.currentUser;
+        const userEmail = user ? user.email : "Unknown user";
+        await logAudit(userEmail, "Rescheduling", {
+            status: "Failed",
+            error: error.message,
+            timestamp: new Date().toISOString(),
+        });
+
         alert("Failed to save changes. Please try again.");
     }
 };
-
 
 // Initialize calendar and fetch data
 document.addEventListener("DOMContentLoaded", async () => {
     requireLogin();
     fetchDashboardData();
+    const saveChangesBtn = document.getElementById('saveChangesBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    if (saveChangesBtn) {
+        saveChangesBtn.addEventListener('click', async () => {
+            const eventId = document.getElementById("eventId").value;
+            const newDate = document.getElementById("interviewDate").value;
+            const newTime = document.getElementById("interviewTime").value;
+            const interviewer = document.getElementById("interviewer").value;
 
+            try {
+                const interviewRef = doc(firestore, "interview", eventId);
+                await updateDoc(interviewRef, {
+                    date: newDate,
+                    time: newTime,
+                    contactPerson: interviewer,
+                });
+
+                // Update the calendar event
+                const event = calendar.getEventById(eventId);
+                if (event) {
+                    event.setStart(`${newDate}T${newTime}`); // Update the start date and time
+                    event.setEnd(null); // Clear the end date to prevent spanning multiple days
+                    event.setExtendedProp("interviewer", interviewer); // Update additional data
+                }
+
+                // Update the schedule list
+                const interviewItem = document.getElementById(`interview-${eventId}`);
+                if (interviewItem) {
+                    interviewItem.innerHTML = `
+                        <p><strong>Date:</strong> ${newDate}</p>
+                        <p><strong>Time:</strong> ${newTime}</p>
+                        <p><strong>Interviewer:</strong> ${interviewer}</p>
+                        <button class="btn btn-primary reschedule-btn" data-id="${eventId}" data-date="${newDate}" data-time="${newTime}" data-interviewer="${interviewer}">Reschedule</button>
+                    `;
+                }
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById("rescheduleModal"));
+                modal.hide();
+
+                alert("Interview rescheduled successfully!");
+            } catch (error) {
+                console.error("Error saving changes:", error);
+                alert("Failed to save changes. Please try again.");
+            }
+        });
+    }
+
+    // Add event listener for the "Close" button if additional logic is needed
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            console.log('Modal closed');
+        });
+    }
+
+    // Add event delegation for dynamically created reschedule buttons
+    const interviewListEl = document.getElementById("interview-list");
+    if (interviewListEl) {
+        interviewListEl.addEventListener('click', (event) => {
+            if (event.target.classList.contains('reschedule-btn')) {
+                const button = event.target;
+                const eventId = button.getAttribute('data-id');
+                const date = button.getAttribute('data-date');
+                const time = button.getAttribute('data-time');
+                const interviewer = button.getAttribute('data-interviewer');
+
+                document.getElementById("eventId").value = eventId;
+                document.getElementById("interviewDate").value = date;
+                document.getElementById("interviewTime").value = time;
+                document.getElementById("interviewer").value = interviewer;
+
+                const modal = new bootstrap.Modal(document.getElementById("rescheduleModal"));
+                modal.show();
+            }
+        });
+    }
     const { events, interviewList } = await fetchScheduledInterviews();
 
     // Initialize FullCalendar
@@ -233,7 +329,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     calendar.render();
 
     // Populate interview list
-    const interviewListEl = document.getElementById("interview-list");
     interviewListEl.innerHTML = interviewList.join("");
 });
 // Add event listener to the Sign Out button

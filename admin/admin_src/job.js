@@ -143,13 +143,14 @@ function viewJobDetails(jobId) {
                 <p><strong>Company:</strong> ${jobData.company || 'N/A'}</p><hr>
                 <p><strong>Location:</strong> ${jobData.location || 'N/A'}</p><hr>
                 <p><strong>Vacancy:</strong> ${jobData.vacancy || 'N/A'}</p><hr>
-                 <p><strong>Contact:</strong> ${jobData.contact || 'N/A'}</p><hr>
+                <p><strong>Contact Person:</strong> ${jobData.contactPerson || 'N/A'}</p><hr>
+                <p><strong>Contact Number:</strong> ${jobData.contactNumber || 'N/A'}</p><hr>
                 <p><strong>Type:</strong> ${jobData.type || 'N/A'}</p><hr>
+                 <p><strong>Job Category:</strong> ${jobData.jobType || 'N/A'}</p><hr>
                 <p><strong>Email:</strong> ${jobData.email || 'N/A'}</p><hr>
                 <p><strong> Salary:</strong> ${jobData.salary || 'N/A'}</p><hr>
                 <p><strong>Skills:</strong> ${skills.length > 0 ? skills.join(', ') : 'N/A'}</p><hr>
                 <p><strong>Qualifications:</strong> ${qualifications.length > 0 ? qualifications.join(', ') : 'N/A'}</p><hr>
-                <p><strong>Experience:</strong> ${[jobData.experience1, jobData.experience2, jobData.experience3].filter(Boolean).join(', ') || 'N/A'}</p><hr>
                 <p><strong>Facilities:</strong> ${jobData.facilities || 'N/A'}</p><hr>
                 <p><strong>Description:</strong> ${jobData.description || 'N/A'}</p>
             `;
@@ -213,7 +214,7 @@ async function updateJobTable() {
             checkbox.dataset.id = job.id;
             checkboxCell.appendChild(checkbox);
 
-            const cells = ['position', 'company', 'location', 'vacancy', 'type', 'contact'];
+            const cells = ['position', 'company', 'location', 'vacancy', 'type', 'email'];
             cells.forEach(field => {
                 const cell = newRow.insertCell();
                 cell.textContent = job[field] || 'N/A';

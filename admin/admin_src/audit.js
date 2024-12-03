@@ -34,7 +34,34 @@ function requireLogin() {
         }
     });
 }
+function formatTimestamp(timestamp) {
+    if (!timestamp) return 'N/A';
 
+    try {
+        // Parse the timestamp string into a Date object
+        const date = new Date(Date.parse(timestamp));
+
+        // Ensure the parsed date is valid
+        if (isNaN(date.getTime())) {
+            return 'Invalid Date';
+        }
+
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true,
+        };
+
+        return date.toLocaleString('en-US', options);
+    } catch (error) {
+        console.error("Error parsing timestamp:", error);
+        return 'Invalid Date';
+    }
+}
 //Navigation
 document.getElementById('homeButton').addEventListener('click', function () {
     location.href = 'home.html';
@@ -104,6 +131,8 @@ async function fetchAuditLogs() {
             id: doc.id,
             ...doc.data(),
         }));
+        // Sort logs by timestamp (descending order)
+        logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         displayLogs(); // Display logs with pagination
     } catch (error) {
         console.error('Error fetching audit logs:', error);
@@ -117,19 +146,23 @@ function displayLogs() {
     const startIndex = (currentPage - 1) * recordsPerPage;
     const endIndex = Math.min(startIndex + recordsPerPage, logs.length);
 
-    logs.slice(startIndex, endIndex).forEach((log, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${startIndex + index + 1}</td>
-            <td>${log.timestamp || 'N/A'}</td>
-            <td>${log.user || 'N/A'}</td>
-            <td>${log.action || 'N/A'}</td>
-        `;
-        tableBody.appendChild(row);
-    });
+    logs
+        .sort((a, b) => new Date(b.details.timestamp) - new Date(a.details.timestamp)) // Sort by most recent first
+        .slice(startIndex, endIndex)
+        .forEach((log, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${startIndex + index + 1}</td>
+                <td>${formatTimestamp(log.details.timestamp) || 'N/A'}</td>
+                <td>${log.user || 'N/A'}</td>
+                <td>${log.action || 'N/A'}</td>
+            `;
+            tableBody.appendChild(row);
+        });
 
     updatePaginationControls();
 }
+// Pagination controls
 function updatePaginationControls() {
     const totalPages = Math.ceil(logs.length / recordsPerPage);
     const paginationDiv = document.getElementById('paginationControls');
@@ -146,8 +179,8 @@ function updatePaginationControls() {
         paginationDiv.appendChild(prevButton);
     }
 
-    // Next button
-    if (currentPage < totalPages) {
+       // Next button
+       if (currentPage < totalPages) {
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
         nextButton.addEventListener('click', () => {
@@ -164,7 +197,7 @@ function updatePaginationControls() {
 }
 // Export logs to Excel
 document.getElementById('exportAuditLogBtn').addEventListener('click', () => {
-    exportAuditLog().then(csvContent => {
+    exportAuditLog().then((csvContent) => {
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -173,16 +206,17 @@ document.getElementById('exportAuditLogBtn').addEventListener('click', () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }).catch(error => {
+    }).catch((error) => {
         console.error("Error exporting audit log:", error);
     });
 });
+
 document.addEventListener('DOMContentLoaded', async() => {
     const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
         signOutBtn.addEventListener('click', performSignOut);
     }
     requireLogin();
-    const logs = await fetchAuditLogs();
+    await fetchAuditLogs();
 });
 
