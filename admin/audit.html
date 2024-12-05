@@ -16,11 +16,13 @@
     </script>
        <!-- use version 0.20.3 -->
 <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
  <!-- Include Chart.js -->
     <script type="module" src="./admin_src/audit.js" defer></script>
 
 </head>
-
 <body>
 
     <div class="nav">
@@ -44,7 +46,7 @@
             <button id="auditButton" class="active">
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v16h12V4H6zm4 3h6v2h-6V7zm0 4h6v2h-6v-2zm-2 4v2H8v-2h6zm-4-8h2v2H8v-2zm0 4h2v2H8v-2z" />
-                </svg>Audit</button>
+                </svg>Reports and Audit</button>
             <button id="signOutBtn"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="icon">
                 <path d="M10 17l1.41-1.41L7.83 12H20v-2H7.83l3.58-3.59L10 5l-7 7 7 7zm9-15H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-3h-2v3H5V4h14v3h2V4c0-1.1-.9-2-2-2z"/>
             </svg>Sign-Out</button>
@@ -65,7 +67,24 @@
             </div>
         </div>
     </div>
-    
+    <div class="container">
+        <div class="card job">
+            <h3>JOB</h3>
+            <p id="jobCount">Total: 0</p>
+        </div>
+        <div class="card app">
+            <h3>APPLICATION</h3>
+            <p id="applicationCount">Total: 0</p>
+        </div>
+        <div class="card emp">
+            <h3>EMPLOYED</h3>
+            <p id="employedCount">Total: 0</p>
+        </div>
+        <div class="card vac">
+            <h3>VACANCIES</h3>
+            <p id="vacanciesCount">Total: 0</p>
+        </div>
+    </div>
     <main class="audit-container">
         <h1>Audit Trail</h1>
         <button id="exportAuditLogBtn" class="export-btn">Export Audit Log</button>
@@ -86,6 +105,30 @@
             <!-- Pagination buttons will be dynamically added here -->
         </div>
     </main>
+    <div class="charts-wrapper">
+        <div class="chart-summary-wrapper">
+            <div class="chart-container">
+                <canvas id="applicationsByCompanyChart"></canvas>
+            </div>
+            <div id="applicationsByCompanySummary" class="summary-container"></div>
+        </div>
+        <div class="chart-summary-wrapper">
+            <div class="chart-container">
+                <canvas id="employedByPositionChart"></canvas>
+            </div>
+            <div id="employedByPositionSummary" class="summary-container"></div>
+        </div>
+        <div class="chart-summary-wrapper">
+            <div class="chart-container">
+                <canvas id="employedByCompanyChart"></canvas>
+            </div>
+            <div id="employedByCompanySummary" class="summary-container"></div>
+        </div>
+    </div>
 
+    <div class="most-applied-jobs">
+        <h3>Most Applied Jobs</h3>
+        <ul id="mostAppliedJobsList"></ul>
+    </div>
 </body>
 </html>

@@ -1,24 +1,37 @@
 /* Main body styles */
 body {
-    background: linear-gradient(90deg, #FF5F5F 46%, #D7263D 63%, #8B1D1D 97%);
+    background: linear-gradient(90deg, #413f3f 46%, #222121 63%, #0f0303 97%);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    color: #333333; /* Dark charcoal for default text color */
+    color: #333333;
 }
 
 /* Login Container */
 .login-container {
-    background-color: #FFFFFF; /* White background for the login card */
+    background: rgba(255, 255, 255, 0.95);
     padding: 40px;
-    width: 350px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 380px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
     text-align: center;
     position: relative;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* Logo Section */
@@ -29,19 +42,21 @@ body {
 }
 
 .img img {
-    width: 80px;
+    width: 90px;
 }
 
 /* Title and Subtitle Styling */
 h2 {
-    color: #333333; /* Dark charcoal */
+    color: #333333;
     margin-bottom: 5px;
+    font-size: 22px;
+    font-weight: bold;
 }
 
 p {
-    color: #666666; /* Mid-gray */
-    font-size: 12px;
-    margin-bottom: 20px;
+    color: #555555;
+    font-size: 14px;
+    margin-bottom: 25px;
 }
 
 /* Login Form Fields */
@@ -49,89 +64,69 @@ p {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 25px;
 }
 
 .input1 {
     width: 100%;
     position: relative;
-    border-bottom: 2px solid #D7263D; /* Red accent for input underline */
     margin-top: 10px;
+    margin-right: 25px;
 }
 
 .input1 label {
-    color: #D7263D; /* Red for labels */
+    color: #181515;
     font-size: 14px;
     position: absolute;
-    top: -20px;
-    left: 5px;
+    top: -18px;
+    left: 10px;
     pointer-events: none;
+    transition: all 0.3s ease;
 }
 
 .input1 input {
     width: 100%;
-    padding: 10px;
+    padding: 12px 15px;
     background: none;
-    border: none;
-    color: #333333; /* Dark charcoal for input text */
+    border: 1px solid #161516;
+    border-radius: 8px;
     font-size: 14px;
-    border-radius: 5px;
+    color: #333333;
+    transition: border-color 0.3s ease;
 }
 
 input:focus {
     outline: none;
-    border-bottom: 1px solid #D7263D; /* Red accent when focused */
+    border-color: #1b1a1a;
+    background-color: #FFF6F6;
 }
 
-/* Button Styles */
 button {
     width: 100%;
-    padding: 12px 0;
-    background-color: #D7263D; /* Red background for primary button */
-    color: #FFFFFF; /* White text for contrast */
+    padding: 15px 0;
+    background: linear-gradient(90deg, #424141, #161515);
+    color: #FFFFFF;
     border: none;
     border-radius: 10px;
-    cursor: pointer;
     font-size: 16px;
     font-weight: bold;
-    transition: background-color 0.3s ease;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #8B1D1D; /* Darker red on hover */
+    background: linear-gradient(90deg, #292828, #0e0d0d);
 }
 
 button:active {
-    transform: scale(0.98); /* Subtle scale effect on click */
+    transform: scale(0.96);
 }
 
-/* Error Message */
 .error-message {
-    color: #D7263D; /* Red for error messages */
+    color: #D7263D;
     font-size: 12px;
     margin-top: 10px;
 }
-
-/* Toggle Password Button */
-.toggle-password {
-    position: absolute;
-    right: 1px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 50px;
-    padding: 2px;
-    background: none;
-    border: none;
-    color: #D7263D; /* Red text for toggle button */
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.toggle-password:hover {
-    color: #8B1D1D; /* Darker red on hover */
-}
-
 /* Loading Screen */
 .loading-screen {
     display: none;
@@ -146,31 +141,19 @@ button:active {
 }
 
 .load-circle {
-    width: 100px;
-    height: 40px;
-    --g: radial-gradient(farthest-side, #0000 calc(95% - 3px), #fff calc(100% - 3px) 98%, #0000 101%) no-repeat;
-    background: var(--g), var(--g), var(--g);
-    background-size: 30px 30px;
-    animation: la9 1s infinite alternate;
+    width: 80px;
+    height: 80px;
+    border: 8px solid rgba(255, 255, 255, 0.2);
+    border-top: 8px solid #D7263D;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-@keyframes la9 {
+@keyframes spin {
     0% {
-        background-position: 0 50%, 50% 50%, 100% 50%;
-    }
-    20% {
-        background-position: 0 0, 50% 50%, 100% 50%;
-    }
-    40% {
-        background-position: 0 100%, 50% 0, 100% 50%;
-    }
-    60% {
-        background-position: 0 50%, 50% 100%, 100% 0;
-    }
-    80% {
-        background-position: 0 50%, 50% 50%, 100% 100%;
+        transform: rotate(0deg);
     }
     100% {
-        background-position: 0 50%, 50% 50%, 100% 50%;
+        transform: rotate(360deg);
     }
 }
