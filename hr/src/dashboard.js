@@ -67,7 +67,38 @@ async function performSignOut() {
         signOutConfirmation.style.display = 'none';
     });
 }
+  //Navigation
+document.getElementById('homeButton').addEventListener('click', function () {
+    location.href = 'home.html';
+});
 
+document.getElementById('jobButton').addEventListener('click', function () {
+    location.href = 'job.html';
+});
+
+document.getElementById('appButton').addEventListener('click', function () {
+    location.href = 'app.html';
+});
+
+document.getElementById('archiveButton').addEventListener('click', function () {
+    location.href = 'archive.html';
+});
+
+// Assuming the sign-out functionality is handled in the same JavaScript file
+document.getElementById('signOutBtn').addEventListener('click', function () {
+    console.log('Sign out button clicked');
+});
+
+
+
+   const saveChangesBtn = document.getElementById("saveChangesBtn");
+   const closeModalBtn = document.getElementById("closeModalBtn");
+
+   saveChangesBtn.addEventListener('click', saveChangesBtn);
+   closeModalBtn.addEventListener('click', () => {
+       const modal = bootstrap.Modal.getInstance(document.getElementById("rescheduleModal"));
+       modal.hide();
+   });
 // Fetch user role from Realtime Database
 async function fetchUserRole(userId) {
     try {
