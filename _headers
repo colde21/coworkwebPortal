@@ -1,14 +1,18 @@
+/* 
+  style-src 'self' 'unsafe-inline'; 
+  font-src 'self';
+
 /*
-Content-Security-Policy: default-src; 
+  Content-Security-Policy: default-src 'self'; 
     script-src 'self' https://www.gstatic.com https://www.googleapis.com 'nonce-brostop' 'unsafe-inline'; 
     style-src 'self' 'unsafe-inline'; 
-     font-src 'self'; 
+    font-src 'self'; 
     img-src 'self' data: https://firebasestorage.googleapis.com; 
     connect-src 'self' https://www.googleapis.com https://firebase.googleapis.com https://firestore.googleapis.com https://*.firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com wss://*.firebaseio.com wss://*.firebasedatabase.app; 
     frame-src 'self' https://www.gstatic.com; 
     report-uri https://cowork-portal.netlify.app/.netlify/functions/__csp-violations;
-Strict-Transport-Security: max-age=31536000; includeSubDomains
-X-Frame-Options: DENY
-X-Content-Type-Options: nosniff
-Referrer-Policy: no-referrer-when-downgrade
-Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains;
+  X-Frame-Options: DENY;
+  X-Content-Type-Options: nosniff;
+  Referrer-Policy: no-referrer-when-downgrade;
+  Permissions-Policy: geolocation=(), microphone=(), camera=();
