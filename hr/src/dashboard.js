@@ -67,17 +67,17 @@ async function performSignOut() {
         signOutConfirmation.style.display = 'none';
     });
 }
-  //Navigation
+//Navigation
 document.getElementById('homeButton').addEventListener('click', function () {
-    location.href = 'home.html';
+    location.href = 'dashboard_hr.html';
 });
 
 document.getElementById('jobButton').addEventListener('click', function () {
-    location.href = 'job.html';
+    location.href = 'Jobs/job.html';
 });
 
 document.getElementById('appButton').addEventListener('click', function () {
-    location.href = 'app.html';
+    location.href = 'application.html';
 });
 
 document.getElementById('archiveButton').addEventListener('click', function () {
